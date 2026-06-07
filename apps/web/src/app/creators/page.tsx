@@ -3,14 +3,12 @@
 import { Button } from "@/components/ui/button";
 import {
   Search,
-  ExternalLink,
   Coins,
   Users,
   TrendingUp,
   SlidersHorizontal,
   ChevronDown,
   X,
-  Loader2,
   AlertCircle,
   RefreshCw,
   ArrowUpRight,
@@ -39,14 +37,7 @@ const fadeSlideUp = {
   },
 } as const;
 
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { type: "spring" as const, stiffness: 120, damping: 20 },
-  },
-} as const;
+
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 

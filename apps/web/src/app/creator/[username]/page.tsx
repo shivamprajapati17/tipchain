@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useWalletConnection, useSolTransfer, useSplToken, useWallet, useWalletSession } from "@solana/react-hooks";
+import { useWalletConnection, useSolTransfer, useSplToken, useWalletSession } from "@solana/react-hooks";
 import { toAddress } from "@solana/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +19,6 @@ import {
   ChevronDown,
   Loader2,
   Check,
-  MessageCircle,
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
@@ -782,7 +781,6 @@ function SocialLinks({ links }: { links: Record<string, string> }) {
 
 export default function CreatorProfilePage() {
   const params = useParams();
-  const { status } = useWallet();
   const session = useWalletSession();
   const currentWallet = session?.account.address ?? "";
   const username =
