@@ -1,0 +1,28 @@
+{
+  "name": "tipchain-backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx src/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6",
+    "cors": "^2.8.5",
+    "express": "^4.21",
+    "zod": "^3.24"
+  },
+  "devDependencies": {
+    "@types/cors": "^2",
+    "@types/express": "^5",
+    "@types/node": "^22",
+    "prisma": "^6",
+    "tsx": "^4",
+    "typescript": "^5"
+  }
+}
