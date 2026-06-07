@@ -12,6 +12,7 @@ type CreatorListItem = {
   username: string;
   bio: string;
   avatarUrl: string | null;
+  socialLinks: string;
   totalTips: bigint;
   supporterCount: number;
   createdAt: Date;
@@ -81,7 +82,7 @@ router.get("/creators", async (_req: Request, res: Response) => {
 // GET /creator/by-username/:username — Get a single creator by username
 router.get("/creator/by-username/:username", async (req: Request, res: Response) => {
   try {
-    const { username } = req.params;
+    const username = req.params.username as string;
 
     const creator = await prisma.creator.findUnique({
       where: { username },
@@ -101,10 +102,11 @@ router.get("/creator/by-username/:username", async (req: Request, res: Response)
       return res.status(404).json({ error: "Creator not found" });
     }
 
-    const tipsReceived = creator.tipsReceived as unknown as TxSummary[];
-    const supporters = creator.supporters as unknown as SupporterSummary[];
+    const tipsReceived = (creator as any).tipsReceived as TxSummary[];
+    const supporters = (creator as any).supporters as SupporterSummary[];
 
-    res.json({        creator: {
+    res.json({
+      creator: {
           walletAddress: creator.walletAddress,
           username: creator.username,
           bio: creator.bio,
@@ -139,7 +141,7 @@ router.get("/creator/by-username/:username", async (req: Request, res: Response)
 // GET /creator/:wallet — Get a single creator by wallet address
 router.get("/creator/:wallet", async (req: Request, res: Response) => {
   try {
-    const { wallet } = req.params;
+    const wallet = req.params.wallet as string;
 
     const creator = await prisma.creator.findUnique({
       where: { walletAddress: wallet },
@@ -159,8 +161,8 @@ router.get("/creator/:wallet", async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Creator not found" });
     }
 
-    const tipsReceived = creator.tipsReceived as unknown as TxSummary[];
-    const supporters = creator.supporters as unknown as SupporterSummary[];
+    const tipsReceived = (creator as any).tipsReceived as TxSummary[];
+    const supporters = (creator as any).supporters as SupporterSummary[];
 
     res.json({
       creator: {
@@ -207,7 +209,7 @@ router.post("/creator", async (req: Request, res: Response) => {
       });
     }
 
-    const { walletAddress, username, bio, avatarUrl } = parsed.data;
+    const { walletAddress, username, bio, avatarUrl } = parsed.data as { walletAddress: string; username: string; bio?: string; avatarUrl?: string | null; socialLinks?: Record<string, string> };
 
     // Check for existing wallet
     const existing = await prisma.creator.findUnique({
@@ -260,7 +262,7 @@ router.post("/creator", async (req: Request, res: Response) => {
 // PUT /creator/:wallet — Update a creator profile
 router.put("/creator/:wallet", async (req: Request, res: Response) => {
   try {
-    const { wallet } = req.params;
+    const wallet = req.params.wallet as string;
     const parsed = updateCreatorSchema.safeParse(req.body);
 
     if (!parsed.success) {

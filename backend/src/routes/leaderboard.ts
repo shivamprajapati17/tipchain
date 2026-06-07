@@ -52,7 +52,7 @@ router.get(
   "/leaderboard/:wallet",
   async (req: Request, res: Response) => {
     try {
-      const { wallet } = req.params;
+      const wallet = req.params.wallet as string;
 
       const stats = await prisma.supporter.aggregate({
         where: { walletAddress: wallet },
@@ -60,18 +60,9 @@ router.get(
         _count: true,
       });
 
-      // Get rank by counting supporters with higher totals
-      const rank = await prisma.supporter.groupBy({
-        by: ["walletAddress"],
-        _sum: { totalTipped: true },
-        having: {
-          totalTipped: {
-            _gt: stats._sum.totalTipped ?? BigInt(0),
-          },
-        },
-      });
+      const totalTipped = stats._sum?.totalTipped;
 
-      if (!stats._sum.totalTipped) {
+      if (!totalTipped) {
         return res.json({
           walletAddress: wallet,
           rank: null,
@@ -80,11 +71,22 @@ router.get(
         });
       }
 
+      // Get rank by counting supporters with higher totals
+      const rank = await prisma.supporter.groupBy({
+        by: ["walletAddress"],
+        _sum: { totalTipped: true },
+        having: {
+          totalTipped: {
+            _gt: totalTipped,
+          },
+        } as any,
+      });
+
       res.json({
         walletAddress: wallet,
         rank: rank.length + 1,
-        totalTipped: stats._sum.totalTipped.toString(),
-        tipCount: stats._count,
+        totalTipped: totalTipped.toString(),
+        tipCount: typeof stats._count === 'number' ? stats._count : 0,
       });
     } catch (error) {
       console.error("Error fetching leaderboard rank:", error);

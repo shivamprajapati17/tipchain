@@ -49,7 +49,7 @@ router.get("/transactions", async (_req: Request, res: Response) => {
 // GET /transactions/:wallet — Get transactions for a specific wallet
 router.get("/transactions/:wallet", async (req: Request, res: Response) => {
   try {
-    const { wallet } = req.params;
+    const wallet = req.params.wallet as string;
     const limit = Math.min(
       Number(req.query.limit) || 50,
       200
