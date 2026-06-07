@@ -17,10 +17,12 @@ app.use(
     origin: (origin, callback) => {
       // Allow requests with no origin (server-to-server, curl, etc.)
       if (!origin) return callback(null, true);
-      // Allow specific FRONTEND_URL env var
+      // Allow specific FRONTEND_URL env var (comma-separated)
       if (allowedOrigins && allowedOrigins.includes(origin)) return callback(null, true);
       // Allow any localhost origin in development
       if (/^https?:\/\/localhost(:\d+)?$/i.test(origin)) return callback(null, true);
+      // Allow any *.vercel.app domain (for easy deployment)
+      if (/^https?:\/\/.+\.vercel\.app$/.test(origin)) return callback(null, true);
       callback(null, false);
     },
     methods: ["GET", "POST", "PUT", "DELETE"],

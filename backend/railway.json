@@ -1,0 +1,13 @@
+{
+  "build": {
+    "builder": "nixpacks",
+    "buildCommand": "prisma generate --schema=../prisma/schema.prisma && tsc",
+    "startCommand": "npx prisma db push --schema=../prisma/schema.prisma && node dist/index.js",
+    "watchPatterns": ["src/**/*.ts"]
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

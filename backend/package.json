@@ -4,12 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "prisma generate --schema=../prisma/schema.prisma && tsc",
     "start": "node dist/index.js",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx src/seed.ts"
+    "db:generate": "prisma generate --schema=../prisma/schema.prisma",
+    "db:push": "prisma db push --schema=../prisma/schema.prisma",
+    "db:migrate": "prisma migrate dev --schema=../prisma/schema.prisma",
+    "db:seed": "tsx src/seed.ts",
+    "postinstall": "prisma generate --schema=../prisma/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6",
