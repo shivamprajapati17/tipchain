@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discord Community
+    url: https://discord.gg/tipchain
+    about: Ask questions and discuss TipChain with the community
+  - name: 🎯 Public Roadmap
+    url: https://github.com/orgs/tipchain/projects/1
+    about: See what we're working on and vote on features
+  - name: 📝 Documentation
+    url: https://docs.tipchain.dev
+    about: Check the documentation before opening an issue

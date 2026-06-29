@@ -1,0 +1,22 @@
+{
+  "title": "TipChain Documentation",
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "installation",
+    "self-hosting",
+    "configuration",
+    "---Guides---",
+    "creators",
+    "tipping",
+    "dashboard",
+    "---Advanced---",
+    "api-reference",
+    "plugin-system",
+    "sdk",
+    "cli",
+    "---Contributing---",
+    "contributing",
+    "architecture"
+  ]
+}

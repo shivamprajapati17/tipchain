@@ -1,3 +1,7 @@
+// ─── TipChain Database Schema v2 ───────────────────────────────────────────
+// Complete schema for the next-generation creator monetization platform
+// Last updated: June 2026
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,23 +11,103 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// USER & AUTH
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Extended user profile for supporters & creators
+model User {
+  id            String   @id @default(cuid())
+  walletAddress String   @unique @map("wallet_address")
+  displayName   String?  @map("display_name")
+  bio           String   @default("")
+  avatarUrl     String?  @map("avatar_url")
+  email         String?  // For notifications
+  emailVerified Boolean  @default(false) @map("email_verified")
+  reputation    Int      @default(0) // Supporter reputation score
+  totalTipped   BigInt   @default(0) @map("total_tipped")
+  tipCount      Int      @default(0) @map("tip_count")
+  isAdmin       Boolean  @default(false) @map("is_admin")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  badges         BadgeAward[]
+  comments       Comment[]
+  follows        Follow[]           @relation("Follower")
+  notifications  Notification[]
+  referralsMade  ReferralUse[]      @relation("Referrer")
+  transactions   Transaction[]      @relation("SenderTransactions")
+
+  @@map("users")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CREATOR PROFILE
+// ═══════════════════════════════════════════════════════════════════════════
+
 model Creator {
   id             String   @id @default(cuid())
   walletAddress  String   @unique @map("wallet_address")
   username       String   @unique
+  displayName    String?  @map("display_name")
   bio            String   @default("")
   avatarUrl      String?  @map("avatar_url")
-  socialLinks    String   @default("{}") @map("social_links")
+  bannerUrl      String?  @map("banner_url")
+  socialLinks    String   @default("{}") @map("social_links") // JSON
+  categoryId     String?  @map("category_id")
+  tags           String   @default("[]") @map("tags") // JSON array
+  featured       Boolean  @default(false)
+  verified       Boolean  @default(false)
+  joinMessage    String?  @map("join_message")
+
+  // Stats (pre-computed for performance)
   totalTips      BigInt   @default(0) @map("total_tips")
   supporterCount Int      @default(0) @map("supporter_count")
-  createdAt      DateTime @default(now()) @map("created_at")
+  followerCount  Int      @default(0) @map("follower_count")
+  monthlyTips    BigInt   @default(0) @map("monthly_tips")
+  monthlySupporters Int   @default(0) @map("monthly_supporters")
 
-  supporters     Supporter[]    @relation("CreatorSupporters")
-  tipsSent       Transaction[]  @relation("SenderTransactions")
-  tipsReceived   Transaction[]  @relation("ReceiverTransactions")
+  // Timestamps
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  category       Category?            @relation(fields: [categoryId], references: [id])
+  supporters     Supporter[]          @relation("CreatorSupporters")
+  tipsReceived   Transaction[]        @relation("ReceiverTransactions")
+  follows        Follow[]             @relation("CreatorFollows")
+  comments       Comment[]
+  updates        CreatorUpdate[]
+  milestones     Milestone[]
+  membershipTiers MembershipTier[]
+  referralCodes  Referral[]
 
   @@map("creators")
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CATEGORIES
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?  // Lucide icon name
+  color       String?  // Hex color
+  order       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  creators    Creator[]
+
+  @@map("categories")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SUPPORTER RELATION (tracks tips per creator)
+// ═══════════════════════════════════════════════════════════════════════════
 
 model Supporter {
   id            String   @id @default(cuid())
@@ -31,6 +115,8 @@ model Supporter {
   creatorWallet String   @map("creator_wallet")
   totalTipped   BigInt   @default(0) @map("total_tipped")
   tipCount      Int      @default(0) @map("tip_count")
+  firstTipAt    DateTime @default(now()) @map("first_tip_at")
+  lastTipAt     DateTime @default(now()) @map("last_tip_at")
 
   creator       Creator  @relation("CreatorSupporters", fields: [creatorWallet], references: [walletAddress])
 
@@ -38,18 +124,254 @@ model Supporter {
   @@map("supporters")
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TRANSACTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
 model Transaction {
   id             String   @id @default(cuid())
   senderWallet   String   @map("sender_wallet")
   receiverWallet String   @map("receiver_wallet")
   amount         BigInt
-  token          String   @default("SOL")
+  token          String   @default("SOL") // SOL or USDC
   txHash         String?  @unique @map("tx_hash")
   message        String?
+  isConfirmed    Boolean  @default(true) @map("is_confirmed")
   createdAt      DateTime @default(now()) @map("timestamp")
 
-  sender         Creator? @relation("SenderTransactions", fields: [senderWallet], references: [walletAddress])
+  sender         User?    @relation("SenderTransactions", fields: [senderWallet], references: [walletAddress])
   receiver       Creator? @relation("ReceiverTransactions", fields: [receiverWallet], references: [walletAddress])
 
   @@map("transactions")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NFT SUPPORTER BADGES
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String   @unique // Bronze, Silver, Gold, Platinum, Early Supporter, Top Supporter, Soulbound
+  slug        String   @unique // bronze, silver, gold, platinum, early-supporter, top-supporter, soulbound
+  description String?
+  imageUrl    String?  @map("image_url")
+  tier        Int      @default(1) // 1=Bronze, 2=Silver, 3=Gold, 4=Platinum, 5=Special
+  requirement String?  // Description of how to earn it
+  threshold   BigInt?  // SOL threshold for tier badges
+  isSoulbound Boolean  @default(false) @map("is_soulbound")
+  isLimited   Boolean  @default(false) @map("is_limited")
+  maxSupply   Int?     @map("max_supply")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  awards      BadgeAward[]
+
+  @@map("badges")
+}
+
+model BadgeAward {
+  id              String   @id @default(cuid())
+  badgeId         String   @map("badge_id")
+  walletAddress   String   @map("wallet_address")
+  creatorWallet   String?  @map("creator_wallet") // Nullable for platform-wide badges
+  mintAddress     String?  @map("mint_address") // On-chain NFT mint address
+  metadataUri     String?  @map("metadata_uri")
+  awardedAt       DateTime @default(now()) @map("awarded_at")
+
+  badge           Badge    @relation(fields: [badgeId], references: [id])
+  user            User     @relation(fields: [walletAddress], references: [walletAddress])
+
+  @@unique([badgeId, walletAddress, creatorWallet])
+  @@map("badge_awards")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MEMBERSHIPS & SUBSCRIPTIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model MembershipTier {
+  id            String   @id @default(cuid())
+  creatorWallet String   @map("creator_wallet")
+  name          String   // e.g. "Bronze", "Silver", "Gold"
+  description   String   @default("")
+  price         BigInt   // Monthly price in lamports (0 = free)
+  token         String   @default("SOL")
+  benefits      String   @default("[]") // JSON array of benefit strings
+  roleId        String?  @map("role_id") // Discord role ID
+  isActive      Boolean  @default(true) @map("is_active")
+  maxSubscribers Int?    @map("max_subscribers")
+  color         String?  // Hex color for tier
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  creator       Creator  @relation(fields: [creatorWallet], references: [walletAddress])
+  subscriptions Membership[]
+
+  @@map("membership_tiers")
+}
+
+model Membership {
+  id             String   @id @default(cuid())
+  tierId         String   @map("tier_id")
+  supporterWallet String  @map("supporter_wallet")
+  active         Boolean  @default(true)
+  startDate      DateTime @default(now()) @map("start_date")
+  endDate        DateTime? @map("end_date")
+  lastPaymentAt  DateTime? @map("last_payment_at")
+  nextPaymentAt  DateTime? @map("next_payment_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  tier           MembershipTier @relation(fields: [tierId], references: [id])
+
+  @@unique([tierId, supporterWallet])
+  @@map("memberships")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SOCIAL FEATURES
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Follow {
+  id              String   @id @default(cuid())
+  followerWallet  String   @map("follower_wallet")
+  creatorWallet   String   @map("creator_wallet")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  follower        User     @relation("Follower", fields: [followerWallet], references: [walletAddress])
+  creator         Creator  @relation("CreatorFollows", fields: [creatorWallet], references: [walletAddress])
+
+  @@unique([followerWallet, creatorWallet])
+  @@map("follows")
+}
+
+model Comment {
+  id              String   @id @default(cuid())
+  authorWallet    String   @map("author_wallet")
+  creatorWallet   String   @map("creator_wallet")
+  content         String
+  likes           Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  author          User     @relation(fields: [authorWallet], references: [walletAddress])
+  creator         Creator  @relation(fields: [creatorWallet], references: [walletAddress])
+
+  @@map("comments")
+}
+
+model CreatorUpdate {
+  id              String   @id @default(cuid())
+  creatorWallet   String   @map("creator_wallet")
+  title           String
+  content         String
+  imageUrl        String?  @map("image_url")
+  likes           Int      @default(0)
+  comments        Int      @default(0)
+  isPinned        Boolean  @default(false) @map("is_pinned")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  creator         Creator  @relation(fields: [creatorWallet], references: [walletAddress])
+
+  @@map("creator_updates")
+}
+
+model Milestone {
+  id              String   @id @default(cuid())
+  creatorWallet   String   @map("creator_wallet")
+  title           String
+  description     String?
+  target          BigInt?  // Target amount for revenue milestones
+  current         BigInt?  // Current progress
+  achievedAt      DateTime? @map("achieved_at")
+  isAchieved      Boolean  @default(false) @map("is_achieved")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  creator         Creator  @relation(fields: [creatorWallet], references: [walletAddress])
+
+  @@map("milestones")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// REFERRAL SYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Referral {
+  id              String   @id @default(cuid())
+  creatorWallet   String   @map("creator_wallet")
+  code            String   @unique
+  totalRewards    BigInt   @default(0) @map("total_rewards")
+  totalReferrals  Int      @default(0) @map("total_referrals")
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  creator         Creator  @relation(fields: [creatorWallet], references: [walletAddress])
+  uses            ReferralUse[]
+
+  @@map("referrals")
+}
+
+model ReferralUse {
+  id              String   @id @default(cuid())
+  referralId      String   @map("referral_id")
+  referredWallet  String   @map("referred_wallet")
+  reward          BigInt   @default(0) // Reward in lamports
+  rewardToken     String   @default("SOL") @map("reward_token")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  referral        Referral @relation(fields: [referralId], references: [id])
+  referrer        User?    @relation("Referrer", fields: [referredWallet], references: [walletAddress])
+
+  @@map("referral_uses")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════════════════
+
+model Notification {
+  id              String   @id @default(cuid())
+  walletAddress   String   @map("wallet_address")
+  type            String   // tip_received, new_follower, badge_earned, milestone, comment, etc.
+  title           String
+  body            String
+  data            String?  // JSON payload
+  isRead          Boolean  @default(false) @map("is_read")
+  isPush          Boolean  @default(false) @map("is_push")
+  isEmail         Boolean  @default(false) @map("is_email")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  user            User     @relation(fields: [walletAddress], references: [walletAddress])
+
+  @@map("notifications")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYTICS (pre-computed snapshots)
+// ═══════════════════════════════════════════════════════════════════════════
+
+model DailyAnalytics {
+  id              String   @id @default(cuid())
+  date            DateTime @map("date")
+  walletAddress   String?  @map("wallet_address") // Nullable for platform-wide
+  totalTips       BigInt   @default(0) @map("total_tips")
+  tipCount        Int      @default(0) @map("tip_count")
+  newSupporters   Int      @default(0) @map("new_supporters")
+  newFollowers    Int      @default(0) @map("new_followers")
+  newSubscribers  Int      @default(0) @map("new_subscribers")
+  activeUsers     Int      @default(0) @map("active_users")
+  totalRevenue    BigInt   @default(0) @map("total_revenue")
+
+  @@unique([date, walletAddress])
+  @@map("daily_analytics")
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PLATFORM CONFIG
+// ═══════════════════════════════════════════════════════════════════════════
+
+model PlatformSetting {
+  id              String   @id @default(cuid())
+  key             String   @unique
+  value           String
+  description     String?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("platform_settings")
 }

@@ -111,7 +111,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
       }}
       className={`group flex items-center gap-4 rounded-xl px-4 py-4 transition-all duration-500 ${
         isTop3
-          ? "bg-gradient-to-r from-emerald-50/80 to-transparent"
+          ? "bg-gradient-to-r from-emerald-50/80 to-transparent dark:from-emerald-500/10 dark:to-transparent"
           : "hover:bg-muted/20"
       }`}
     >

@@ -2,12 +2,24 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [master, main]
   pull_request:
-    branches: [master]
+    branches: [master, main]
 
 jobs:
-  backend:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run lint
+        continue-on-error: true
+
+  typecheck-backend:
     name: Backend — TypeScript
     runs-on: ubuntu-latest
     defaults:
@@ -25,7 +37,7 @@ jobs:
       - run: npx tsc --noEmit
         name: Type check
 
-  frontend:
+  typecheck-frontend:
     name: Frontend — TypeScript
     runs-on: ubuntu-latest
     defaults:
@@ -41,3 +53,48 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
         name: Type check
+
+  typecheck-sdk:
+    name: SDK — TypeScript
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: packages/sdk/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+        name: Type check
+        continue-on-error: true
+
+  typecheck-cli:
+    name: CLI — TypeScript
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cli
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: cli/package-lock.json
+      - run: npm ci
+      - run: npx tsc --noEmit
+        name: Type check
+        continue-on-error: true
+
+  pr-title:
+    name: PR Title Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

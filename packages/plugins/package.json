@@ -1,0 +1,30 @@
+{
+  "name": "@tipchain/plugins",
+  "version": "0.1.0",
+  "description": "Plugin system for TipChain — extend the platform without modifying core code",
+  "keywords": ["tipchain", "plugin", "extensible"],
+  "homepage": "https://github.com/tipchain/tipchain#readme",
+  "license": "MIT",
+  "author": "TipChain Contributors",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.mjs", "require": "./dist/index.js", "types": "./dist/index.d.ts" },
+    "./types": { "import": "./dist/types.mjs", "require": "./dist/types.js", "types": "./dist/types.d.ts" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts src/types.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts src/types.ts --format esm,cjs --dts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.24"
+  },
+  "devDependencies": {
+    "tsup": "^8",
+    "typescript": "^5"
+  },
+  "publishConfig": { "access": "public" }
+}

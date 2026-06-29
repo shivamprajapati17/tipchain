@@ -291,7 +291,23 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      {/* ── Gradient Mesh Background ─────────────────────────────────── */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <motion.div
+          className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
+          style={{ background: "radial-gradient(circle at 30% 50%, oklch(0.45 0.12 160), transparent 70%)", filter: "blur(80px)" }}
+          animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-20 size-[400px] rounded-full opacity-8 dark:opacity-3"
+          style={{ background: "radial-gradient(circle at 70% 50%, oklch(0.55 0.10 160), transparent 70%)", filter: "blur(80px)" }}
+          animate={{ scale: [1.1, 1, 1.1], x: [0, -30, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="mx-auto max-w-2xl relative">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}

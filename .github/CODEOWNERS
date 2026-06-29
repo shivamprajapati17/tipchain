@@ -1,0 +1,39 @@
+# ─── TipChain CODEOWNERS ────────────────────────────────────────────────────
+# Each line is a file pattern followed by one or more owners.
+
+# Default owners for everything
+* @tipchain/maintainers
+
+# Frontend
+/apps/web/ @tipchain/frontend
+
+# Backend
+/backend/ @tipchain/backend
+/backend/prisma/ @tipchain/backend
+
+# Packages
+/packages/sdk/ @tipchain/sdk
+/packages/ui/ @tipchain/ui
+/packages/solana/ @tipchain/blockchain
+/packages/auth/ @tipchain/backend
+/packages/database/ @tipchain/backend
+/packages/webhooks/ @tipchain/backend
+
+# CLI
+/cli/ @tipchain/cli
+
+# Solana Programs
+/programs/ @tipchain/blockchain
+
+# Documentation
+/apps/docs/ @tipchain/docs
+/docs/ @tipchain/docs
+*.md @tipchain/docs
+
+# CI/CD
+/.github/ @tipchain/infra
+
+# Docker
+/docker/ @tipchain/infra
+Dockerfile* @tipchain/infra
+docker-compose* @tipchain/infra

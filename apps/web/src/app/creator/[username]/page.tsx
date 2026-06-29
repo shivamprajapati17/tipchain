@@ -32,6 +32,10 @@ import {
   type TransactionResponse,
   type SupporterResponse,
 } from "@/lib/api";
+import { MembershipTierBrowser } from "@/components/MembershipTierBrowser";
+import { FollowButton } from "@/components/FollowButton";
+import { BadgeDisplay } from "@/components/BadgeDisplay";
+import { ReferralShare } from "@/components/ReferralShare";
 
 // ─── Motion Variants ────────────────────────────────────────────────────────
 
@@ -748,7 +752,7 @@ function LinkedInIcon(props: React.SVGProps<SVGSVGElement>) {
 // ─── Social Links Row ───────────────────────────────────────────────────────
 
 function SocialLinks({ links }: { links: Record<string, string> }) {
-  const entries = Object.entries(links).filter(([, url]) => url && url.trim());
+  const entries = Object.entries(links).filter(([, url]) => typeof url === "string" && url.trim());
   if (entries.length === 0) return null;
 
   return (
@@ -914,6 +918,14 @@ export default function CreatorProfilePage() {
                       <ArrowUpRight className="size-3" />
                       Solscan
                     </a>
+                    {/* Follow button — shown to other users */}
+                    {currentWallet && currentWallet !== creator.walletAddress && (
+                      <FollowButton
+                        creatorWallet={creator.walletAddress}
+                        followerWallet={currentWallet}
+                        size="sm"
+                      />
+                    )}
                     {/* Edit Profile button — only visible to the profile owner */}
                     {currentWallet && currentWallet === creator.walletAddress && (
                       <Link href="/profile">
@@ -925,6 +937,11 @@ export default function CreatorProfilePage() {
                         </motion.div>
                       </Link>
                     )}
+                  </div>
+
+                  {/* Badge Display — compact on profile header */}
+                  <div className="mt-3">
+                    <BadgeDisplay wallet={creator.walletAddress} compact />
                   </div>
 
                   {/* Social Links */}
@@ -1004,6 +1021,23 @@ export default function CreatorProfilePage() {
                     </motion.div>
                   </div>
                 </motion.div>
+
+                {/* Membership Tiers */}
+                {currentWallet && (
+                  <div className="mt-4">
+                    <MembershipTierBrowser
+                      creatorWallet={creator.walletAddress}
+                      currentWallet={currentWallet}
+                    />
+                  </div>
+                )}
+
+                {/* Referral Share — only visible to profile owner */}
+                {currentWallet && currentWallet === creator.walletAddress && (
+                  <div className="mt-4">
+                    <ReferralShare creatorWallet={creator.walletAddress} />
+                  </div>
+                )}
               </div>
             </div>
 

@@ -1,0 +1,137 @@
+---
+title: API Reference
+description: REST API and GraphQL reference for TipChain
+---
+
+# API Reference
+
+## REST API
+
+Base URL: `http://localhost:4000` (development) or `https://api.tipchain.dev/v1` (production)
+
+### Creators
+
+#### `GET /creators`
+List all creators.
+
+#### `GET /creators/search?q=&category=&sort=`
+Search creators with filters.
+
+#### `GET /creator/:wallet`
+Get creator by wallet address.
+
+#### `GET /creator/by-username/:username`
+Get creator by username.
+
+#### `POST /creator`
+Create a new creator profile.
+
+**Body:**
+```json
+{
+  "walletAddress": "string",
+  "username": "string",
+  "bio": "string (optional)",
+  "displayName": "string (optional)",
+  "avatarUrl": "string (optional)",
+  "socialLinks": { "twitter": "https://x.com/..." }
+}
+```
+
+#### `PUT /creator/:wallet`
+Update creator profile.
+
+### Transactions
+
+#### `GET /transactions`
+List all transactions.
+
+#### `GET /transactions/:wallet`
+Get transactions for a wallet.
+
+#### `POST /transaction`
+Record a new transaction.
+
+### Analytics
+
+#### `GET /analytics/:wallet/overview`
+Dashboard overview.
+
+#### `GET /analytics/:wallet/revenue?days=30`
+Revenue chart data.
+
+#### `GET /analytics/:wallet/export?days=90`
+Export CSV.
+
+### Leaderboard
+
+#### `GET /leaderboard?limit=25`
+Get supporter leaderboard.
+
+### Badges
+
+#### `GET /badges`
+List all badge types.
+
+#### `POST /badges/award`
+Award a badge.
+
+### Memberships
+
+#### `GET /memberships/:wallet`
+Get creator's membership tiers.
+
+#### `POST /memberships`
+Create a membership tier.
+
+#### `POST /memberships/subscribe`
+Subscribe to a tier.
+
+### Social
+
+#### `POST /follow`
+Follow a creator.
+
+#### `DELETE /follow/:follower/:creator`
+Unfollow a creator.
+
+#### `POST /comments`
+Add a comment.
+
+#### `POST /updates`
+Create a creator update.
+
+### Notifications
+
+#### `GET /notifications/:wallet`
+Get notifications.
+
+#### `PUT /notifications/:id/read`
+Mark as read.
+
+## GraphQL
+
+GraphQL endpoint: `POST /graphql`
+
+```graphql
+query GetCreator($username: String!) {
+  creator(username: $username) {
+    walletAddress
+    username
+    bio
+    totalTips
+    supporterCount
+    recentTransactions(first: 5) {
+      amount
+      token
+      message
+      timestamp
+    }
+    topSupporters(first: 5) {
+      walletAddress
+      totalTipped
+      tipCount
+    }
+  }
+}
+```

@@ -1,0 +1,73 @@
+---
+title: Plugin System
+description: Extend TipChain with plugins
+---
+
+# Plugin System
+
+TipChain's plugin architecture lets you extend the platform without modifying core code.
+
+## Architecture
+
+Plugins are npm packages or local modules that export a `TipChainPlugin` interface:
+
+```typescript
+interface TipChainPlugin {
+  name: string;
+  version: string;
+  onLoad?: (context: PluginContext) => Promise<void>;
+  onUnload?: () => Promise<void>;
+  onTipReceived?: (tip: TipEvent) => Promise<void>;
+  onCreatorCreated?: (creator: CreatorEvent) => Promise<void>;
+  onMembershipActivated?: (membership: MembershipEvent) => Promise<void>;
+  onBadgeAwarded?: (badge: BadgeEvent) => Promise<void>;
+  components?: Record<string, React.ComponentType>;
+  apiRoutes?: Router;
+}
+```
+
+## Plugin Context
+
+Plugins receive a context object with:
+
+- **`config`** — Plugin configuration
+- **`db`** — Prisma database client
+- **`logger`** — Structured logger
+- **`fetch`** — Global fetch for external API calls
+
+## Available Hooks
+
+| Hook | Triggered When |
+|------|---------------|
+| `onTipReceived` | A tip is received by a creator |
+| `onCreatorCreated` | A new creator profile is created |
+| `onMembershipActivated` | A membership subscription is activated |
+| `onBadgeAwarded` | A badge is awarded to a supporter |
+
+## Plugin Types
+
+- **NFT Rewards** — Auto-mint badges on tipping milestones
+- **Discord Roles** — Sync membership tiers to Discord
+- **Telegram Bots** — Receive notifications via Telegram
+- **Email** — Transaction receipts, weekly digests
+- **Analytics** — Custom analytics providers (PostHog, Plausible)
+- **AI Assistants** — Chat with your analytics, auto-reply
+
+## Creating a Plugin
+
+```typescript
+import type { TipChainPlugin } from "@tipchain/plugins";
+
+export const MyPlugin: TipChainPlugin = {
+  name: "my-plugin",
+  version: "1.0.0",
+
+  async onLoad(context) {
+    context.logger.info("My plugin loaded!");
+  },
+
+  async onTipReceived(tip) {
+    console.log(`Received ${tip.amount} ${tip.token} from ${tip.senderWallet}`);
+  },
+};
+```

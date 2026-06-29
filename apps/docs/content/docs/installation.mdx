@@ -1,0 +1,55 @@
+---
+title: Installation
+description: Install and set up TipChain
+---
+
+# Installation
+
+## Prerequisites
+
+- **Node.js** >= 20
+- **PostgreSQL** >= 15
+- **npm** or **bun** or **pnpm**
+- A Solana wallet (Phantom, Solflare, Backpack)
+
+## Quick Install
+
+```bash
+npx @tipchain/cli init
+```
+
+## Manual Setup
+
+```bash
+# Clone the monorepo
+git clone https://github.com/tipchain/tipchain.git
+cd tipchain
+
+# Install all dependencies
+npm install
+
+# Copy environment variables
+cp .env.example .env
+```
+
+## Database Setup
+
+```bash
+# Push the schema to your database
+npx prisma db push --schema=backend/prisma/schema.prisma
+
+# (Optional) Seed with sample data
+npm run db:seed
+```
+
+## Start Development
+
+```bash
+# Start backend (terminal 1)
+cd backend && npm run dev
+
+# Start frontend (terminal 2)
+cd apps/web && npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) for the frontend and [http://localhost:4000/health](http://localhost:4000/health) for the API.

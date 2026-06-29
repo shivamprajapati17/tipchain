@@ -1,0 +1,25 @@
+[package]
+name = "tipchain"
+version = "0.1.0"
+description = "TipChain Solana program — on-chain creator monetization"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "=0.29.0", features = ["init-if-needed"] }
+
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+debug = false

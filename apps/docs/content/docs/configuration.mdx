@@ -1,0 +1,37 @@
+---
+title: Configuration
+description: Configure your TipChain deployment
+---
+
+# Configuration
+
+## Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
+| `SOLANA_RPC_URL` | ✅ | `https://api.devnet.solana.com` | Solana RPC endpoint |
+| `SOLANA_NETWORK` | — | `devnet` | `devnet` or `mainnet-beta` |
+| `FRONTEND_URL` | — | `http://localhost:3000` | CORS allowlist |
+| `PORT` | — | `4000` | Backend server port |
+| `REDIS_URL` | — | — | Redis for caching (optional) |
+
+## Solana Network
+
+```bash
+# Development / Testing
+SOLANA_NETWORK=devnet
+SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# Production
+SOLANA_NETWORK=mainnet-beta
+SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=your_key
+```
+
+## CORS Configuration
+
+For production, set `FRONTEND_URL` to a comma-separated list of allowed origins:
+
+```bash
+FRONTEND_URL=https://tipchain.yourdomain.com,https://admin.yourdomain.com
+```

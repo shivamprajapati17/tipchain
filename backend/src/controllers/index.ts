@@ -1,0 +1,11 @@
+export * as authController from "./auth.controller";
+export * as creatorController from "./creator.controller";
+export * as tipController from "./tip.controller";
+export * as supporterController from "./supporter.controller";
+export * as analyticsController from "./analytics.controller";
+export * as adminController from "./admin.controller";
+export * as membershipController from "./membership.controller";
+export * as socialController from "./social.controller";
+export * as badgeController from "./badge.controller";
+export * as referralController from "./referral.controller";
+export * as apiKeyController from "./apiKey.controller";

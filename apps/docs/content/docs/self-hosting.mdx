@@ -1,0 +1,66 @@
+---
+title: Self-Hosting
+description: Deploy TipChain on your own infrastructure
+---
+
+# Self-Hosting TipChain
+
+TipChain is designed to be self-hosted from day one. You can deploy it anywhere Docker runs.
+
+## Docker Compose (Recommended)
+
+```bash
+git clone https://github.com/tipchain/tipchain.git
+cd tipchain
+
+# Copy environment variables
+cp .env.example .env
+# Edit .env with your values
+
+# Start all services
+docker compose -f docker/docker-compose.yml up -d
+```
+
+## Platform Guides
+
+### Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/tipchain)
+
+1. Click the deploy button
+2. Connect your GitHub repository
+3. Set environment variables
+4. Deploy
+
+### Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/tipchain/tipchain)
+
+### Vercel (Frontend Only)
+
+```bash
+npx vercel deploy --prod
+```
+
+Set `NEXT_PUBLIC_API_URL` to your backend URL.
+
+### Fly.io
+
+```bash
+fly launch
+fly deploy
+```
+
+### DigitalOcean App Platform
+
+1. Create a new App
+2. Connect your GitHub repository
+3. Set `DATABASE_URL` to a managed PostgreSQL database
+4. Deploy
+
+## Requirements
+
+- **Node.js** >= 20
+- **PostgreSQL** >= 15
+- **Redis** >= 7 (optional, for caching)
+- **Solana RPC** — Helius or QuickNode recommended

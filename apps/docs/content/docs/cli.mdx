@@ -1,0 +1,76 @@
+---
+title: CLI
+description: TipChain command-line interface reference
+---
+
+# CLI
+
+The `@tipchain/cli` package provides a command-line interface for managing your TipChain deployment.
+
+## Installation
+
+```bash
+npm install -g @tipchain/cli
+```
+
+## Commands
+
+### `tipchain init`
+
+Initialize a new TipChain deployment.
+
+```bash
+tipchain init --dir ./my-tipchain --template docker
+```
+
+### `tipchain deploy`
+
+Deploy to production.
+
+```bash
+tipchain deploy --platform railway
+```
+
+### `tipchain sync`
+
+Sync on-chain data with your database.
+
+```bash
+tipchain sync --rpc https://api.mainnet-beta.solana.com
+```
+
+### `tipchain creator create`
+
+Create a creator profile.
+
+```bash
+tipchain creator create \
+  --wallet 9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r \
+  --username rahul \
+  --bio "Full-stack developer & Solana enthusiast"
+```
+
+### `tipchain analytics`
+
+View creator analytics.
+
+```bash
+tipchain analytics --wallet wallet_address --days 30
+```
+
+### `tipchain plugin install`
+
+Install a plugin.
+
+```bash
+tipchain plugin install nft-rewards
+```
+
+### `tipchain doctor`
+
+Diagnose deployment health.
+
+```bash
+tipchain doctor
+tipchain doctor --fix   # Attempt automatic fixes
+```

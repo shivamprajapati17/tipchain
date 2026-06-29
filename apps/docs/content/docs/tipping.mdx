@@ -1,0 +1,38 @@
+---
+title: Tipping
+description: Send and receive tips on TipChain
+---
+
+# Tipping
+
+## Supported Tokens
+
+- **SOL** — Native Solana token
+- **USDC** — Circle's USD stablecoin (SPL)
+
+## How Tipping Works
+
+1. Visit a creator's profile page
+2. Enter the amount (or use a preset)
+3. Select SOL or USDC
+4. Optionally add a message (max 280 chars)
+5. Confirm the transaction in your wallet
+6. The tip arrives in seconds
+
+## Transaction Flow
+
+```
+Supporter → Amount & Token → Wallet Approval
+  → Solana Transaction → On-Chain Confirmation
+  → Backend Indexing → Creator Stats Updated
+  → Supporter Leaderboard Updated
+  → Notification Sent to Creator
+```
+
+## Zero Fees
+
+TipChain charges **zero platform fees**. The only cost is the Solana network fee (~$0.0002 per transaction).
+
+## Tips are Verifiable
+
+Every tip is recorded on Solana with a transaction hash you can view on Solscan.

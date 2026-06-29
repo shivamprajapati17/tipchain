@@ -33,6 +33,9 @@ import {
   type TransactionResponse,
   type SupporterResponse,
 } from "@/lib/api";
+import { RevenueChart } from "@/components/charts/RevenueChart";
+import { TipAnalyticsChart } from "@/components/charts/TipAnalyticsChart";
+import { GrowthChart } from "@/components/charts/GrowthChart";
 
 // ─── Motion Variants ────────────────────────────────────────────────────────
 
@@ -311,7 +314,7 @@ const IntelligentList = memo(function IntelligentList({
             <motion.span
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="text-[10px] text-emerald-600 font-medium"
+              className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium"
             >
               Re-prioritizing...
             </motion.span>
@@ -559,10 +562,9 @@ const LiveStatus = memo(function LiveStatus({
               transition={{ duration: 0.5 }}
             >
               <Bell className="size-3 text-emerald-600" />
-            </motion.div>
-            <span className="text-[11px] font-medium text-emerald-700 whitespace-nowrap">
-              +{lamportsToSol(badgeTx.amount).toFixed(2)} {badgeTx.token}
-            </span>
+            </motion.div>              <span className="text-[11px] font-medium text-emerald-700 dark:text-emerald-300 whitespace-nowrap">
+                +{lamportsToSol(badgeTx.amount).toFixed(2)} {badgeTx.token}
+              </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -870,8 +872,24 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="flex-1 px-6 py-8">
-        <div className="mx-auto max-w-6xl">
+      {/* ── Gradient Mesh Background ─────────────────────────────────── */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <motion.div
+          className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
+          style={{ background: "radial-gradient(circle at 30% 50%, oklch(0.45 0.12 160), transparent 70%)", filter: "blur(80px)" }}
+          animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          className="absolute -bottom-40 -left-20 size-[400px] rounded-full opacity-8 dark:opacity-3"
+          style={{ background: "radial-gradient(circle at 70% 50%, oklch(0.55 0.10 160), transparent 70%)", filter: "blur(80px)" }}
+          animate={{ scale: [1.1, 1, 1.1], x: [0, -30, 0] }}
+          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="flex-1 px-6 py-8 relative">
+        <div className="mx-auto max-w-6xl relative">
           {/* ── Header ─────────────────────────────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -949,6 +967,32 @@ export default function DashboardPage() {
                 transactions={recentTips}
                 loading={loading}
               />
+            </div>
+          </motion.div>
+
+          {/* ── Phase 3: Analytics Charts ──────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 80, damping: 20, delay: 0.4 }}
+            className="mt-6"
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <div className="flex size-7 items-center justify-center rounded-lg bg-emerald-500/10">
+                <BarChart3 className="size-4 text-emerald-600" />
+              </div>
+              <h2 className="text-sm font-semibold">Analytics</h2>
+            </div>
+            <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="lg:col-span-1 xl:col-span-1">
+                <RevenueChart walletAddress={walletAddress} />
+              </div>
+              <div className="lg:col-span-1 xl:col-span-1">
+                <TipAnalyticsChart walletAddress={walletAddress} />
+              </div>
+              <div className="lg:col-span-2 xl:col-span-1">
+                <GrowthChart walletAddress={walletAddress} />
+              </div>
             </div>
           </motion.div>
         </div>

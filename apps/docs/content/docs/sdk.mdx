@@ -1,0 +1,62 @@
+---
+title: SDK
+description: TipChain JavaScript/TypeScript SDK reference
+---
+
+# SDK
+
+The `@tipchain/sdk` package provides a type-safe client for interacting with the TipChain API.
+
+## Installation
+
+```bash
+npm install @tipchain/sdk
+```
+
+## Quick Start
+
+```typescript
+import { TipChain } from "@tipchain/sdk";
+
+const client = new TipChain({
+  apiKey: "tc_your_api_key",
+});
+
+const { creator } = await client.creators.get("rahul");
+console.log(creator.totalTips);
+```
+
+## Modules
+
+### `client.creators`
+
+| Method | Description |
+|--------|-------------|
+| `list(options?)` | List/search creators |
+| `get(username)` | Get creator by username |
+| `getByWallet(wallet)` | Get creator by wallet |
+| `create(data)` | Create creator profile |
+| `update(wallet, data)` | Update creator |
+
+### `client.tips`
+
+| Method | Description |
+|--------|-------------|
+| `send(input)` | Send a tip |
+| `list(wallet?, limit?)` | Get transaction history |
+
+### `client.analytics`
+
+| Method | Description |
+|--------|-------------|
+| `overview(wallet)` | Dashboard overview |
+| `revenue(wallet, days?)` | Revenue chart data |
+| `exportCSV(wallet, days?)` | Export as CSV |
+
+## Self-Hosted
+
+```typescript
+const client = new TipChain({
+  baseUrl: "https://tipchain.yourdomain.com",
+});
+```

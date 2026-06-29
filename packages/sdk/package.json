@@ -1,0 +1,33 @@
+{
+  "name": "@tipchain/sdk",
+  "version": "0.1.0",
+  "description": "Universal JavaScript SDK for TipChain — interact with the creator monetization platform",
+  "keywords": ["tipchain", "solana", "creator", "monetization", "sdk"],
+  "homepage": "https://github.com/tipchain/tipchain#readme",
+  "bugs": { "url": "https://github.com/tipchain/tipchain/issues" },
+  "license": "MIT",
+  "author": "TipChain Contributors",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "import": "./dist/index.mjs", "require": "./dist/index.js", "types": "./dist/index.d.ts" }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "zod": "^3.24"
+  },
+  "devDependencies": {
+    "tsup": "^8",
+    "typescript": "^5",
+    "vitest": "^3"
+  },
+  "publishConfig": { "access": "public" }
+}
