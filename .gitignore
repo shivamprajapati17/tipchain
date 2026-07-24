@@ -31,6 +31,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Programs / Anchor build artifacts
+programs/tipchain/target/
+programs/tipchain/.test-ledger/
+
 # Prisma
 prisma/dev.db
 prisma/dev.db-journal
