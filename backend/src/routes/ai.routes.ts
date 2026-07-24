@@ -11,19 +11,20 @@ import {
   aiHealth,
 } from "../controllers/ai.controller";
 import { apiLimiter } from "../middleware/rateLimiter.middleware";
+import { simpleApiKeyAuth } from "../middleware/simpleApiKey.middleware";
 
 // ─── Base Router: /ai/... ─────────────────────────────────────────────────────
 // Accessible as: /ai/wallet-assistant, /api/v1/ai/wallet-assistant
 const router = Router();
 
-router.post("/ai/wallet-assistant", apiLimiter, walletAssistant);
-router.post("/ai/portfolio-manager", apiLimiter, portfolioManager);
-router.post("/ai/yield-optimizer", apiLimiter, yieldOptimizer);
-router.post("/ai/trading-assistant", apiLimiter, tradingAssistant);
-router.post("/ai/community-manager", apiLimiter, communityManager);
-router.post("/ai/creator-assistant", apiLimiter, creatorAssistant);
-router.post("/ai/quest-generator", apiLimiter, questGenerator);
-router.post("/ai/npc-engine", apiLimiter, npcEngine);
+router.post("/ai/wallet-assistant", apiLimiter, simpleApiKeyAuth, walletAssistant);
+router.post("/ai/portfolio-manager", apiLimiter, simpleApiKeyAuth, portfolioManager);
+router.post("/ai/yield-optimizer", apiLimiter, simpleApiKeyAuth, yieldOptimizer);
+router.post("/ai/trading-assistant", apiLimiter, simpleApiKeyAuth, tradingAssistant);
+router.post("/ai/community-manager", apiLimiter, simpleApiKeyAuth, communityManager);
+router.post("/ai/creator-assistant", apiLimiter, simpleApiKeyAuth, creatorAssistant);
+router.post("/ai/quest-generator", apiLimiter, simpleApiKeyAuth, questGenerator);
+router.post("/ai/npc-engine", apiLimiter, simpleApiKeyAuth, npcEngine);
 router.get("/ai/health", apiLimiter, aiHealth);
 
 // ─── API Router: /api/ai/... ──────────────────────────────────────────────────
@@ -31,14 +32,14 @@ router.get("/ai/health", apiLimiter, aiHealth);
 // https://tipchain-api.onrender.com/api/ai/wallet-assistant
 const apiRouter = Router();
 
-apiRouter.post("/api/ai/wallet-assistant", apiLimiter, walletAssistant);
-apiRouter.post("/api/ai/portfolio-manager", apiLimiter, portfolioManager);
-apiRouter.post("/api/ai/yield-optimizer", apiLimiter, yieldOptimizer);
-apiRouter.post("/api/ai/trading-assistant", apiLimiter, tradingAssistant);
-apiRouter.post("/api/ai/community-manager", apiLimiter, communityManager);
-apiRouter.post("/api/ai/creator-assistant", apiLimiter, creatorAssistant);
-apiRouter.post("/api/ai/quest-generator", apiLimiter, questGenerator);
-apiRouter.post("/api/ai/npc-engine", apiLimiter, npcEngine);
+apiRouter.post("/api/ai/wallet-assistant", apiLimiter, simpleApiKeyAuth, walletAssistant);
+apiRouter.post("/api/ai/portfolio-manager", apiLimiter, simpleApiKeyAuth, portfolioManager);
+apiRouter.post("/api/ai/yield-optimizer", apiLimiter, simpleApiKeyAuth, yieldOptimizer);
+apiRouter.post("/api/ai/trading-assistant", apiLimiter, simpleApiKeyAuth, tradingAssistant);
+apiRouter.post("/api/ai/community-manager", apiLimiter, simpleApiKeyAuth, communityManager);
+apiRouter.post("/api/ai/creator-assistant", apiLimiter, simpleApiKeyAuth, creatorAssistant);
+apiRouter.post("/api/ai/quest-generator", apiLimiter, simpleApiKeyAuth, questGenerator);
+apiRouter.post("/api/ai/npc-engine", apiLimiter, simpleApiKeyAuth, npcEngine);
 apiRouter.get("/api/ai/health", apiLimiter, aiHealth);
 
 // ─── Export Combined ──────────────────────────────────────────────────────────

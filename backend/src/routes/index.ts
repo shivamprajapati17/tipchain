@@ -37,10 +37,14 @@ import sdkRoutes from "./sdk.routes";
 // AI routes
 import aiRoutes, { apiRouter as aiApiRouter } from "./ai.routes";
 
+// GameFi / DeFi / Creator Economy routes
+import moduleRoutes from "./module.routes";
+
 router.use(daoRoutes);
 router.use(graphqlRoutes);
 router.use(sdkRoutes);
 router.use(aiRoutes);
 router.use(aiApiRouter);
+router.use(moduleRoutes);
 
 export default router;

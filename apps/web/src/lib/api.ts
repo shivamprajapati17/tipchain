@@ -1,4 +1,6 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+// In production (deployed on Vercel), use the Next.js proxy route to avoid CORS issues
+// In development, use the direct backend URL from env or localhost
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/proxy";
 
 // ─── Generic Fetch ──────────────────────────────────────────────────────────
 
@@ -504,6 +506,27 @@ export async function getAdminHealth() {
     "/admin/health"
   );
 }
+
+// ─── AI Agents ──────────────────────────────────────────────────────────────
+
+export async function queryAIAgent(agentType: string, message: string, context?: Record<string, any>) {
+  const endpoint = `/ai/${agentType}`;
+  return fetchJSON<{ agent: string; content: string; usage?: any }>(endpoint, {
+    method: "POST",
+    body: JSON.stringify({ message, context: context || {} }),
+  });
+}
+
+export const AI_AGENTS = [
+  { id: "wallet-assistant", name: "AI Wallet Assistant", icon: "💼", color: "emerald", desc: "Check balances, monitor transactions, and get wallet security advice." },
+  { id: "portfolio-manager", name: "AI Portfolio Manager", icon: "📊", color: "blue", desc: "Analyze your DeFi portfolio and get investment insights." },
+  { id: "yield-optimizer", name: "AI Yield Optimizer", icon: "🌾", color: "emerald", desc: "Find the best yield opportunities across Solana DeFi." },
+  { id: "trading-assistant", name: "AI Trading Assistant", icon: "📈", color: "purple", desc: "Analyze markets, identify trading opportunities, and execute strategies." },
+  { id: "community-manager", name: "AI Community Manager", icon: "👥", color: "cyan", desc: "Manage and grow your Web3 communities effectively." },
+  { id: "creator-assistant", name: "AI Creator Assistant", icon: "🎨", color: "pink", desc: "Build, manage, and monetize your Web3 creator presence." },
+  { id: "quest-generator", name: "AI Quest Generator", icon: "⚔️", color: "orange", desc: "Design engaging quests, missions, and challenges." },
+  { id: "npc-engine", name: "AI NPC Engine", icon: "🎭", color: "purple", desc: "Generate NPC characters with personalities and dialogue." },
+];
 
 // ─── Categories ─────────────────────────────────────────────────────────────
 

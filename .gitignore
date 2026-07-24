@@ -35,6 +35,10 @@ yarn-error.log*
 programs/tipchain/target/
 programs/tipchain/.test-ledger/
 
+# n8n workflow files (contains credentials)
+n8n_workflow.json
+n8n/
+
 # Prisma
 prisma/dev.db
 prisma/dev.db-journal
