@@ -3,3 +3,4 @@ export { creatorService } from "./creator.service";
 export { tipService } from "./tip.service";
 export { analyticsService } from "./analytics.service";
 export { notificationService } from "./notification.service";
+export { nvidiaService } from "./nvidia.service";

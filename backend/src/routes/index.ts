@@ -34,8 +34,13 @@ import daoRoutes from "./dao.routes";
 import graphqlRoutes from "./graphql.routes";
 import sdkRoutes from "./sdk.routes";
 
+// AI routes
+import aiRoutes, { apiRouter as aiApiRouter } from "./ai.routes";
+
 router.use(daoRoutes);
 router.use(graphqlRoutes);
 router.use(sdkRoutes);
+router.use(aiRoutes);
+router.use(aiApiRouter);
 
 export default router;

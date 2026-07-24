@@ -28,6 +28,9 @@ const envSchema = z.object({
   // Auth
   TIPCHAIN_API_KEY: z.string().optional(),
 
+  // NVIDIA AI
+  NVIDIA_API_KEY: z.string().optional(),
+
   // Storage
   STORAGE_PROVIDER: z.enum(["local", "cloudinary", "s3"]).default("local"),
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
