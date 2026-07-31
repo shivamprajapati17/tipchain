@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   getCreatorByWallet,
@@ -114,7 +115,7 @@ function SocialLinkInput({
 }) {
   const Icon = platform.icon;
   return (
-    <div    className="group flex items-center gap-3 rounded-xl border border-border bg-background/50 px-3 py-2.5 hover-glass-strong focus-within:border-emerald-500/30 focus-within:ring-2 focus-within:ring-emerald-500/10">
+    <div className="group flex items-center gap-3 rounded-xl border border-border bg-background/50 px-3 py-2.5 hover-glass-strong focus-within:border-emerald-500/30 focus-within:ring-2 focus-within:ring-emerald-500/10">
       <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 text-muted-foreground transition-colors duration-200 group-focus-within:bg-emerald-500/10 group-focus-within:text-emerald-600">
         <Icon className="size-4" />
       </div>
@@ -192,6 +193,7 @@ function NotConnected() {
 // ─── Main Profile Page ──────────────────────────────────────────────────────
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { status } = useWallet();
   const session = useWalletSession();
   const walletAddress = session?.account.address ?? "";
@@ -273,7 +275,12 @@ export default function ProfilePage() {
         setCreatorData(result.creator);
       }
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      if (isNewProfile) {
+        // Redirect to dashboard after creating a new profile
+        setTimeout(() => router.push("/dashboard"), 1500);
+      } else {
+        setTimeout(() => setSuccess(false), 3000);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save profile");
     } finally {

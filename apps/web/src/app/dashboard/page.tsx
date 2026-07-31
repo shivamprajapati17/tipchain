@@ -780,6 +780,50 @@ function NotConnected() {
   );
 }
 
+// ─── No Profile State ───────────────────────────────────────────────────────
+
+function NoProfile({ onRefresh }: { onRefresh: () => void }) {
+  return (
+    <div className="flex flex-1 items-center justify-center px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 80, damping: 20 }}
+        className="text-center max-w-sm"
+      >
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
+          <User className="size-7 text-muted-foreground" />
+        </div>
+        <h1 className="mb-2 text-xl font-semibold">Create Your Creator Profile</h1>
+        <p className="mb-6 text-sm text-muted-foreground leading-relaxed">
+          You don&apos;t have a creator profile yet. Set one up to start receiving
+          tips, track your earnings, and build your supporter community.
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <Link href="/profile">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+              <Button className="gap-2 rounded-xl w-full sm:w-auto">
+                <User className="size-4" />
+                Create Profile
+              </Button>
+            </motion.div>
+          </Link>
+          <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+            <Button
+              onClick={onRefresh}
+              variant="outline"
+              className="gap-2 rounded-xl w-full sm:w-auto"
+            >
+              <RefreshCw className="size-4" />
+              Refresh
+            </Button>
+          </motion.div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard Page ────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -865,6 +909,22 @@ export default function DashboardPage() {
 
   if (error) {
     return <DashboardError message={error} onRetry={fetchDashboard} />;
+  }
+
+  if (!profileExists && !loading) {
+    return (
+      <>
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <motion.div
+            className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
+            style={{ background: "radial-gradient(circle at 30% 50%, oklch(0.45 0.12 160), transparent 70%)", filter: "blur(80px)" }}
+            animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+        <NoProfile onRefresh={fetchDashboard} />
+      </>
+    );
   }
 
   const solBalance =

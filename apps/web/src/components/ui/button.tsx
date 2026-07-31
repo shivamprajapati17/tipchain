@@ -4,30 +4,30 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center border border-transparent text-xs font-bold whitespace-nowrap tracking-[0.1em] uppercase outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 transition-colors duration-150",
+  "group/button inline-flex shrink-0 items-center justify-center border text-xs font-medium whitespace-nowrap outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 transition-all duration-200",
   {
     variants: {
       variant: {
-        default: "bg-[#059669] text-white border-[#059669] hover:bg-[#047857]",
+        default: "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-500/15",
         outline:
-          "border-[#D4D4D0] bg-white text-[#111111] hover:bg-[#F0F0EC]",
+          "border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white hover:border-white/20",
         secondary:
-          "bg-[#F0F0EC] text-[#111111] border-[#D4D4D0] hover:bg-[#E8E8E4]",
+          "bg-white/5 text-white/70 border-white/5 hover:bg-white/10 hover:text-white",
         ghost:
-          "border-transparent bg-transparent text-[#888888] hover:text-[#111111] hover:bg-[#F0F0EC]",
+          "border-transparent bg-transparent text-white/50 hover:text-white hover:bg-white/5",
         destructive:
-          "bg-[#DC2626]/10 text-[#DC2626] border-[#DC2626]/30 hover:bg-[#DC2626]/20",
-        link: "text-[#059669] underline-offset-4 hover:underline border-transparent bg-transparent",
+          "bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20",
+        link: "text-emerald-400 underline-offset-4 hover:underline border-transparent bg-transparent",
       },
       size: {
-        default: "h-9 px-4 gap-2",
-        xs: "h-6 px-2.5 gap-1 text-[10px]",
-        sm: "h-7 px-3 gap-1.5 text-[10px]",
-        lg: "h-11 px-8 gap-2.5 text-xs",
-        icon: "size-9",
-        "icon-xs": "size-6",
-        "icon-sm": "size-7",
-        "icon-lg": "size-11",
+        default: "h-9 px-4 gap-2 rounded-lg",
+        xs: "h-6 px-2.5 gap-1 text-[10px] rounded-md",
+        sm: "h-7 px-3 gap-1.5 text-[10px] rounded-md",
+        lg: "h-11 px-8 gap-2.5 text-sm rounded-xl",
+        icon: "size-9 rounded-lg",
+        "icon-xs": "size-6 rounded-md",
+        "icon-sm": "size-7 rounded-md",
+        "icon-lg": "size-11 rounded-xl",
       },
     },
     defaultVariants: {

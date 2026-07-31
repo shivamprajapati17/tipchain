@@ -1,181 +1,424 @@
 "use client";
 
-import { ArrowRight } from "@phosphor-icons/react";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  Sparkles,
+  Zap,
+  Shield,
+  Coins,
+  TrendingUp,
+  Bot,
+  Gamepad2,
+  BarChart3,
+  Users,
+  Layers,
+  ChevronRight,
+} from "lucide-react";
 
-// ─── MOCK DATA ──────────────────────────────────────────────────────────────
+// ─── Animations ──────────────────────────────────────────────────────────────
 
-const FEATURED_CREATORS = [
-  {
-    username: "rahul",
-    displayName: "Rahul Sharma",
-    bio: "Full-stack developer & Solana enthusiast",
-    totalTips: "12.5 SOL",
-    supporters: 24,
-  },
-  {
-    username: "priya",
-    displayName: "Priya Patel",
-    bio: "Digital artist & NFT creator on Solana",
-    totalTips: "8.3 SOL",
-    supporters: 19,
-  },
-  {
-    username: "arjun",
-    displayName: "Arjun Singh",
-    bio: "Open source contributor & Rust dev",
-    totalTips: "5.7 SOL",
-    supporters: 15,
-  },
-];
+const fadeInUp = {
+  initial: { opacity: 0, y: 30 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-80px" },
+  transition: { duration: 0.6 },
+};
 
-const FAQS = [
-  {
-    q: "WHAT IS TIPCHAIN?",
-    a: "A decentralized creator tipping platform built on Solana. Fans send tips directly to creators via crypto wallets — no middlemen, no platform fees.",
-  },
-  {
-    q: "HOW DO I RECEIVE TIPS?",
-    a: "Connect your Solana wallet, create your profile, and share your link. Supporters send SOL or USDC directly to your wallet instantly.",
-  },
-  {
-    q: "WHAT WALLETS ARE SUPPORTED?",
-    a: "Phantom, Solflare, and Backpack. Any Solana browser extension wallet works.",
-  },
-  {
-    q: "ARE THERE ANY FEES?",
-    a: "ZERO platform fees. Only the Solana network tx fee (typically less than $0.01). 100% goes to creators.",
-  },
-  {
-    q: "CAN I SEND TIPS IN USDC?",
-    a: "Yes. Both SOL and USDC tips are supported. All transactions are on-chain and verifiable.",
-  },
-  {
-    q: "HOW DO I WITHDRAW?",
-    a: "Tips are sent directly to your connected wallet. Full custody, no withdrawal needed.",
-  },
-];
+const staggerItem = (i: number) => ({
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { delay: i * 0.08, duration: 0.5 },
+});
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  HERO
+//  SPLASH — Minimal brand intro
 // ═══════════════════════════════════════════════════════════════════════════
 
-function HeroSection() {
+function SplashSection() {
   return (
-    <section className="relative min-h-[90dvh] border-b border-[#D4D4D0]">
-      {/* Green stripe top */}
-      <div
-        className="h-[3px]"
-        style={{
-          background: "repeating-linear-gradient(90deg, #059669 0px, #059669 10px, transparent 10px, transparent 20px)",
-        }}
-      />
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-hero">
+      {/* Ambient orbs */}
+      <div className="orb orb-1 -top-40 -left-40" />
+      <div className="orb orb-2 -bottom-40 -right-40" />
+      <div className="orb orb-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
 
-      <div className="mx-auto max-w-7xl px-6 py-24 lg:py-32">
-        <div className="relative">
-          {/* Crosshair markers */}
-          <span className="absolute -left-1 -top-1 text-[#D4D4D0] text-[10px] font-bold select-none">+</span>
-          <span className="absolute -right-1 -top-1 text-[#D4D4D0] text-[10px] font-bold select-none">+</span>
+      {/* Grid backdrop */}
+      <div className="absolute inset-0 grid-backdrop opacity-40" />
 
-          <div className="brutal-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
-            {/* LEFT — Content */}
-            <div className="p-8 lg:p-12" style={{ background: "#FFFFFF" }}>
-              <samp className="ascii-bracket text-xs tracking-[0.15em] mb-6 text-[#888888] block">
-                BUILT ON SOLANA
-              </samp>
+      <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.6 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs text-emerald-400 mb-8"
+          >
+            <span className="pulse-dot" />
+            AI-Native GameFi & DeFi Infrastructure
+          </motion.div>
 
-              <h1
-                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-[-0.04em] leading-[0.85] text-[#111111] uppercase"
-                style={{ fontFamily: "Inter, IBM Plex Mono, sans-serif" }}
-              >
-                SUPPORT
-                <br />
-                CREATORS
-                <br />
-                <span className="text-[#059669]">DIRECTLY</span>
-              </h1>
+          {/* Main heading */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-[-0.04em] leading-[0.9] mb-6"
+            style={{ fontFamily: "Space Grotesk, sans-serif" }}
+          >
+            <span className="text-white">BUILD ON</span>
+            <br />
+            <span className="text-gradient-emerald">SOLANA</span>
+          </motion.h1>
 
-              <p className="mt-8 max-w-md text-xs sm:text-sm leading-relaxed text-[#888888] tracking-[0.02em]">
-                NO MIDDLEMEN. NO PLATFORM FEES. EVERY TIP GOES STRAIGHT TO THE
-                CREATORS YOU LOVE — VERIFIED ON SOLANA IN SECONDS.
-              </p>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            className="max-w-2xl mx-auto text-sm md:text-base text-white/40 leading-relaxed mb-10"
+          >
+            AI agents · Quests · XP rewards · NFT utilities · DeFi hub · Analytics · Governance
+            <br />
+            <span className="text-white/30 text-xs">The all-in-one infrastructure layer for the next generation of Web3 applications.</span>
+          </motion.p>
 
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <a
-                  href="/profile"
-                  className="inline-flex items-center justify-center h-10 px-6 border border-[#059669] bg-[#059669] text-white text-xs font-bold tracking-[0.1em] hover:bg-[#047857] transition-colors"
-                >
-                  START RECEIVING &gt;&gt;
-                </a>
-                <a
-                  href="/creators"
-                  className="inline-flex items-center justify-center h-10 px-6 border border-[#D4D4D0] text-[#111111] text-xs font-bold tracking-[0.1em] hover:bg-[#F0F0EC] transition-colors"
-                >
-                  [ EXPLORE CREATORS ]
-                </a>
+          {/* CTA buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <a
+              href="/dashboard"
+              className="group inline-flex items-center justify-center gap-2 h-11 px-7 rounded-xl bg-emerald-500 text-black text-sm font-semibold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
+            >
+              Launch App
+              <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+            <a
+              href="/ai"
+              className="group inline-flex items-center justify-center gap-2 h-11 px-7 rounded-xl glass-card text-white/70 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
+            >
+              <Bot className="size-4" />
+              Meet TipChain AI
+              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          </motion.div>
+
+          {/* Stats row */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.0, duration: 0.6 }}
+            className="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16"
+          >
+            {[
+              { label: "Protocol Volume", value: "$1M+" },
+              { label: "Ecosystem Partners", value: "100+" },
+              { label: "AI Agents", value: "1K+" },
+            ].map((stat) => (
+              <div key={stat.label} className="text-center">
+                <div className="text-2xl md:text-3xl font-bold text-white tracking-tight">{stat.value}</div>
+                <div className="text-xs text-white/30 mt-1 tracking-wider uppercase">{stat.label}</div>
               </div>
+            ))}
+          </motion.div>
+        </motion.div>
+      </div>
 
-              {/* Trust indicators */}
-              <div className="mt-16 flex items-center gap-8 border-t border-[#D4D4D0] pt-6">
-                {([
-                  { label: "TX COUNT" as const, value: "10K+" as const },
-                  { label: "CREATORS" as const, value: "200+" as const },
-                  { label: "SOL TIPPED" as const, value: "26.5K" as const },
-                ]).map((stat) => (
-                  <div key={stat.label}>
-                    <data value={stat.value} className="text-xl font-bold text-[#111111] tracking-tight">
-                      {stat.value}
-                    </data>
-                    <p className="text-[10px] tracking-[0.12em] text-[#9CA3AF]">{stat.label}</p>
+      {/* Bottom fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ECOSYSTEM
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MODULES = [
+  {
+    icon: Bot,
+    title: "AI Agent Marketplace",
+    desc: "Deploy, discover, and monetize AI agents. Built-in agent wallets, autonomous trading, and on-chain verification.",
+    color: "emerald",
+    href: "/ai",
+  },
+  {
+    icon: Gamepad2,
+    title: "Quest Engine",
+    desc: "Gamified on-chain quests with XP, achievements, and reward pools. Drive engagement through challenges.",
+    color: "cyan",
+    href: "/quests",
+  },
+  {
+    icon: Coins,
+    title: "DeFi Hub",
+    desc: "Stake, swap, lend, and yield farm. Integrated Solana DeFi primitives with aggregated liquidity.",
+    color: "purple",
+    href: "/defi",
+  },
+  {
+    icon: Layers,
+    title: "NFT Utilities",
+    desc: "Dynamic NFTs, soulbound tokens, gated access, and royalty enforcement for creators.",
+    color: "emerald",
+    href: "/nfts",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics Suite",
+    desc: "Real-time dashboards, portfolio tracking, on-chain analytics, and custom reporting.",
+    color: "cyan",
+    href: "/dashboard",
+  },
+  {
+    icon: Shield,
+    title: "Governance",
+    desc: "DAO tooling, proposal systems, voting, and treasury management for decentralized decision-making.",
+    color: "purple",
+    href: "/governance",
+  },
+];
+
+function EcosystemSection() {
+  return (
+    <section className="relative py-28 overflow-hidden border-t border-white/5">
+      <div className="absolute inset-0 grid-backdrop opacity-20" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div {...fadeInUp}>
+          <div className="section-tag mb-3">Ecosystem</div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
+            Everything in one
+            <br />
+            <span className="text-gradient-emerald">unified platform</span>
+          </h2>
+          <p className="max-w-lg text-sm text-white/30 mb-16">
+            Seven integrated modules that work together seamlessly. Pick what you need, deploy in minutes.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {MODULES.map((mod, i) => {
+            const Icon = mod.icon;
+            const glowClass =
+              mod.color === "emerald"
+                ? "hover:border-emerald-500/30 hover:shadow-emerald-500/10"
+                : mod.color === "cyan"
+                ? "hover:border-cyan-500/30 hover:shadow-cyan-500/10"
+                : "hover:border-purple-500/30 hover:shadow-purple-500/10";
+            const iconColor =
+              mod.color === "emerald"
+                ? "text-emerald-400 bg-emerald-500/10"
+                : mod.color === "cyan"
+                ? "text-cyan-400 bg-cyan-500/10"
+                : "text-purple-400 bg-purple-500/10";
+
+            return (
+              <motion.a
+                key={mod.title}
+                href={mod.href}
+                {...staggerItem(i)}
+                className={`group glass-card rounded-2xl p-6 hover:!bg-white/[0.08] transition-all duration-300 ${glowClass}`}
+              >
+                <div className={`flex items-center justify-center size-10 rounded-xl mb-4 ${iconColor} group-hover:scale-110 transition-transform`}>
+                  <Icon className="size-5" />
+                </div>
+                <h3 className="text-base font-semibold text-white mb-2">{mod.title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{mod.desc}</p>
+              </motion.a>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  AI SECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+function AISection() {
+  return (
+    <section className="relative py-28 overflow-hidden gradient-ai border-t border-white/5">
+      <div className="orb orb-1 top-0 right-0" />
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div {...fadeInUp}>
+            <div className="section-tag mb-3">AI Infrastructure</div>
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
+              Deploy & manage
+              <br />
+              <span className="text-gradient-emerald">AI agents</span>
+              <br />
+              on Solana
+            </h2>
+            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
+              Autonomous agents with wallets, on-chain memory, MCP tools, and LangGraph orchestration.
+              Build trading bots, content agents, or community managers in minutes.
+            </p>
+            <div className="space-y-4 mb-10">
+              {[
+                "Agent wallet with private key management",
+                "On-chain memory & state persistence",
+                "MCP tool integration & LangGraph workflows",
+                "Autonomous trading & DeFi operations",
+              ].map((feature, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className="flex items-center justify-center size-5 rounded-full bg-emerald-500/10 mt-0.5 shrink-0">
+                    <Zap className="size-3 text-emerald-400" />
+                  </div>
+                  <span className="text-sm text-white/60">{feature}</span>
+                </div>
+              ))}
+            </div>
+            <a
+              href="/ai"
+              className="group inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-all"
+            >
+              Explore AI Agents
+              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative"
+          >
+            <div className="glass-card rounded-2xl p-6 glow-cyan">
+              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+                <div className="flex items-center justify-center size-8 rounded-lg bg-cyan-500/10">
+                  <Bot className="size-4 text-cyan-400" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white">TipChain AI</div>
+                  <div className="text-xs text-white/30">v2.0 — Online</div>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="pulse-dot" />
+                  <span className="text-[10px] text-emerald-400">Active</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {[
+                  { role: "agent", msg: "Analyzing portfolio risk exposure..." },
+                  { role: "agent", msg: "Found 3 arbitrage opportunities on Orca." },
+                  { role: "user", msg: "Execute if profit > 2%" },
+                  { role: "agent", msg: "✅ Executed. Profit: 2.4% in 12s." },
+                ].map((item, i) => (
+                  <div
+                    key={i}
+                    className={`flex items-start gap-3 ${item.role === "user" ? "justify-end" : ""}`}
+                  >
+                    <div
+                      className={`max-w-[80%] rounded-xl px-4 py-2.5 text-xs ${
+                        item.role === "agent"
+                          ? "bg-white/5 text-white/70"
+                          : "bg-emerald-500/10 text-emerald-300"
+                      }`}
+                    >
+                      {item.msg}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2">
+                <span className="text-[10px] text-white/20">Type a message...</span>
+                <span className="ml-auto text-[10px] text-white/20">$TC token required</span>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  GAMEFI SECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+function GameFiSection() {
+  return (
+    <section className="relative py-28 overflow-hidden gradient-gamefi border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="relative order-2 lg:order-1"
+          >
+            <div className="glass-card rounded-2xl p-6 glow-purple">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: "Active Quests", value: "24" },
+                  { label: "XP Earned", value: "128,450" },
+                  { label: "Rewards Pool", value: "5,000 $TC" },
+                  { label: "Players", value: "3,247" },
+                ].map((stat) => (
+                  <div key={stat.label} className="glass rounded-xl p-4 text-center">
+                    <div className="text-xl font-bold text-white">{stat.value}</div>
+                    <div className="text-[10px] text-white/30 mt-1 uppercase tracking-wider">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 space-y-2">
+                {[
+                  { quest: "Daily Compass", xp: 250, progress: 80 },
+                  { quest: "Liquidity Provider", xp: 500, progress: 45 },
+                  { quest: "Agent Deployer", xp: 1000, progress: 20 },
+                ].map((q) => (
+                  <div key={q.quest} className="glass rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-white/70 font-medium">{q.quest}</span>
+                      <span className="text-[10px] text-emerald-400">+{q.xp} XP</span>
+                    </div>
+                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                        style={{ width: `${q.progress}%` }}
+                      />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+          </motion.div>
 
-            {/* RIGHT — System Visual */}
-            <div className="p-8 lg:p-12 flex flex-col justify-center" style={{ background: "#FFFFFF" }}>
-              <div className="ascii-frame mb-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#D4D4D0] pb-3">
-                    <samp className="text-xs tracking-[0.1em] text-[#888888]">SYSTEM STATUS</samp>
-                    <span className="text-[10px] text-[#059669] tracking-[0.15em] font-bold">
-                      [ ACTIVE ]
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {([
-                      { label: "NETWORK" as const, value: "SOLANA DEVNET" as const },
-                      { label: "CLUSTER NODES" as const, value: "1,847" as const },
-                      { label: "TPS" as const, value: "4,213" as const },
-                      { label: "FINALITY" as const, value: "0.42s" as const },
-                    ]).map((row) => (
-                      <div key={row.label} className="flex items-center justify-between">
-                        <span className="text-[10px] tracking-[0.1em] text-[#9CA3AF]">
-                          {row.label}
-                          <span className="text-[#D4D4D0] mx-1">::</span>
-                        </span>
-                        <data value={row.value} className="text-[11px] text-[#111111] tracking-[0.05em] font-medium">
-                          {row.value}
-                        </data>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Live ticker */}
-              <div className="border border-[#D4D4D0] px-4 py-3 bg-[#F9F9F7]">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-block size-2 bg-[#059669]" />
-                    <span className="text-[10px] tracking-[0.1em] text-[#888888]">LIVE</span>
-                  </div>
-                  <span className="text-[10px] text-[#9CA3AF] tracking-[0.05em] truncate">
-                    TX &gt; 0x7a3f...b92e &gt; +0.5 SOL &gt; CONFIRMED
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <motion.div {...fadeInUp} className="order-1 lg:order-2">
+            <div className="section-tag mb-3">GameFi</div>
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
+              Play, earn, and
+              <br />
+              <span className="text-gradient-emerald">level up</span>
+              <br />
+              on Solana
+            </h2>
+            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
+              Gamified quest system with XP, skill trees, achievement badges, and reward pools.
+              Complete challenges, earn rewards, and climb the leaderboard.
+            </p>
+            <a
+              href="/quests"
+              className="group inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/20 transition-all"
+            >
+              View Quests
+              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+          </motion.div>
         </div>
       </div>
     </section>
@@ -183,166 +426,79 @@ function HeroSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  STATS
+//  DEFI SECTION
 // ═══════════════════════════════════════════════════════════════════════════
 
-function StatsGrid() {
+function DeFiSection() {
   return (
-    <section className="border-b border-[#D4D4D0]">
-      <div
-        className="h-[2px]"
-        style={{
-          background: "repeating-linear-gradient(90deg, #059669 0px, #059669 6px, transparent 6px, transparent 12px)",
-        }}
-      />
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="brutal-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)" }}>
-          {([
-            { label: "TOTAL TIPPED" as const, value: "26.5 SOL" as const },
-            { label: "CREATORS" as const, value: "3" as const },
-            { label: "TX COUNT" as const, value: "107" as const },
-          ]).map((stat) => (
-            <div key={stat.label} className="p-8 text-center" style={{ background: "#FFFFFF" }}>
-              <data value={stat.value} className="text-3xl font-bold text-[#111111]">
-                {stat.value}
-              </data>
-              <p className="text-[10px] tracking-[0.12em] text-[#9CA3AF] mt-2">{stat.label}</p>
+    <section className="relative py-28 overflow-hidden gradient-defi border-t border-white/5">
+      <div className="orb orb-2 -bottom-40 -left-40" />
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <motion.div {...fadeInUp}>
+            <div className="section-tag mb-3">DeFi Hub</div>
+            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
+              Full-spectrum
+              <br />
+              <span className="text-gradient-emerald">DeFi operations</span>
+              <br />
+              integrated
+            </h2>
+            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
+              Stake, swap, lend, and yield farm across Solana. Aggregated liquidity, MEV protection,
+              and cross-protocol portfolio management.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {["Staking", "Swaps", "Lending", "Yield", "LP Positions"].map((tag) => (
+                <span
+                  key={tag}
+                  className="px-3 py-1.5 text-xs rounded-lg bg-white/5 text-white/50 border border-white/5"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+          </motion.div>
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  FEATURED CREATORS
-// ═══════════════════════════════════════════════════════════════════════════
-
-function FeaturedSection() {
-  return (
-    <section className="border-b border-[#D4D4D0]">
-      <div className="mx-auto max-w-7xl px-6 py-24">
-        <samp className="ascii-bracket text-xs tracking-[0.15em] mb-2 text-[#888888] block">
-          FEATURED UNITS
-        </samp>
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[#111111] mb-4 uppercase">
-          CREATORS ON TIPCHAIN
-        </h2>
-        <p className="max-w-md text-xs tracking-[0.05em] text-[#9CA3AF] mb-16">
-          DISCOVER AND SUPPORT AMAZING CREATORS BUILDING ON SOLANA
-        </p>
-
-        <div className="brutal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
-          {FEATURED_CREATORS.map((creator) => {
-            const initials = creator.displayName.split(" ").map((n) => n[0]).join("").toUpperCase();
-            return (
-              <a
-                key={creator.username}
-                href={`/creator/${creator.username}`}
-                className="group block p-6 hover:bg-[#F9F9F7] transition-colors"
-                style={{ background: "#FFFFFF" }}
-              >
-                <div className="flex items-center gap-4 border-b border-[#D4D4D0] pb-4 mb-4">
-                  <div className="flex size-12 items-center justify-center border border-[#D4D4D0] bg-[#F9F9F7] text-xs font-bold text-[#059669]">
-                    {initials}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-bold text-[#111111] tracking-[-0.02em]">
-                        {creator.displayName}
-                      </span>
-                      <span className="inline-block size-1.5 bg-[#059669]" />
-                    </div>
-                    <p className="text-[10px] tracking-[0.08em] text-[#9CA3AF]">@{creator.username}</p>
-                  </div>
-                </div>
-                <p className="text-xs text-[#888888] mb-6 leading-relaxed">{creator.bio}</p>
-                <div className="flex items-center gap-6">
-                  <div>
-                    <p className="text-xs font-bold text-[#111111]">{creator.totalTips}</p>
-                    <p className="text-[9px] tracking-[0.1em] text-[#9CA3AF]">EARNED</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#111111]">{creator.supporters}</p>
-                    <p className="text-[9px] tracking-[0.1em] text-[#9CA3AF]">SUPPORTERS</p>
-                  </div>
-                  <div className="ml-auto text-[#D4D4D0] group-hover:text-[#059669] transition-colors">
-                    <ArrowRight className="size-4" weight="bold" />
-                  </div>
-                </div>
-              </a>
-            );
-          })}
-        </div>
-
-        <div className="mt-12 text-center">
-          <a
-            href="/creators"
-            className="inline-flex items-center justify-center h-10 px-8 border border-[#D4D4D0] text-[#111111] text-xs font-bold tracking-[0.1em] hover:bg-[#F0F0EC] transition-colors"
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
           >
-            [ VIEW ALL CREATORS ] &gt;&gt;
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  WHY TIPCHAIN
-// ═══════════════════════════════════════════════════════════════════════════
-
-const BENEFITS = [
-  {
-    title: "INSTANT TX",
-    description: "Tips arrive in seconds on Solana. No waiting, no delays.",
-  },
-  {
-    title: "ZERO FEES",
-    description: "Every lamport goes directly to creators. Zero platform cuts.",
-  },
-  {
-    title: "ON-CHAIN",
-    description: "Every tip recorded on Solana. Verifiable and immutable.",
-  },
-  {
-    title: "DIRECT CONNECTION",
-    description: "Wallet-to-wallet. No middlemen, real relationships.",
-  },
-];
-
-function BenefitsSection() {
-  return (
-    <section className="border-b border-[#D4D4D0]">
-      <div
-        className="h-[2px]"
-        style={{
-          background: "repeating-linear-gradient(90deg, #059669 0px, #059669 6px, transparent 6px, transparent 12px)",
-        }}
-      />
-      <div className="mx-auto max-w-7xl px-6 py-24">
-        <samp className="ascii-bracket text-xs tracking-[0.15em] mb-2 text-[#888888] block">
-          ADVANTAGES
-        </samp>
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[#111111] mb-16 uppercase">
-          BUILT FOR CREATORS
-        </h2>
-
-        <div className="brutal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
-          {BENEFITS.map((benefit) => (
-            <div key={benefit.title} className="p-8" style={{ background: "#FFFFFF" }}>
-              <div className="flex items-center justify-center size-10 border border-[#D4D4D0] bg-[#F9F9F7] mb-6">
-                <span className="text-[#059669] text-sm font-bold">//</span>
+            <div className="glass-card rounded-2xl p-6 glow-green">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-semibold text-white">Portfolio Overview</h3>
+                <span className="text-[10px] text-emerald-400">+12.4% this week</span>
               </div>
-              <h3 className="text-sm font-bold text-[#111111] tracking-[-0.02em] mb-3 uppercase">
-                {benefit.title}
-              </h3>
-              <p className="text-xs text-[#888888] leading-relaxed">
-                {benefit.description}
-              </p>
+              <div className="space-y-3">
+                {[
+                  { asset: "SOL", balance: "145.8", value: "$24,367", change: "+5.2%" },
+                  { asset: "USDC", balance: "12,450.0", value: "$12,450", change: "0.0%" },
+                  { asset: "$TC", balance: "8,320.0", value: "$4,992", change: "+18.7%" },
+                  { asset: "EPT", balance: "1,240.0", value: "$3,720", change: "-2.1%" },
+                ].map((row) => (
+                  <div key={row.asset} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center size-8 rounded-lg bg-white/5 text-xs font-bold text-white/70">
+                        {row.asset.charAt(0)}
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-white">{row.asset}</div>
+                        <div className="text-xs text-white/30">{row.balance}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-white">{row.value}</div>
+                      <div className={`text-xs ${row.change.startsWith("+") ? "text-emerald-400" : row.change === "0.0%" ? "text-white/30" : "text-red-400"}`}>
+                        {row.change}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          ))}
+          </motion.div>
         </div>
       </div>
     </section>
@@ -350,99 +506,57 @@ function BenefitsSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  HOW IT WORKS
+//  MARKETPLACE
 // ═══════════════════════════════════════════════════════════════════════════
 
-function HowItWorksSection() {
-  const steps = [
-    { step: "01", label: "CONNECT WALLET", desc: "Connect Phantom, Solflare, or Backpack to get started." },
-    { step: "02", label: "FIND CREATORS", desc: "Browse profiles and discover creators you want to support." },
-    { step: "03", label: "SEND TIPS", desc: "Send SOL or USDC directly — confirmed in seconds, zero fees." },
+function MarketplaceSection() {
+  const items = [
+    { title: "AI Trading Bot", price: "500 $TC", sales: 234, tag: "Agent" },
+    { title: "Quest Template Pack", price: "100 $TC", sales: 892, tag: "Template" },
+    { title: "Soulbound Badge", price: "50 $TC", sales: 1247, tag: "NFT" },
+    { title: "Analytics Dashboard", price: "Free", sales: 3412, tag: "Tool" },
   ];
 
   return (
-    <section className="border-b border-[#D4D4D0]">
-      <div className="mx-auto max-w-7xl px-6 py-24">
-        <samp className="ascii-bracket text-xs tracking-[0.15em] mb-2 text-[#888888] block">
-          OPERATIONS MANUAL
-        </samp>
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[#111111] mb-16 uppercase">
-          HOW IT WORKS
-        </h2>
+    <section className="relative py-28 overflow-hidden border-t border-white/5">
+      <div className="absolute inset-0 grid-backdrop opacity-20" />
+      <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <motion.div {...fadeInUp}>
+          <div className="section-tag mb-3">Marketplace</div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
+            Discover & trade
+            <br />
+            <span className="text-gradient-emerald">ecosystem assets</span>
+          </h2>
+          <p className="max-w-lg text-sm text-white/30 mb-16">
+            Agent templates, NFTs, tools, and modules. Build, sell, and buy in the TipChain marketplace.
+          </p>
+        </motion.div>
 
-        <div className="brutal-grid relative" style={{ gridTemplateColumns: "1fr" }}>
-          <span className="absolute -left-1 -top-1 text-[#D4D4D0] text-[10px] font-bold select-none">+</span>
-          {steps.map((item) => (
-            <div
-              key={item.step}
-              className="p-8 lg:p-10 flex items-start gap-6"
-              style={{ background: "#FFFFFF" }}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {items.map((item, i) => (
+            <motion.a
+              key={item.title}
+              href="/marketplace"
+              {...staggerItem(i)}
+              className="group glass-card rounded-2xl p-5 hover:!bg-white/[0.08] transition-all"
             >
-              <span className="text-3xl font-bold text-[#059669] tracking-[-0.04em] leading-none shrink-0">
-                {item.step}
-              </span>
-              <div className="flex-1">
-                <h3 className="text-base font-bold text-[#111111] tracking-[-0.02em] mb-2 uppercase">
-                  {item.label}
-                </h3>
-                <p className="text-xs text-[#888888] leading-relaxed max-w-md">
-                  {item.desc}
-                </p>
+              <div className="flex items-center justify-center h-28 rounded-xl bg-white/[0.02] mb-4 border border-white/5 group-hover:border-white/10 transition-colors">
+                <div className="text-3xl">
+                  {item.tag === "Agent" ? "🤖" : item.tag === "Template" ? "📦" : item.tag === "NFT" ? "🏅" : "📊"}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        <dl className="mt-8 border border-[#059669] bg-[#F0FDF4] p-4">
-          <div className="flex items-center gap-3">
-            <span className="inline-block size-2 bg-[#059669]" />
-            <dt className="text-[10px] tracking-[0.1em] text-[#059669] font-medium sr-only">System Status</dt>
-            <dd className="text-[10px] tracking-[0.1em] text-[#059669] font-semibold">
-              SYSTEM READY /// {steps.length} OPERATIONAL UNITS STANDBY
-            </dd>
-          </div>
-        </dl>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  FAQ
-// ═══════════════════════════════════════════════════════════════════════════
-
-function FAQSection() {
-  return (
-    <section className="border-b border-[#D4D4D0]">
-      <div
-        className="h-[2px]"
-        style={{
-          background: "repeating-linear-gradient(90deg, #059669 0px, #059669 6px, transparent 6px, transparent 12px)",
-        }}
-      />
-      <div className="mx-auto max-w-4xl px-6 py-24">
-        <samp className="ascii-bracket text-xs tracking-[0.15em] mb-2 text-[#888888] block">
-          KNOWLEDGE BASE
-        </samp>
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-[-0.03em] text-[#111111] mb-12 uppercase">
-          FREQUENTLY ASKED QUESTIONS
-        </h2>
-
-        <div className="border border-[#D4D4D0] divide-y divide-[#D4D4D0]">
-          {FAQS.map((faq, i) => (
-            <details key={i} className="group">
-              <summary className="flex items-center justify-between px-6 py-5 cursor-pointer select-none text-xs font-bold tracking-[0.02em] text-[#111111] hover:bg-[#F9F9F7] transition-colors list-none">
-                <span className="pr-4">{faq.q}</span>
-                <span className="text-[#059669] text-[10px] group-open:rotate-180 transition-transform">
-                  [ + ]
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
+                  {item.tag}
                 </span>
-              </summary>
-              <div className="px-6 pb-5">
-                <p className="text-xs text-[#888888] leading-relaxed">
-                  {faq.a}
-                </p>
               </div>
-            </details>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-emerald-400">{item.price}</span>
+                <span className="text-[10px] text-white/30">{item.sales} sales</span>
+              </div>
+            </motion.a>
           ))}
         </div>
       </div>
@@ -451,36 +565,148 @@ function FAQSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  CTA
+//  ROADMAP
+// ═══════════════════════════════════════════════════════════════════════════
+
+function RoadmapSection() {
+  const phases = [
+    {
+      phase: "Phase 1",
+      title: "Infrastructure",
+      status: "Live",
+      items: ["Wallet & Identity", "Creator Profiles", "Tip Engine"],
+      color: "emerald",
+    },
+    {
+      phase: "Phase 2",
+      title: "AI",
+      status: "In Progress",
+      items: ["AI Agent Marketplace", "LangGraph Integration", "MCP Tools"],
+      color: "cyan",
+    },
+    {
+      phase: "Phase 3",
+      title: "GameFi",
+      status: "Coming Soon",
+      items: ["Quest Engine", "XP & Badges", "Reward Pools"],
+      color: "purple",
+    },
+    {
+      phase: "Phase 4",
+      title: "DeFi",
+      status: "Planned",
+      items: ["Staking Pool", "DEX Aggregator", "Yield Strategies"],
+      color: "emerald",
+    },
+    {
+      phase: "Phase 5",
+      title: "Platform SDK",
+      status: "Planned",
+      items: ["TypeScript SDK", "React Hooks", "CLI Tools"],
+      color: "cyan",
+    },
+  ];
+
+  return (
+    <section className="relative py-28 overflow-hidden border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-6">
+        <motion.div {...fadeInUp}>
+          <div className="section-tag mb-3">Roadmap</div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
+            Building the future
+            <br />
+            <span className="text-gradient-emerald">phase by phase</span>
+          </h2>
+          <p className="max-w-lg text-sm text-white/30 mb-16">
+            Our development roadmap spans infrastructure through full platform SDK.
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-5 gap-4">
+          {phases.map((phase, i) => {
+            const borderColor =
+              phase.color === "emerald"
+                ? "border-emerald-500/30"
+                : phase.color === "cyan"
+                ? "border-cyan-500/30"
+                : "border-purple-500/30";
+            const statusColor =
+              phase.status === "Live"
+                ? "text-emerald-400"
+                : phase.status === "In Progress"
+                ? "text-cyan-400"
+                : "text-white/30";
+
+            return (
+              <motion.div
+                key={phase.phase}
+                {...staggerItem(i)}
+                className={`glass-card rounded-2xl p-5 ${borderColor} border`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">
+                    {phase.phase}
+                  </span>
+                  <span className={`text-[10px] font-medium ${statusColor}`}>{phase.status}</span>
+                </div>
+                <h3 className="text-base font-semibold text-white mb-3">{phase.title}</h3>
+                <ul className="space-y-2">
+                  {phase.items.map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-xs text-white/40">
+                      <div className="size-1 rounded-full bg-white/20" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  CTA — Final
 // ═══════════════════════════════════════════════════════════════════════════
 
 function CTASection() {
   return (
-    <section className="border-b border-[#D4D4D0]">
-      <div className="mx-auto max-w-3xl px-6 py-32 text-center">
-        <samp className="ascii-bracket text-xs tracking-[0.15em] mb-4 text-[#888888] block">
-          DEPLOY COMMAND
-        </samp>
-        <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.04em] text-[#111111] mb-6 uppercase">
-          READY TO START?
-        </h2>
-        <p className="text-xs tracking-[0.05em] text-[#9CA3AF] mb-10 max-w-lg mx-auto">
-          JOIN THE CREATOR ECONOMY ON SOLANA. CONNECT YOUR WALLET AND START RECEIVING TIPS IN MINUTES.
-        </p>
-        <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-          <a
-            href="/profile"
-            className="inline-flex items-center justify-center h-12 px-8 border-2 border-[#059669] bg-[#059669] text-white text-xs font-bold tracking-[0.1em] hover:bg-[#047857] transition-colors"
-          >
-            START RECEIVING &gt;&gt;
-          </a>
-          <a
-            href="/creators"
-            className="inline-flex items-center justify-center h-12 px-8 border-2 border-[#D4D4D0] text-[#111111] text-xs font-bold tracking-[0.1em] hover:bg-[#F0F0EC] transition-colors"
-          >
-            [ EXPLORE CREATORS ]
-          </a>
-        </div>
+    <section className="relative py-32 overflow-hidden border-t border-white/5 gradient-hero">
+      <div className="orb orb-1 -top-60 -right-60" />
+      <div className="orb orb-2 -bottom-60 -left-60" />
+      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
+        <motion.div {...fadeInUp}>
+          <div className="section-tag mb-4 justify-center before:!bg-emerald-500">
+            Get Started
+          </div>
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
+            Ready to build on
+            <br />
+            <span className="text-gradient-emerald">TipChain?</span>
+          </h2>
+          <p className="text-sm text-white/30 max-w-lg mx-auto mb-10">
+            Connect your wallet, create your profile, and start exploring the TipChain ecosystem.
+            AI agents, quests, DeFi — all in one place.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/dashboard"
+              className="group inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl bg-emerald-500 text-black text-sm font-semibold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/25"
+            >
+              Launch Dashboard
+              <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
+            </a>
+            <a
+              href="/creators"
+              className="group inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl glass-card text-white/60 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
+            >
+              <Users className="size-4" />
+              Explore Creators
+            </a>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -495,109 +721,81 @@ const WHITEPAPER_URL =
 
 function Footer() {
   return (
-    <footer className="border-t border-[#D4D4D0]">
-      <div
-        className="h-[3px]"
-        style={{
-          background: "repeating-linear-gradient(90deg, #059669 0px, #059669 8px, transparent 8px, transparent 16px)",
-        }}
-      />
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        {/* Resources grid */}
-        <div className="brutal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))" }}>
-          {/* Whitepaper */}
-          <div className="p-6" style={{ background: "#FFFFFF" }}>
-            <p className="text-[10px] tracking-[0.12em] text-[#059669] font-bold mb-3 uppercase">
-              [ WHITEPAPER ]
+    <footer className="relative gradient-footer border-t border-white/5">
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4">
+              <span className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                T
+              </span>
+              <span className="text-sm font-semibold text-white" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
+                TipChain
+              </span>
+            </div>
+            <p className="text-xs text-white/30 leading-relaxed max-w-xs">
+              AI-native GameFi & DeFi infrastructure platform on Solana. Build, earn, and govern.
             </p>
-            <p className="text-[10px] text-[#888888] leading-relaxed mb-4">
-              Read the official TipChain whitepaper — technical overview, tokenomics, and architecture.
-            </p>
-            <a
-              href={WHITEPAPER_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] text-[#059669] font-bold tracking-[0.05em] hover:text-[#047857] transition-colors uppercase"
-            >
-              READ &gt;&gt;
-            </a>
           </div>
 
-          {/* SDK */}
-          <div className="p-6" style={{ background: "#FFFFFF" }}>
-            <p className="text-[10px] tracking-[0.12em] text-[#059669] font-bold mb-3 uppercase">
-              [ SDK ]
-            </p>
-            <p className="text-[10px] text-[#888888] leading-relaxed mb-4">
-              @tipchain/sdk — Universal JavaScript SDK for integrating TipChain into your app.
-            </p>
-            <a
-              href="/docs/sdk"
-              className="inline-flex items-center gap-1 text-[10px] text-[#059669] font-bold tracking-[0.05em] hover:text-[#047857] transition-colors uppercase"
-            >
-              DOCS &gt;&gt;
-            </a>
+          {/* Platform */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Platform</h4>
+            <div className="space-y-2.5">
+              {["AI Agents", "Quests", "DeFi Hub", "Marketplace", "Governance"].map((link) => (
+                <a
+                  key={link}
+                  href={`/${link.toLowerCase().replace(/\s+/g, "")}`}
+                  className="block text-xs text-white/30 hover:text-white/60 transition-colors"
+                >
+                  {link}
+                </a>
+              ))}
+            </div>
           </div>
 
-          {/* API */}
-          <div className="p-6" style={{ background: "#FFFFFF" }}>
-            <p className="text-[10px] tracking-[0.12em] text-[#059669] font-bold mb-3 uppercase">
-              [ API ]
-            </p>
-            <p className="text-[10px] text-[#888888] leading-relaxed mb-4">
-              @tipchain/api — Type-safe REST client for the TipChain platform API.
-            </p>
-            <a
-              href="/docs/api"
-              className="inline-flex items-center gap-1 text-[10px] text-[#059669] font-bold tracking-[0.05em] hover:text-[#047857] transition-colors uppercase"
-            >
-              REFERENCE &gt;&gt;
-            </a>
+          {/* Developers */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Developers</h4>
+            <div className="space-y-2.5">
+              <a href="/docs/sdk" className="block text-xs text-white/30 hover:text-white/60 transition-colors">SDK</a>
+              <a href="/docs/api" className="block text-xs text-white/30 hover:text-white/60 transition-colors">API Reference</a>
+              <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">Whitepaper</a>
+              <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">GitHub</a>
+            </div>
           </div>
 
-          {/* Source */}
-          <div className="p-6" style={{ background: "#FFFFFF" }}>
-            <p className="text-[10px] tracking-[0.12em] text-[#059669] font-bold mb-3 uppercase">
-              [ SOURCE ]
-            </p>
-            <p className="text-[10px] text-[#888888] leading-relaxed mb-4">
-              Open-source monorepo. Contribute, file issues, or self-host your own instance.
-            </p>
-            <a
-              href="https://github.com/shivamprajapati17/tipchain12"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-[10px] text-[#059669] font-bold tracking-[0.05em] hover:text-[#047857] transition-colors uppercase"
-            >
-              GITHUB &gt;&gt;
-            </a>
+          {/* Network */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Network</h4>
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2 text-xs text-white/30">
+                <span className="pulse-dot" />
+                Solana Devnet
+              </div>
+              <div className="flex items-center gap-2 text-xs text-white/30">
+                <span className="inline-block size-1.5 rounded-full bg-cyan-400/50" />
+                Helius RPC
+              </div>
+              <div className="flex items-center gap-2 text-xs text-white/30">
+                <span className="inline-block size-1.5 rounded-full bg-emerald-400/50" />
+                Status: Operational
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-8 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] text-[#059669] tracking-[0.15em] font-bold">[ T ]</span>
-            <span className="text-[10px] text-[#9CA3AF] tracking-[0.05em]">
-              TIPCHAIN // SUPPORT CREATORS DIRECTLY
-            </span>
+        {/* Bottom */}
+        <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="text-[10px] text-white/20">
+            © 2026 TipChain. Built on Solana.
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-[9px] text-[#D4D4D0] tracking-[0.1em] uppercase">
-              REV 2.6
-            </span>
-            <span className="text-[9px] text-[#D4D4D0] tracking-[0.1em] uppercase">
-              POWERED BY SOLANA
-            </span>
-            <span className="text-[9px] text-[#D4D4D0]" style={{ fontFamily: "serif" }}>
-              ®
-            </span>
+            <span className="text-[10px] text-white/20">v2.0</span>
+            <span className="text-[10px] text-white/20">$TC</span>
+            <span className="text-[10px] text-white/20">Powered by Solana</span>
           </div>
-        </div>
-        <div className="mt-4 pt-4 border-t border-[#E8E8E4]">
-          <p className="text-[8px] text-[#D4D4D0] tracking-[0.15em] text-center uppercase">
-            &lt; DECLASSIFIED // DISTRIBUTION UNLIMITED &gt;
-          </p>
         </div>
       </div>
     </footer>
@@ -611,12 +809,13 @@ function Footer() {
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
-      <HeroSection />
-      <StatsGrid />
-      <FeaturedSection />
-      <BenefitsSection />
-      <HowItWorksSection />
-      <FAQSection />
+      <SplashSection />
+      <EcosystemSection />
+      <AISection />
+      <GameFiSection />
+      <DeFiSection />
+      <MarketplaceSection />
+      <RoadmapSection />
       <CTASection />
       <Footer />
     </div>

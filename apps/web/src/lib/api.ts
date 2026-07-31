@@ -2,6 +2,11 @@
 // In development, use the direct backend URL from env or localhost
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api/proxy";
 
+// Backend AI/module endpoints are protected by a simple shared-secret API key.
+// The n8n workflow and the deployed backend use this same key value.
+const TIPCHAIN_API_KEY =
+  process.env.NEXT_PUBLIC_TIPCHAIN_API_KEY || "tipchain-api-key";
+
 // ─── Generic Fetch ──────────────────────────────────────────────────────────
 
 async function fetchJSON<T>(
@@ -10,7 +15,10 @@ async function fetchJSON<T>(
   noParse?: boolean
 ): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": TIPCHAIN_API_KEY,
+    },
     ...options,
   });
 
@@ -515,6 +523,48 @@ export async function queryAIAgent(agentType: string, message: string, context?:
     method: "POST",
     body: JSON.stringify({ message, context: context || {} }),
   });
+}
+
+// ─── GameFi / DeFi / Creator Economy Modules ─────────────────────────────────
+
+export async function getQuests() {
+  return fetchJSON<any>("/api/gamefi/quests");
+}
+
+export async function getCollectibles() {
+  return fetchJSON<any>("/api/creator/collectibles");
+}
+
+export async function getTokenSwaps() {
+  return fetchJSON<any>("/api/defi/token-swaps");
+}
+
+export async function getNFTDrops() {
+  return fetchJSON<any>("/api/creator/nft-drops");
+}
+
+export async function getStaking() {
+  return fetchJSON<any>("/api/defi/staking");
+}
+
+export async function getLiquidityPools() {
+  return fetchJSON<any>("/api/defi/liquidity-pools");
+}
+
+export async function getGuilds() {
+  return fetchJSON<any>("/api/gamefi/guilds");
+}
+
+export async function getSeasons() {
+  return fetchJSON<any>("/api/gamefi/seasons");
+}
+
+export async function getMissions() {
+  return fetchJSON<any>("/api/gamefi/missions");
+}
+
+export async function getAchievements() {
+  return fetchJSON<any>("/api/gamefi/achievements");
 }
 
 export const AI_AGENTS = [
