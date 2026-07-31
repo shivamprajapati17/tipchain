@@ -192,9 +192,6 @@ export default function MarketplacePage() {
       setItems(
         combined.length > 0 ? combined : Object.values(FALLBACK_ITEMS).flat()
       );
-    } catch {
-      // Graceful — showcase data
-      setItems(Object.values(FALLBACK_ITEMS).flat());
     } finally {
       setLoading(false);
     }
