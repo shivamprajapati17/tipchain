@@ -3,6 +3,7 @@ import { creatorRepository } from "../repositories/creator.repository";
 import { userRepository } from "../repositories/user.repository";
 import { ConflictError, NotFoundError } from "../middleware/error.middleware";
 import { cacheGet, cacheSet, cacheDelPattern } from "../lib/redis";
+import { eventBus } from "./eventBus.service";
 
 export class CreatorService {
   async getByWallet(wallet: string) {
@@ -79,6 +80,13 @@ export class CreatorService {
     });
 
     await cacheDelPattern(`creator:*`);
+
+    // Notify the n8n automation workflow (fire-and-forget)
+    void eventBus.emit("creator.created", {
+      wallet: data.walletAddress,
+      username: data.username,
+    });
+
     return this.formatCreator(creator);
   }
 

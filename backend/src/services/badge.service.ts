@@ -1,6 +1,7 @@
 import { prisma } from "../lib/prisma";
 import { NotFoundError, ConflictError } from "../middleware/error.middleware";
 import logger from "../utils/logger";
+import { eventBus } from "./eventBus.service";
 
 const BADGES_KEY = "_badges";
 const AWARDS_KEY = "_awards";
@@ -116,6 +117,15 @@ class BadgeService {
     await this.saveData(targetWallet, { awards: stored.awards });
 
     logger.info("Badge awarded", { badge: data.badgeSlug, wallet: data.walletAddress });
+
+    // Notify the n8n automation workflow (fire-and-forget)
+    void eventBus.emit("badge.awarded", {
+      badgeSlug: data.badgeSlug,
+      badgeName: badge.name,
+      wallet: data.walletAddress,
+      mintAddress: data.mintAddress ?? null,
+    });
+
     return award;
   }
 }

@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma";
 import { transactionRepository } from "../repositories/transaction.repository";
 import { creatorRepository } from "../repositories/creator.repository";
 import { NotFoundError } from "../middleware/error.middleware";
+import { eventBus } from "./eventBus.service";
 
 export class TipService {
   async send(data: {
@@ -19,6 +20,16 @@ export class TipService {
       receiverWallet: data.receiverWallet,
       amount: amountLamports,
       token: data.token ?? "SOL",
+      txHash: data.txHash ?? null,
+      message: data.message ?? null,
+    });
+
+    // Notify the n8n automation workflow (fire-and-forget)
+    void eventBus.emit("tip.received", {
+      amount: data.amount,
+      currency: data.token ?? "SOL",
+      from: data.senderWallet,
+      to: data.receiverWallet,
       txHash: data.txHash ?? null,
       message: data.message ?? null,
     });
@@ -42,6 +53,16 @@ export class TipService {
       receiverWallet: data.receiverWallet,
       amount: amountRaw,
       token: data.tokenSymbol ?? "SPL",
+      txHash: data.txHash ?? null,
+      message: data.message ?? null,
+    });
+
+    // Notify the n8n automation workflow (fire-and-forget)
+    void eventBus.emit("tip.received", {
+      amount: data.amount,
+      currency: data.tokenSymbol ?? "SPL",
+      from: data.senderWallet,
+      to: data.receiverWallet,
       txHash: data.txHash ?? null,
       message: data.message ?? null,
     });

@@ -2,6 +2,7 @@ import { prisma } from "../lib/prisma";
 import logger from "../utils/logger";
 import { AppError, NotFoundError, ConflictError } from "../middleware/error.middleware";
 import { verifyTokenHolding } from "./tokenVerification.service";
+import { eventBus } from "./eventBus.service";
 
 export interface MembershipTier {
   id: string;
@@ -222,6 +223,17 @@ class MembershipService {
         });
 
         logger.info("Subscription created", { tier: tierId, supporter: supporterWallet });
+
+        // Notify the n8n automation workflow (fire-and-forget)
+        void eventBus.emit("membership.activated", {
+          supporter: supporterWallet,
+          creator: creator.walletAddress,
+          tierId,
+          tierName: tier.name,
+          priceSol: tier.priceSol,
+          expiresAt: subscription.expiresAt,
+        });
+
         return subscription;
       }
     }

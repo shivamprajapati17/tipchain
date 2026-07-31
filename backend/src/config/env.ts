@@ -45,6 +45,12 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().optional(),
   DISCORD_WEBHOOK_URL: z.string().url().optional(),
 
+  // n8n Automation Webhook (fire-and-forget domain events).
+  // NOTE: intentionally NOT in the strict schema — eventBus reads it directly
+  // via process.env with a safe localhost fallback, so an invalid value can
+  // never crash server boot.
+  // N8N_WEBHOOK_URL: z.string().url().optional(),
+
   // Analytics
   POSTHOG_KEY: z.string().optional(),
   POSTHOG_HOST: z.string().url().optional(),
