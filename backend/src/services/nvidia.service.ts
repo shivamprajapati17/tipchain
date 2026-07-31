@@ -23,7 +23,8 @@ export type AgentType =
   | "community-manager"
   | "creator-assistant"
   | "quest-generator"
-  | "npc-engine";
+  | "npc-engine"
+  | "summarize";
 
 // ─── System Prompts Per Agent ─────────────────────────────────────────────────
 const AGENT_PROMPTS: Record<AgentType, string> = {
@@ -114,6 +115,15 @@ Capabilities:
 - Generate dynamic NPC responses based on player actions
 
 Each NPC should have: name, role, personality traits, dialogue examples, and interaction mechanics. Make NPCs memorable and immersive.`,
+
+  "summarize": `You are TipChain's AI Operations Manager.
+Analyze the aggregated data from all modules (AI agents, GameFi, DeFi, Creator Economy, Solana) and provide:
+1. Key insights and anomalies
+2. Recommended actions
+3. Priority alerts
+4. Performance summary
+
+Return concise, structured markdown. Be specific and data-driven.`,
 };
 
 // ─── Default Agent: Smart Router ──────────────────────────────────────────────
@@ -236,6 +246,8 @@ class NvidiaService {
         "Quest generation is temporarily unavailable. Quest design framework: (1) Onboarding quest — connect wallet + follow socials (easy), (2) Engagement quest — complete 3 daily tasks (medium), (3) Mastery quest — achieve top 10% leaderboard (hard), (4) Secret quest — discover Easter egg (hidden). Reward proportionally to difficulty.",
       "npc-engine":
         "NPC generation is temporarily unavailable. NPC design template: Name (memorable), Role (quest giver / merchant / lore keeper), Personality (3-5 traits), Dialogue (greeting + 3-5 context-aware responses), Rewards (items/XP appropriate to NPC level). A great NPC has a distinct voice and purpose.",
+      "summarize":
+        "AI summary is temporarily unavailable. Quick digest of module health: (1) All AI agents are responding, (2) GameFi/DeFi/Creator endpoints are returning data, (3) Review the module endpoints directly for the latest numbers. Check that NVIDIA_API_KEY is configured to enable full AI summarization.",
     };
 
     const fallback = fallbacks[agentType];

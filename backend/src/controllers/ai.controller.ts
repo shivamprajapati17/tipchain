@@ -42,6 +42,7 @@ export const communityManager = handleAgentRequest("community-manager");
 export const creatorAssistant = handleAgentRequest("creator-assistant");
 export const questGenerator = handleAgentRequest("quest-generator");
 export const npcEngine = handleAgentRequest("npc-engine");
+export const summarizeData = handleAgentRequest("summarize");
 
 /**
  * AI system health check

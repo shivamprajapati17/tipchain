@@ -8,6 +8,7 @@ import {
   creatorAssistant,
   questGenerator,
   npcEngine,
+  summarizeData,
   aiHealth,
 } from "../controllers/ai.controller";
 import { apiLimiter } from "../middleware/rateLimiter.middleware";
@@ -25,6 +26,7 @@ router.post("/ai/community-manager", apiLimiter, simpleApiKeyAuth, communityMana
 router.post("/ai/creator-assistant", apiLimiter, simpleApiKeyAuth, creatorAssistant);
 router.post("/ai/quest-generator", apiLimiter, simpleApiKeyAuth, questGenerator);
 router.post("/ai/npc-engine", apiLimiter, simpleApiKeyAuth, npcEngine);
+router.post("/ai/summarize", apiLimiter, simpleApiKeyAuth, summarizeData);
 router.get("/ai/health", apiLimiter, aiHealth);
 
 // ─── API Router: /api/ai/... ──────────────────────────────────────────────────
@@ -40,6 +42,7 @@ apiRouter.post("/api/ai/community-manager", apiLimiter, simpleApiKeyAuth, commun
 apiRouter.post("/api/ai/creator-assistant", apiLimiter, simpleApiKeyAuth, creatorAssistant);
 apiRouter.post("/api/ai/quest-generator", apiLimiter, simpleApiKeyAuth, questGenerator);
 apiRouter.post("/api/ai/npc-engine", apiLimiter, simpleApiKeyAuth, npcEngine);
+apiRouter.post("/api/ai/summarize", apiLimiter, simpleApiKeyAuth, summarizeData);
 apiRouter.get("/api/ai/health", apiLimiter, aiHealth);
 
 // ─── Export Combined ──────────────────────────────────────────────────────────
