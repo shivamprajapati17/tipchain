@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Swords,
   Trophy,
@@ -8,9 +7,6 @@ import {
   Users,
   Target,
   CheckCircle2,
-  Loader2,
-  AlertCircle,
-  RefreshCw,
   ArrowUpRight,
   Layers,
 } from "lucide-react";
@@ -139,51 +135,22 @@ function QuestsSkeleton() {
   );
 }
 
-// ─── Error State ────────────────────────────────────────────────────────────
-
-function QuestsError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-1 items-center justify-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-sm"
-      >
-        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
-          <AlertCircle className="size-7 text-destructive" />
-        </div>
-        <h1 className="mb-2 text-xl font-semibold">Failed to load quests</h1>
-        <p className="mb-6 text-sm text-muted-foreground">{message}</p>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-          <Button onClick={onRetry} variant="outline" className="gap-2 rounded-xl">
-            <RefreshCw className="size-4" />
-            Try Again
-          </Button>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function QuestsPage() {
   const [quests, setQuests] = useState<any[]>(FALLBACK_QUESTS);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchQuests = async () => {
     setLoading(true);
-    setError(null);
     try {
       const data = await getQuests();
       const list = Array.isArray(data) ? data : data?.quests;
       if (list && list.length > 0) {
         setQuests(list);
       }
-    } catch (err) {
+    } catch {
       // Fall back to showcase data — quests module is optional content
-      setError(null);
     } finally {
       setLoading(false);
     }
@@ -195,10 +162,6 @@ export default function QuestsPage() {
 
   if (loading) {
     return <QuestsSkeleton />;
-  }
-
-  if (error) {
-    return <QuestsError message={error} onRetry={fetchQuests} />;
   }
 
   return (

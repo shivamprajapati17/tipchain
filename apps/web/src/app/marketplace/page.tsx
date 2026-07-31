@@ -1,19 +1,15 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   ShoppingBag,
   Sparkles,
   Gem,
   Coins,
-  RefreshCw,
-  AlertCircle,
   ArrowUpRight,
   Layers,
   Flame,
   Image as ImageIcon,
 } from "lucide-react";
-import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getCollectibles, getNFTDrops, getTokenSwaps, getLiquidityPools } from "@/lib/api";
@@ -158,43 +154,15 @@ function MarketplaceSkeleton() {
   );
 }
 
-// ─── Error State ────────────────────────────────────────────────────────────
-
-function MarketplaceError({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div className="flex flex-1 items-center justify-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-sm"
-      >
-        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
-          <AlertCircle className="size-7 text-destructive" />
-        </div>
-        <h1 className="mb-2 text-xl font-semibold">Failed to load marketplace</h1>
-        <p className="mb-6 text-sm text-muted-foreground">{message}</p>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-          <Button onClick={onRetry} variant="outline" className="gap-2 rounded-xl">
-            <RefreshCw className="size-4" />
-            Try Again
-          </Button>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
-}
-
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function MarketplacePage() {
   const [category, setCategory] = useState<Category>("all");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const fetchItems = async () => {
     setLoading(true);
-    setError(null);
     try {
       const [collectibles, drops, swaps, pools] = await Promise.allSettled([
         getCollectibles(),
@@ -224,7 +192,7 @@ export default function MarketplacePage() {
       setItems(
         combined.length > 0 ? combined : Object.values(FALLBACK_ITEMS).flat()
       );
-    } catch (err) {
+    } catch {
       // Graceful — showcase data
       setItems(Object.values(FALLBACK_ITEMS).flat());
     } finally {
@@ -247,10 +215,6 @@ export default function MarketplacePage() {
 
   if (loading) {
     return <MarketplaceSkeleton />;
-  }
-
-  if (error) {
-    return <MarketplaceError message={error} onRetry={fetchItems} />;
   }
 
   return (
