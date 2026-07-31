@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
 import { sendSuccess } from "../utils/apiResponse";
+import { eventBus } from "../services/eventBus.service";
 
 // ─── GameFi ───────────────────────────────────────────────────────────────────
 
@@ -237,4 +238,50 @@ export const getRevenueAnalytics = asyncHandler(async (_req: Request, res: Respo
     activeSupporters: 128,
     newSupporters7d: 23,
   });
+});
+
+// ─── Mutation Endpoints (emit events to the n8n automation workflow) ───────────
+
+export const completeQuest = asyncHandler(async (req: Request, res: Response) => {
+  const questId = (req.params.id as string) ?? "unknown";
+  const { player, questTitle, xp } = req.body as {
+    player?: string;
+    questTitle?: string;
+    xp?: number;
+  };
+
+  const payload = {
+    questId,
+    questTitle: questTitle ?? `Quest ${questId}`,
+    player: player ?? "anonymous",
+    xp: xp ?? 0,
+    completedAt: new Date().toISOString(),
+  };
+
+  // Notify the n8n automation workflow (fire-and-forget)
+  void eventBus.emit("quest.completed", payload);
+
+  sendSuccess(res, { status: "completed", quest: payload });
+});
+
+export const stakeFunds = asyncHandler(async (req: Request, res: Response) => {
+  const { wallet, amount, protocol, token } = req.body as {
+    wallet?: string;
+    amount?: number;
+    protocol?: string;
+    token?: string;
+  };
+
+  const payload = {
+    wallet: wallet ?? "anonymous",
+    amount: amount ?? 0,
+    protocol: protocol ?? "Solana",
+    token: token ?? "SOL",
+    stakedAt: new Date().toISOString(),
+  };
+
+  // Notify the n8n automation workflow (fire-and-forget)
+  void eventBus.emit("defi.staked", payload);
+
+  sendSuccess(res, { status: "staked", stake: payload });
 });

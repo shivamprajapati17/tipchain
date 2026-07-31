@@ -6,6 +6,8 @@ import {
   getStaking, getLending, getLiquidityPools, getYieldFarming, getTreasury, getTokenSwaps, getCrossChainBridge,
   // Creator Economy
   getTokenGatedCommunities, getMemberships, getCollectibles, getNFTDrops, getPayments, getRevenueAnalytics,
+  // Mutations (emit events to the n8n automation workflow)
+  completeQuest, stakeFunds,
 } from "../controllers/module.controller";
 import { apiLimiter } from "../middleware/rateLimiter.middleware";
 import { simpleApiKeyAuth } from "../middleware/simpleApiKey.middleware";
@@ -38,5 +40,9 @@ router.get("/api/creator/collectibles", apiLimiter, simpleApiKeyAuth, getCollect
 router.get("/api/creator/nft-drops", apiLimiter, simpleApiKeyAuth, getNFTDrops);
 router.get("/api/creator/payments", apiLimiter, simpleApiKeyAuth, getPayments);
 router.get("/api/creator/revenue-analytics", apiLimiter, simpleApiKeyAuth, getRevenueAnalytics);
+
+// ─── Mutation Routes (emit events to the n8n automation workflow) ───────────────
+router.post("/api/gamefi/quests/:id/complete", apiLimiter, simpleApiKeyAuth, completeQuest);
+router.post("/api/defi/stake", apiLimiter, simpleApiKeyAuth, stakeFunds);
 
 export default router;
