@@ -52,7 +52,7 @@ export default function RootLayout({
                 </a>
 
                 {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-1">
+                <div className="hidden lg:flex items-center gap-1">
                   <a href="/" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                     Home
                   </a>
@@ -92,7 +92,7 @@ export default function RootLayout({
                 <div className="flex items-center gap-2">
                   <WalletButton />
                   {/* Mobile menu toggle */}
-                  <button className="md:hidden flex items-center justify-center size-8 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all">
+                  <button className="lg:hidden flex items-center justify-center size-8 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all">
                     <Menu className="size-4" />
                   </button>
                 </div>

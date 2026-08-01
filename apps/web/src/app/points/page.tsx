@@ -163,7 +163,7 @@ export default function PointsPage() {
                 icon: Layers,
               },
               {
-                label: "Leaderboard",
+                label: "Top 10 Earners",
                 value: loading ? "—" : String(topEarners ?? "—"),
                 icon: Trophy,
               },
