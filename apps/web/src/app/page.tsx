@@ -241,11 +241,11 @@ const BENTO = [
     iconColor: "text-fuchsia-400 bg-fuchsia-500/10",
   },
   {
-    span: "lg:col-span-7",
+    span: "lg:col-span-5",
     icon: Shield,
     title: "Verifiable, always",
     desc: "Every tip, point, and payout maps to an on-chain transaction. Trust is not claimed — it is proven.",
-    image: "https://picsum.photos/seed/tipshield/1000/420",
+    image: "https://picsum.photos/seed/tipshield/600/420",
     gradient: "from-emerald-500/5 via-transparent to-transparent",
     iconColor: "text-emerald-400 bg-emerald-500/10",
   },

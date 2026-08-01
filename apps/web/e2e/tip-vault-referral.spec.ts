@@ -29,9 +29,8 @@ test.describe("Vault support + history", () => {
     const historyButton = page.locator('button[title="View vault history"]').first();
     if (await historyButton.isVisible().catch(() => false)) {
       await historyButton.click();
+      // The modal opened — that is the assertion; no need to interact further
       await expect(page.getByText(/support transaction/i).first()).toBeVisible();
-      // Modal closes
-      await page.keyboard.press("Escape").catch(() => {});
     }
   });
 });

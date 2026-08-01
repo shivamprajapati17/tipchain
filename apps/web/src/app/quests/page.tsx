@@ -14,9 +14,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getQuests } from "@/lib/api";
 
 // ─── TipPoints quest catalogue (mirrors the TipPoints program) ──────────────
 
@@ -189,13 +188,6 @@ export default function QuestsPage() {
       return next;
     });
   };
-
-  // Fire-and-forget: enrich with backend quests if available (optional)
-  useEffect(() => {
-    getQuests().catch(() => {
-      /* quests module is optional — local catalogue is the source of truth */
-    });
-  }, []);
 
   return (
     <div className="flex-1 relative overflow-hidden">
