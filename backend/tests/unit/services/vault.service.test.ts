@@ -22,6 +22,7 @@ vi.mock("../../../src/lib/prisma", () => ({
 vi.mock("../../../src/repositories/transaction.repository", () => ({
   transactionRepository: {
     createWithStats: vi.fn(),
+    findMany: vi.fn(),
   },
 }));
 
@@ -273,6 +274,67 @@ describe("VaultService", () => {
       const updateCall = (prisma.vault.update as any).mock.calls[0][0];
       const data = updateCall.data;
       expect(data.supporterCount).toBeUndefined();
+    });
+  });
+
+  describe("getTransactions", () => {
+    it("throws NotFoundError for a missing vault", async () => {
+      (prisma.vault.findUnique as any).mockResolvedValue(null);
+
+      await expect(
+        vaultService.getTransactions("missing", { limit: 20, offset: 0 })
+      ).rejects.toThrow(NotFoundError);
+    });
+
+    it("filters by vaultId and formats transactions with string amounts", async () => {
+      (prisma.vault.findUnique as any).mockResolvedValue(vaultFixture);
+      (transactionRepository.findMany as any).mockResolvedValue({
+        transactions: [
+          {
+            id: "tx-1",
+            senderWallet: "supporter-1",
+            receiverWallet: "creator-a",
+            amount: BigInt(4),
+            token: "SOL",
+            txHash: null,
+            message: "Vault: Test Vault",
+            createdAt: new Date("2026-01-01"),
+          },
+        ],
+        total: 1,
+      });
+
+      const result = await vaultService.getTransactions("vault-1", {
+        limit: 20,
+        offset: 0,
+      });
+
+      expect(transactionRepository.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { vaultId: "vault-1" },
+          orderBy: { createdAt: "desc" },
+          take: 20,
+          skip: 0,
+        })
+      );
+      expect(result.vaultId).toBe("vault-1");
+      expect(result.transactions).toHaveLength(1);
+      expect(result.transactions[0].amount).toBe("4");
+      expect(result.pagination).toEqual({ limit: 20, offset: 0, total: 1 });
+    });
+
+    it("caps the page size at 50", async () => {
+      (prisma.vault.findUnique as any).mockResolvedValue(vaultFixture);
+      (transactionRepository.findMany as any).mockResolvedValue({
+        transactions: [],
+        total: 0,
+      });
+
+      await vaultService.getTransactions("vault-1", { limit: 500, offset: 0 });
+
+      expect(transactionRepository.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ take: 50 })
+      );
     });
   });
 
