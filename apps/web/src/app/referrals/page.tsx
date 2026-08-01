@@ -237,7 +237,10 @@ export default function ReferralsPage() {
             </motion.div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Referral Hub
+                Referral{" "}
+                <span className="serif-accent text-amber-600 dark:text-amber-400">
+                  Hub
+                </span>
               </h1>
               <p className="text-sm text-muted-foreground">
                 Earn {Math.round(commissionRate * 100)}% commission on every tip
@@ -351,7 +354,7 @@ export default function ReferralsPage() {
                 </div>
                 <div className="rounded-xl bg-emerald-500/5 border border-emerald-500/10 p-3">
                   <p className="text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
-                    💡 Share this link with friends. When they tip any creator on
+                    Share this link with friends. When they tip any creator on
                     TipChain, you earn {Math.round(commissionRate * 100)}% of
                     their tips as commission.
                   </p>

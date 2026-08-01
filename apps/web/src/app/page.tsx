@@ -1,7 +1,13 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import {
   ArrowRight,
   Sparkles,
@@ -13,9 +19,12 @@ import {
   Users,
   Layers,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Gift,
   Shield,
   Heart,
+  Quote,
 } from "lucide-react";
 
 // ─── Motion primitives ──────────────────────────────────────────────────────
@@ -482,6 +491,153 @@ function ScrubbedReveal() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  DESIRE — Testimonial carousel (human voices)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const TESTIMONIALS = [
+  {
+    quote:
+      "The first tip I sent came with a message the creator replied to the same day. It felt like a letter, not a transaction.",
+    name: "Maya R.",
+    role: "Supporter since day one",
+    image: "https://picsum.photos/seed/maya/120/120",
+  },
+  {
+    quote:
+      "TipPoints turned my support into something I can see and feel. Climbing from Bronze to Gold is strangely motivating.",
+    name: "Dev K.",
+    role: "TipPoints Bronze → Gold",
+    image: "https://picsum.photos/seed/devk/120/120",
+  },
+  {
+    quote:
+      "I backed a vault of five creators with one tip and each of them thanked me. That simply does not happen anywhere else.",
+    name: "Priya S.",
+    role: "Vault supporter",
+    image: "https://picsum.photos/seed/priya/120/120",
+  },
+  {
+    quote:
+      "My referral code brought three friends, and the commission came through exactly as promised. No fine print, no games.",
+    name: "Arjun M.",
+    role: "Referral partner",
+    image: "https://picsum.photos/seed/arjun/120/120",
+  },
+];
+
+function Testimonials() {
+  const [index, setIndex] = useState(0);
+  const t = TESTIMONIALS[index];
+
+  const go = (dir: number) => {
+    setIndex((prev) => (prev + dir + TESTIMONIALS.length) % TESTIMONIALS.length);
+  };
+
+  // Auto-advance every 6s; the interval re-arms on manual navigation too
+  useEffect(() => {
+    const id = setInterval(() => {
+      setIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+    }, 6000);
+    return () => clearInterval(id);
+  }, [index]);
+
+  return (
+    <section className="section-chapter relative overflow-hidden border-t border-white/5">
+      <div className="absolute inset-0 grid-backdrop opacity-20" />
+      <div className="relative z-10 mx-auto max-w-4xl px-6">
+        <motion.div {...fadeUp} className="mb-14 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.08]">
+            People, <span className="serif-accent text-emerald-300">not just wallets</span>
+          </h2>
+        </motion.div>
+
+        <div className="relative">
+          {/* Overlapping portraits */}
+          <div className="flex items-center justify-center mb-10 -space-x-4">
+            {TESTIMONIALS.map((item, i) => (
+              <motion.div
+                key={i}
+                whileHover={{ scale: 1.1, zIndex: 10 }}
+                onClick={() => setIndex(i)}
+                className={`relative size-14 rounded-full ring-2 transition-all duration-300 cursor-pointer ${
+                  i === index
+                    ? "ring-emerald-400 scale-110 z-10"
+                    : "ring-white/20 opacity-60 hover:opacity-100"
+                }`}
+              >
+                <img
+                  src={item.image}
+                  alt={item.name}
+                  className="size-full rounded-full object-cover grayscale-[0.4]"
+                  loading="lazy"
+                />
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Quote card */}
+          <div className="relative overflow-hidden rounded-3xl border border-white/8 bg-white/[0.03] p-8 md:p-12 backdrop-blur-sm">
+            <Quote className="absolute top-6 left-6 size-10 text-emerald-500/15" />
+            <AnimatePresence mode="wait">
+              <motion.blockquote
+                key={index}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
+                className="relative text-center"
+              >
+                <p className="text-lg md:text-2xl leading-relaxed text-white/85 tracking-tight" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <footer className="mt-6">
+                  <p className="text-sm font-semibold text-white">{t.name}</p>
+                  <p className="text-xs text-white/35 mt-0.5">{t.role}</p>
+                </footer>
+              </motion.blockquote>
+            </AnimatePresence>
+          </div>
+
+          {/* Controls */}
+          <div className="mt-8 flex items-center justify-center gap-4">
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => go(-1)}
+              aria-label="Previous testimonial"
+              className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:text-white hover:border-emerald-500/40 transition-all"
+            >
+              <ChevronLeft className="size-4" />
+            </motion.button>
+            <div className="flex items-center gap-2">
+              {TESTIMONIALS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIndex(i)}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${
+                    i === index ? "w-6 bg-emerald-400" : "w-2 bg-white/15 hover:bg-white/30"
+                  }`}
+                />
+              ))}
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.92 }}
+              onClick={() => go(1)}
+              aria-label="Next testimonial"
+              className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/60 hover:text-white hover:border-emerald-500/40 transition-all"
+            >
+              <ChevronRight className="size-4" />
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  ACTION — Final CTA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -540,6 +696,7 @@ export default function Home() {
       <Bento />
       <ProofGallery />
       <ScrubbedReveal />
+      <Testimonials />
       <FinalCTA />
     </main>
   );

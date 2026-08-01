@@ -1004,21 +1004,31 @@ export default function VaultsPage() {
   const [historyTarget, setHistoryTarget] = useState<VaultResponse | null>(null);
   const [connectPrompt, setConnectPrompt] = useState(false);
 
-  const fetchVaults = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const fetchVaults = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
+    if (!silent) setError(null);
     try {
       const data = await getVaults(24, 0);
       setVaults(data.vaults || []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load vaults");
+      if (!silent) {
+        setError(err instanceof Error ? err.message : "Failed to load vaults");
+      }
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchVaults();
+  }, [fetchVaults]);
+
+  // Live feed: silently refresh vault stats every 15s while the page is open
+  useEffect(() => {
+    const id = setInterval(() => {
+      fetchVaults(true);
+    }, 15000);
+    return () => clearInterval(id);
   }, [fetchVaults]);
 
   const handleSupportClick = (vault: VaultResponse) => {
@@ -1175,7 +1185,7 @@ export default function VaultsPage() {
             <AlertCircle className="size-3.5 shrink-0" />
             {error}
             <button
-              onClick={fetchVaults}
+              onClick={() => fetchVaults()}
               className="ml-auto underline hover:no-underline"
             >
               Retry

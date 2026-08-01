@@ -90,6 +90,44 @@ jobs:
         name: Type check
         continue-on-error: true
 
+  test-backend:
+    name: Backend — Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+        name: Generate Prisma client
+      - run: npx vitest run
+        name: Run unit tests
+
+  test-e2e:
+    name: Frontend — E2E (Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+        name: Install Playwright browsers
+      - run: npx playwright test
+        name: Run e2e tests
+
   pr-title:
     name: PR Title Check
     if: github.event_name == 'pull_request'

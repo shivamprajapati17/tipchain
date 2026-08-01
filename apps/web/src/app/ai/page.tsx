@@ -6,13 +6,21 @@ import {
   Bot,
   MessageSquare,
   Zap,
-  Sparkles,
   ChevronRight,
   Send,
   RefreshCw,
   AlertCircle,
   CheckCircle2,
   Loader2,
+  Wallet,
+  BarChart3,
+  Sprout,
+  CandlestickChart,
+  Users,
+  Palette,
+  Swords,
+  Gamepad2,
+  Sparkles,
 } from "lucide-react";
 import { AI_AGENTS, queryAIAgent } from "@/lib/api";
 
@@ -21,6 +29,23 @@ interface ChatMessage {
   role: "user" | "agent";
   content: string;
   agentId?: string;
+}
+
+// ─── Agent icon map (replaces the emoji icons from the API data) ────────────
+const AGENT_ICONS: Record<string, typeof Bot> = {
+  "wallet-assistant": Wallet,
+  "portfolio-manager": BarChart3,
+  "yield-optimizer": Sprout,
+  "trading-assistant": CandlestickChart,
+  "community-manager": Users,
+  "creator-assistant": Palette,
+  "quest-generator": Swords,
+  "npc-engine": Gamepad2,
+};
+
+function AgentIcon({ agentId, className }: { agentId: string; className?: string }) {
+  const Icon = AGENT_ICONS[agentId] ?? Bot;
+  return <Icon className={className} />;
 }
 
 // ─── Agent Color Config ─────────────────────────────────────────────────────
@@ -33,6 +58,13 @@ const AGENT_COLORS: Record<string, { bg: string; text: string; border: string; g
   orange: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", gradient: "from-orange-500 to-orange-400" },
 };
 
+// ─── Motion ─────────────────────────────────────────────────────────────────
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] as const },
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 //  MAIN PAGE
 // ═══════════════════════════════════════════════════════════════════════════
@@ -40,7 +72,12 @@ const AGENT_COLORS: Record<string, { bg: string; text: string; border: string; g
 export default function AIPage() {
   const [selectedAgent, setSelectedAgent] = useState<string>("wallet-assistant");
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: "agent", content: "👋 Welcome to TipChain AI! Select an agent from above and ask me anything about Solana, DeFi, trading, or your Web3 projects.", agentId: "wallet-assistant" },
+    {
+      role: "agent",
+      content:
+        "Welcome to TipChain AI. Pick an agent above and ask anything about Solana, DeFi, trading, or your Web3 projects — each one is tuned for a specific job.",
+      agentId: "wallet-assistant",
+    },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -78,7 +115,7 @@ export default function AIPage() {
         ...prev,
         {
           role: "agent",
-          content: `⚠️ Sorry, I couldn't reach the AI service. Error: ${err.message || "Unknown error"}`,
+          content: `Sorry, the AI service is unreachable right now. Error: ${err.message || "Unknown error"}`,
           agentId: selectedAgent,
         },
       ]);
@@ -96,33 +133,38 @@ export default function AIPage() {
 
   const clearChat = () => {
     setMessages([
-      { role: "agent", content: `👋 Chat cleared. How can the ${currentAgent?.name} help you?`, agentId: selectedAgent },
+      {
+        role: "agent",
+        content: `Chat cleared. How can the ${currentAgent?.name} help you?`,
+        agentId: selectedAgent,
+      },
     ]);
     setError(null);
   };
 
   return (
-    <div className="pt-20 min-h-screen bg-[#0a0a0f]">
-      {/* Header */}
-      <section className="relative py-8 overflow-hidden border-b border-white/5">
-        <div className="orb orb-1 -top-40 -right-40" />
-        <div className="mx-auto max-w-7xl px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <div className="flex items-center justify-center size-10 rounded-xl bg-cyan-500/10">
-                <Bot className="size-5 text-cyan-400" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                  AI Agents
-                </h1>
-                <p className="text-xs text-white/40">Powered by NVIDIA NIM — Select an agent to start</p>
-              </div>
-            </div>
+    <div className="flex-1 relative overflow-hidden">
+      {/* Ambient */}
+      <div className="orb orb-1 -top-40 -right-40 opacity-40" />
+      <div className="orb orb-2 -bottom-40 -left-40 opacity-30" />
+
+      {/* Hero */}
+      <section className="relative px-6 pt-14 pb-8 sm:pt-16">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-400">
+              <Sparkles className="size-3" />
+              NVIDIA NIM
+            </span>
+            <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-[-0.03em] text-white leading-[1.05] max-w-3xl">
+              Eight agents, one{" "}
+              <span className="serif-accent text-cyan-300">human intent</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm md:text-base text-white/40 leading-relaxed">
+              Each agent is a specialist — wallets, portfolios, yields, trades,
+              communities, creators, quests, NPCs. Pick one and ask in plain
+              language.
+            </p>
           </motion.div>
         </div>
       </section>
@@ -151,7 +193,7 @@ export default function AIPage() {
                     : "bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/60 border border-transparent"
                 }`}
               >
-                <span className="text-base">{agent.icon}</span>
+                <AgentIcon agentId={agent.id} className="size-3.5" />
                 {agent.name}
                 {isSelected && <CheckCircle2 className="size-3" />}
               </button>
@@ -165,14 +207,14 @@ export default function AIPage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="lg:col-span-3 glass-card rounded-2xl overflow-hidden flex flex-col"
+            className="lg:col-span-3 rounded-3xl border border-white/5 bg-white/[0.03] backdrop-blur-sm overflow-hidden flex flex-col"
             style={{ minHeight: "600px", maxHeight: "750px" }}
           >
             {/* Chat header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/5 shrink-0">
               <div className="flex items-center gap-3">
                 <div className={`flex items-center justify-center size-8 rounded-lg ${colors.bg}`}>
-                  <MessageSquare className={`size-4 ${colors.text}`} />
+                  <AgentIcon agentId={selectedAgent} className={`size-4 ${colors.text}`} />
                 </div>
                 <div>
                   <div className="text-sm font-semibold text-white">{currentAgent?.name}</div>
@@ -207,7 +249,7 @@ export default function AIPage() {
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
+                        className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                           msg.role === "agent"
                             ? `${msgColors.bg} ${msgColors.text}`
                             : "bg-white/10 text-white/80"
@@ -224,7 +266,7 @@ export default function AIPage() {
                     animate={{ opacity: 1 }}
                     className="flex justify-start"
                   >
-                    <div className={`max-w-[80%] rounded-xl px-4 py-3 ${colors.bg}`}>
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-3 ${colors.bg}`}>
                       <div className="flex items-center gap-2">
                         <Loader2 className={`size-4 ${colors.text} animate-spin`} />
                         <span className={`text-sm ${colors.text} animate-pulse`}>
@@ -248,7 +290,7 @@ export default function AIPage() {
 
             {/* Chat input */}
             <div className="p-4 border-t border-white/5 shrink-0">
-              <div className="flex items-center gap-3 glass rounded-xl px-4 py-2.5">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 focus-within:border-cyan-500/30 transition-colors">
                 <input
                   type="text"
                   value={input}
@@ -303,10 +345,10 @@ export default function AIPage() {
             className="space-y-4"
           >
             {/* Selected Agent Info */}
-            <div className={`glass-card rounded-2xl p-5 ${colors.border} border`}>
+            <div className={`rounded-3xl border border-white/5 bg-white/[0.03] p-5 ${colors.border} border`}>
               <div className="flex items-center gap-3 mb-4">
                 <div className={`flex items-center justify-center size-10 rounded-xl ${colors.bg}`}>
-                  <span className="text-xl">{currentAgent?.icon}</span>
+                  <AgentIcon agentId={selectedAgent} className={`size-5 ${colors.text}`} />
                 </div>
                 <div>
                   <h3 className="text-sm font-semibold text-white">{currentAgent?.name}</h3>
@@ -321,7 +363,7 @@ export default function AIPage() {
             </div>
 
             {/* All Agents Quick List */}
-            <div className="glass-card rounded-2xl p-5">
+            <div className="rounded-3xl border border-white/5 bg-white/[0.03] p-5">
               <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
                 All Agents
               </h3>
@@ -341,7 +383,7 @@ export default function AIPage() {
                           : "hover:bg-white/5"
                       }`}
                     >
-                      <span className="text-base">{agent.icon}</span>
+                      <AgentIcon agentId={agent.id} className="size-4 shrink-0" />
                       <span className="text-xs font-medium truncate">{agent.name}</span>
                       <ChevronRight className={`size-3 ml-auto ${
                         selectedAgent === agent.id ? agentColors.text : "text-white/20"
@@ -353,7 +395,7 @@ export default function AIPage() {
             </div>
 
             {/* Stats */}
-            <div className="glass-card rounded-2xl p-5">
+            <div className="rounded-3xl border border-white/5 bg-white/[0.03] p-5">
               <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3">
                 Status
               </h3>
@@ -380,5 +422,3 @@ export default function AIPage() {
     </div>
   );
 }
-
-

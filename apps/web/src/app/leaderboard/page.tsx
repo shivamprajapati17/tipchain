@@ -513,7 +513,21 @@ export default function LeaderboardPage() {
             </span>
           </div>
           <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            {isPoints ? "TipPoints Leaderboard" : "Supporter Leaderboard"}
+            {isPoints ? (
+              <>
+                TipPoints{" "}
+                <span className="serif-accent text-fuchsia-600 dark:text-fuchsia-400">
+                  Leaderboard
+                </span>
+              </>
+            ) : (
+              <>
+                Supporter{" "}
+                <span className="serif-accent text-emerald-600 dark:text-emerald-400">
+                  Leaderboard
+                </span>
+              </>
+            )}
           </h1>
           <p className="mb-8 text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
             {isPoints

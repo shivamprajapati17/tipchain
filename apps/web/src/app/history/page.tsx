@@ -147,7 +147,12 @@ export default function HistoryPage() {
               <History className="size-5 text-blue-500" />
             </motion.div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Tip History</h1>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Tip{" "}
+                <span className="serif-accent text-blue-600 dark:text-blue-400">
+                  History
+                </span>
+              </h1>
               <p className="text-sm text-muted-foreground">
                 Every tip you&apos;ve sent and received, on-chain
               </p>

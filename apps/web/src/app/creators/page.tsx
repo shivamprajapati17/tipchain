@@ -444,7 +444,10 @@ export default function CreatorsPage() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Explore Creators
+                Explore{" "}
+                <span className="serif-accent text-emerald-600 dark:text-emerald-400">
+                  Creators
+                </span>
               </h1>
               <p className="mt-2 text-sm text-muted-foreground max-w-lg leading-relaxed">
                 Discover and support amazing creators building on Solana. Find
