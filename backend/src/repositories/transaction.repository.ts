@@ -66,6 +66,7 @@ export class TransactionRepository {
     token: string;
     txHash?: string | null;
     message?: string | null;
+    vaultId?: string | null;
   }) {
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Upsert supporter record

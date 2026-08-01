@@ -18,6 +18,7 @@ import {
   Wallet,
   Crown,
   SlidersHorizontal,
+  History,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -26,12 +27,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   getVaults,
   getVault,
+  getVaultTransactions,
   createVault,
   updateVault,
   deleteVault,
   supportVault,
   lamportsToSol,
   type VaultResponse,
+  type TransactionResponse,
 } from "@/lib/api";
 
 // ─── Motion Variants ────────────────────────────────────────────────────────
@@ -90,12 +93,14 @@ function NotConnected() {
 function VaultCard({
   vault,
   onSupport,
+  onHistory,
   onDelete,
   onEdit,
   isOwner,
 }: {
   vault: VaultResponse;
   onSupport: (v: VaultResponse) => void;
+  onHistory: (v: VaultResponse) => void;
   onDelete?: (v: VaultResponse) => void;
   onEdit?: (v: VaultResponse) => void;
   isOwner?: boolean;
@@ -199,6 +204,14 @@ function VaultCard({
                     </motion.button>
                   </>
                 )}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => onHistory(vault)}
+                  className="flex size-7 items-center justify-center rounded-lg text-muted-foreground/60 hover:text-emerald-500 transition-colors"
+                  title="View vault history"
+                >
+                  <History className="size-3.5" />
+                </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
@@ -822,6 +835,158 @@ function SupportModal({
   );
 }
 
+// ─── Vault History Modal (followup: per-vault support transactions) ─────────
+
+function VaultHistoryModal({
+  vault,
+  onClose,
+}: {
+  vault: VaultResponse;
+  onClose: () => void;
+}) {
+  const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+
+  const fetchHistory = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getVaultTransactions(vault.id, 20, 0);
+      setTransactions(data.transactions || []);
+      setTotal(data.pagination?.total ?? data.transactions.length);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load history");
+    } finally {
+      setLoading(false);
+    }
+  }, [vault.id]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
+
+  const solExplorer = (txHash: string | null) =>
+    txHash
+      ? `https://explorer.solana.com/tx/${txHash}?cluster=devnet`
+      : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 30, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 20, scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-premium-lg"
+      >
+        <div className="mb-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <History className="size-4 text-emerald-500" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold">{vault.name}</h2>
+              <p className="text-[10px] text-muted-foreground">
+                {total} support transaction{total === 1 ? "" : "s"}
+              </p>
+            </div>
+          </div>
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="size-4" />
+          </motion.button>
+        </div>
+
+        {loading ? (
+          <div className="space-y-2">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="h-12 rounded-xl border border-border bg-muted/20 overflow-hidden relative"
+              >
+                <div className="absolute inset-0 shimmer-slow" />
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-3 text-xs text-destructive">
+            <AlertCircle className="size-3.5 shrink-0" />
+            {error}
+            <button
+              onClick={fetchHistory}
+              className="ml-auto underline hover:no-underline"
+            >
+              Retry
+            </button>
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border py-12 text-center">
+            <History className="mx-auto mb-3 size-6 text-muted-foreground/30" />
+            <p className="text-sm text-muted-foreground">
+              No support transactions yet.
+            </p>
+            <p className="mt-1 text-[11px] text-muted-foreground/60">
+              When someone supports this vault, the splits appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+            {transactions.map((tx) => {
+              const link = solExplorer(tx.txHash);
+              return (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between rounded-xl border border-border bg-muted/20 px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="font-mono text-[11px] text-muted-foreground truncate">
+                      {truncateAddress(tx.senderWallet)}
+                      <span className="text-white/25"> → </span>
+                      {truncateAddress(tx.receiverWallet)}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                      {new Date(tx.timestamp).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <span className="text-xs font-semibold">
+                      {lamportsToSol(tx.amount).toFixed(4)}{" "}
+                      <span className="text-muted-foreground">{tx.token}</span>
+                    </span>
+                    {link ? (
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-muted-foreground/50 hover:text-emerald-500 transition-colors"
+                        title="View on Solana Explorer"
+                      >
+                        <ArrowUpRight className="size-3.5" />
+                      </a>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function VaultsPage() {
@@ -836,6 +1001,7 @@ export default function VaultsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [supportTarget, setSupportTarget] = useState<VaultResponse | null>(null);
   const [editTarget, setEditTarget] = useState<VaultResponse | null>(null);
+  const [historyTarget, setHistoryTarget] = useState<VaultResponse | null>(null);
   const [connectPrompt, setConnectPrompt] = useState(false);
 
   const fetchVaults = useCallback(async () => {
@@ -1043,6 +1209,7 @@ export default function VaultsPage() {
                   vault={vault}
                   isOwner={connected && vault.ownerWallet === walletAddress}
                   onSupport={handleSupportClick}
+                  onHistory={setHistoryTarget}
                   onEdit={
                     connected && vault.ownerWallet === walletAddress
                       ? setEditTarget
@@ -1168,6 +1335,12 @@ export default function VaultsPage() {
             vault={editTarget}
             onClose={() => setEditTarget(null)}
             onSaved={fetchVaults}
+          />
+        )}
+        {historyTarget && (
+          <VaultHistoryModal
+            vault={historyTarget}
+            onClose={() => setHistoryTarget(null)}
           />
         )}
       </AnimatePresence>

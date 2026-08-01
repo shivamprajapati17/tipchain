@@ -9,6 +9,7 @@ vi.mock("../../../src/lib/prisma", () => ({
     },
     transaction: {
       aggregate: vi.fn(),
+      groupBy: vi.fn(),
     },
   },
 }));
@@ -292,16 +293,16 @@ describe("TipService", () => {
 
   describe("getLeaderboard", () => {
     it("should return top supporters by total tipped", async () => {
-      (prisma.supporter.groupBy as any).mockResolvedValue([
+      (prisma.transaction.groupBy as any).mockResolvedValue([
         {
-          walletAddress: "top-supporter",
-          _sum: { totalTipped: BigInt(5000000000) },
-          _count: { walletAddress: 10 },
+          senderWallet: "top-supporter",
+          _sum: { amount: BigInt(5000000000) },
+          _count: { senderWallet: 10 },
         },
         {
-          walletAddress: "second-supporter",
-          _sum: { totalTipped: BigInt(3000000000) },
-          _count: { walletAddress: 5 },
+          senderWallet: "second-supporter",
+          _sum: { amount: BigInt(3000000000) },
+          _count: { senderWallet: 5 },
         },
       ]);
 
@@ -322,8 +323,8 @@ describe("TipService", () => {
       });
     });
 
-    it("should return empty leaderboard when no supporters exist", async () => {
-      (prisma.supporter.groupBy as any).mockResolvedValue([]);
+    it("should return empty leaderboard when no transactions exist", async () => {
+      (prisma.transaction.groupBy as any).mockResolvedValue([]);
 
       const result = await tipService.getLeaderboard(25);
 
@@ -331,17 +332,33 @@ describe("TipService", () => {
     });
 
     it("should handle BigInt zero values", async () => {
-      (prisma.supporter.groupBy as any).mockResolvedValue([
+      (prisma.transaction.groupBy as any).mockResolvedValue([
         {
-          walletAddress: "supporter-1",
-          _sum: { totalTipped: null },
-          _count: { walletAddress: 0 },
+          senderWallet: "supporter-1",
+          _sum: { amount: null },
+          _count: { senderWallet: 0 },
         },
       ]);
 
       const result = await tipService.getLeaderboard(25);
 
       expect(result[0].totalTipped).toBe("0");
+    });
+
+    it("should pass period and token filters into the groupBy where clause", async () => {
+      (prisma.transaction.groupBy as any).mockResolvedValue([]);
+
+      await tipService.getLeaderboard({ limit: 25, period: "7d", token: "SOL" });
+
+      expect(prisma.transaction.groupBy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          by: ["senderWallet"],
+          where: expect.objectContaining({
+            token: "SOL",
+            createdAt: { gte: expect.any(Date) },
+          }),
+        })
+      );
     });
   });
 });

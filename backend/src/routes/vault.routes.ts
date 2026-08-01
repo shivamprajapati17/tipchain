@@ -10,5 +10,6 @@ router.post("/vaults", apiLimiter, vaultController.createVault);
 router.put("/vaults/:id", apiLimiter, vaultController.updateVault);
 router.delete("/vaults/:id", apiLimiter, vaultController.deleteVault);
 router.post("/vaults/:id/support", apiLimiter, vaultController.supportVault);
+router.get("/vaults/:id/transactions", apiLimiter, vaultController.getVaultTransactions);
 
 export default router;

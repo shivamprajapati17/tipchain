@@ -45,6 +45,7 @@ model Transaction {
   token          String   @default("SOL")
   txHash         String?  @unique @map("tx_hash")
   message        String?
+  vaultId        String?  @map("vault_id") // Set when created via vault support (copy-tipping)
   createdAt      DateTime @default(now()) @map("timestamp")
   receiver       Creator  @relation("ReceiverTransactions", fields: [receiverWallet], references: [walletAddress])
   sender         Creator  @relation("SenderTransactions", fields: [senderWallet], references: [walletAddress])

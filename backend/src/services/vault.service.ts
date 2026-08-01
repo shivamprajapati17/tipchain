@@ -209,6 +209,7 @@ export class VaultService {
         token,
         txHash: null,
         message: data.message ?? `Vault: ${vault.name}`,
+        vaultId: vault.id,
       });
     }
 
@@ -264,6 +265,38 @@ export class VaultService {
           amount: s.share.toString(),
         })),
       vault: fresh ? this.formatVault(fresh) : null,
+    };
+  }
+
+  /**
+   * Per-vault transaction history — every split recorded by this vault's
+   * supporters, newest first (followup: vault history view).
+   */
+  async getTransactions(vaultId: string, params: { limit?: number; offset?: number }) {
+    const { limit = 20, offset = 0 } = params;
+    const vault = await prisma.vault.findUnique({ where: { id: vaultId } });
+    if (!vault) throw new NotFoundError("Vault");
+
+    const { transactions, total } = await transactionRepository.findMany({
+      where: { vaultId },
+      orderBy: { createdAt: "desc" },
+      take: Math.min(limit, 50),
+      skip: offset,
+    });
+
+    return {
+      vaultId,
+      transactions: transactions.map((t) => ({
+        id: t.id,
+        senderWallet: t.senderWallet,
+        receiverWallet: t.receiverWallet,
+        amount: t.amount.toString(),
+        token: t.token,
+        txHash: t.txHash,
+        message: t.message,
+        timestamp: t.createdAt,
+      })),
+      pagination: { limit, offset, total },
     };
   }
 }

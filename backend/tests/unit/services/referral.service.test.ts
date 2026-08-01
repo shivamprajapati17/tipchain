@@ -8,6 +8,9 @@ vi.mock("../../../src/lib/prisma", () => ({
       findMany: vi.fn(),
       update: vi.fn(),
     },
+    transaction: {
+      findMany: vi.fn(),
+    },
   },
 }));
 
@@ -46,6 +49,8 @@ describe("ReferralService", () => {
         }),
       };
       (prisma.creator.findUnique as any).mockResolvedValue(creatorWithCodes);
+      // Commission enrichment queries referred wallets' tips
+      (prisma.transaction.findMany as any).mockResolvedValue([]);
 
       const stats = await referralService.getReferralStats(mockCreator.walletAddress);
 
@@ -53,6 +58,7 @@ describe("ReferralService", () => {
       expect(stats.codes).toHaveLength(1);
       expect(stats.totalUses).toBe(2);
       expect(stats.uses).toHaveLength(2);
+      expect(stats.commissionRate).toBe(0.1);
     });
 
     it("should return empty stats for creator with no codes", async () => {
@@ -62,6 +68,30 @@ describe("ReferralService", () => {
 
       expect(stats.codes).toEqual([]);
       expect(stats.totalUses).toBe(0);
+    });
+
+    it("computes commission from referred wallets' tip totals", async () => {
+      const creatorWithCodes = {
+        ...mockCreator,
+        socialLinks: JSON.stringify({
+          _referrals: [{ code: "SHIV-ABC123", creatorWallet: mockCreator.walletAddress, useCount: 3 }],
+          _referral_uses: [
+            { code: "SHIV-ABC123", wallet: "user1", usedAt: new Date().toISOString() },
+          ],
+        }),
+      };
+      (prisma.creator.findUnique as any).mockResolvedValue(creatorWithCodes);
+      (prisma.transaction.findMany as any).mockResolvedValue([
+        { senderWallet: "user1", amount: BigInt(10000000000) }, // 10 SOL
+        { senderWallet: "user1", amount: BigInt(5000000000) }, // 5 SOL
+      ]);
+
+      const stats = await referralService.getReferralStats(mockCreator.walletAddress);
+
+      expect(stats.totalReferredTips).toBe("15000000000");
+      expect(stats.totalCommission).toBe("1500000000"); // 10% of 15 SOL
+      expect(stats.uses[0].tipped).toBe("15000000000");
+      expect(stats.uses[0].commission).toBe("1500000000");
     });
 
     it("should throw NotFoundError for non-existing creator", async () => {

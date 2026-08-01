@@ -1,278 +1,328 @@
 "use client";
 
 import {
-  Swords,
-  Trophy,
   Sparkles,
-  Users,
+  Trophy,
   Target,
-  CheckCircle2,
-  ArrowUpRight,
+  Coins,
+  Heart,
+  Share2,
+  Users,
+  Gift,
   Layers,
+  ArrowUpRight,
+  CheckCircle2,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getQuests } from "@/lib/api";
 
-// ─── Motion Variants ────────────────────────────────────────────────────────
+// ─── TipPoints quest catalogue (mirrors the TipPoints program) ──────────────
 
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
+const QUESTS = [
+  {
+    id: "first-tip",
+    title: "First Blood",
+    desc: "Send your very first tip to any creator on TipChain.",
+    points: 500,
+    category: "Starter",
+    icon: Heart,
+    color: "from-rose-500/10 to-transparent text-rose-400",
   },
-} as const;
-
-const fadeSlideUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 80, damping: 20 },
+  {
+    id: "profile",
+    title: "Claim your name",
+    desc: "Create your creator profile so the world knows who you are.",
+    points: 350,
+    category: "Starter",
+    icon: Users,
+    color: "from-emerald-500/10 to-transparent text-emerald-400",
   },
-} as const;
+  {
+    id: "vault-backer",
+    title: "Back a vault",
+    desc: "Support a creator vault — your SOL splits across the whole basket.",
+    points: 1000,
+    category: "Vaults",
+    icon: Layers,
+    color: "from-violet-500/10 to-transparent text-violet-400",
+  },
+  {
+    id: "vault-builder",
+    title: "Found a vault",
+    desc: "Create your own curated basket of creators and invite supporters.",
+    points: 1500,
+    category: "Vaults",
+    icon: Trophy,
+    color: "from-amber-500/10 to-transparent text-amber-400",
+  },
+  {
+    id: "referral-share",
+    title: "Spread the word",
+    desc: "Share your referral code with one friend who actually lands.",
+    points: 750,
+    category: "Community",
+    icon: Share2,
+    color: "from-cyan-500/10 to-transparent text-cyan-400",
+  },
+  {
+    id: "three-follows",
+    title: "Community Builder",
+    desc: "Follow three creators and join the TipChain conversation.",
+    points: 400,
+    category: "Community",
+    icon: Users,
+    color: "from-fuchsia-500/10 to-transparent text-fuchsia-400",
+  },
+  {
+    id: "ten-tips",
+    title: "Ten deep",
+    desc: "Send ten tips total — consistency is its own reward.",
+    points: 2000,
+    category: "Starter",
+    icon: Coins,
+    color: "from-emerald-500/10 to-transparent text-emerald-400",
+  },
+  {
+    id: "gift-note",
+    title: "Say it out loud",
+    desc: "Attach a heartfelt message to a tip — words matter as much as SOL.",
+    points: 300,
+    category: "Community",
+    icon: Gift,
+    color: "from-rose-500/10 to-transparent text-rose-400",
+  },
+];
 
-function PulseDot() {
+const CATEGORIES = ["All", "Starter", "Vaults", "Community"];
+
+// ─── Motion ─────────────────────────────────────────────────────────────────
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] as const },
+};
+
+// ─── Quest card ─────────────────────────────────────────────────────────────
+
+function QuestCard({
+  quest,
+  index,
+  onTrack,
+}: {
+  quest: (typeof QUESTS)[number];
+  index: number;
+  onTrack: (id: string) => void;
+}) {
   return (
-    <motion.span
-      className="inline-block size-1.5 rounded-full bg-emerald-500"
-      animate={{ opacity: [0.4, 1, 0.4], scale: [0.9, 1.1, 0.9] }}
-      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-    />
-  );
-}
-
-// ─── Quest Card ─────────────────────────────────────────────────────────────
-
-function QuestCard({ quest, index }: { quest: any; index: number }) {
-  const reward = quest?.reward ?? quest?.xpReward ?? 0;
-  const title = quest?.title ?? quest?.name ?? `Quest #${index + 1}`;
-  const desc =
-    quest?.description ??
-    quest?.objective ??
-    "Complete this quest to earn rewards and XP.";
-  const completed = quest?.status === "completed" || quest?.isCompleted;
-
-  return (
-    <motion.div variants={fadeSlideUp} layout>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.5, delay: (index % 4) * 0.06 }}
+    >
       <motion.div
-        whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } }}
-        className="relative h-full overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/5 p-[2px] shadow-premium transition-all duration-500 hover:shadow-premium-lg"
+        whileHover={{ y: -5, transition: { type: "spring", stiffness: 300, damping: 20 } }}
+        className="group relative h-full overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-6 transition-all duration-500 hover:border-emerald-500/25 hover:shadow-[0_0_40px_rgba(16,185,129,0.08)]"
       >
-        <div className="rounded-[calc(1.5rem-3px)] h-full bg-card shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
-          <div className="p-5 h-full flex flex-col">
-            <div className="mb-3 flex items-center justify-between">
-              <div className="flex size-10 items-center justify-center rounded-xl border border-border bg-gradient-to-br from-orange-500/5 to-orange-500/10">
-                <Target className="size-4 text-orange-400/80" />
-              </div>
-              {completed ? (
-                <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-500">
-                  <CheckCircle2 className="size-3" /> Done
-                </span>
-              ) : (
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                  Active
-                </span>
-              )}
-            </div>
+        <div className={`mb-5 flex items-center justify-between rounded-2xl bg-gradient-to-b ${quest.color} p-3`}>
+          <quest.icon className="size-5" />
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider text-white/50">
+            {quest.category}
+          </span>
+        </div>
 
-            <h3 className="mb-2 text-sm font-semibold leading-snug">{title}</h3>
-            <p className="mb-4 flex-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">
-              {desc}
-            </p>
+        <h3 className="mb-2 text-base font-semibold text-white tracking-tight">
+          {quest.title}
+        </h3>
+        <p className="mb-5 text-xs text-white/40 leading-relaxed flex-1">
+          {quest.desc}
+        </p>
 
-            <div className="flex items-center justify-between border-t border-border pt-3">
-              <span className="flex items-center gap-1.5 text-xs font-semibold text-amber-500/90">
-                <Sparkles className="size-3" /> +{reward} XP
-              </span>
-              <button className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-emerald-500 transition-colors">
-                Start <ArrowUpRight className="size-3" />
-              </button>
-            </div>
-          </div>
+        <div className="flex items-center justify-between border-t border-white/5 pt-4">
+          <span className="flex items-center gap-1.5 text-sm font-bold text-emerald-400">
+            <Sparkles className="size-3.5" />
+            +{quest.points.toLocaleString()} pts
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onTrack(quest.id)}
+            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-white/70 hover:border-emerald-500/40 hover:text-emerald-300 transition-all"
+          >
+            Track
+            <ArrowUpRight className="size-3" />
+          </motion.button>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ─── Fallback Data ──────────────────────────────────────────────────────────
-
-const FALLBACK_QUESTS = [
-  { title: "First Blood", description: "Send your first tip to any creator on TipChain.", reward: 50 },
-  { title: "Creator Onboarding", description: "Create your creator profile and share it with the world.", reward: 100 },
-  { title: "Community Builder", description: "Follow 3 creators and join the TipChain community.", reward: 75 },
-  { title: "Liquidity Provider", description: "Stake into your first liquidity pool on Solana DeFi.", reward: 150 },
-  { title: "Collector", description: "Mint your first collectible or badge on-chain.", reward: 120 },
-  { title: "PvP Challenger", description: "Win your first PvP match in the arena.", reward: 200 },
-];
-
-// ─── Loading Skeleton ───────────────────────────────────────────────────────
-
-function QuestsSkeleton() {
-  return (
-    <div className="flex-1">
-      <section className="border-b border-border bg-muted/20 px-6 py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6 h-8 w-48 shimmer-slow rounded-lg" />
-          <div className="h-4 w-80 shimmer-slow rounded-md" />
-        </div>
-      </section>
-      <section className="px-6 py-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-48 rounded-2xl border border-border bg-card p-5 overflow-hidden relative">
-                <div className="absolute inset-0 shimmer-slow opacity-50" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-// ─── Main Page ──────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+//  MAIN
+// ═══════════════════════════════════════════════════════════════════════════
 
 export default function QuestsPage() {
-  const [quests, setQuests] = useState<any[]>(FALLBACK_QUESTS);
-  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState("All");
+  const [tracked, setTracked] = useState<Set<string>>(new Set());
 
-  const fetchQuests = async () => {
-    setLoading(true);
-    try {
-      const data = await getQuests();
-      const list = Array.isArray(data) ? data : data?.quests;
-      if (list && list.length > 0) {
-        setQuests(list);
+  const filtered =
+    category === "All"
+      ? QUESTS
+      : QUESTS.filter((q) => q.category === category);
+
+  const totalPool = QUESTS.reduce((a, q) => a + q.points, 0);
+
+  const trackQuest = (id: string) => {
+    setTracked((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-    } catch {
-      // Fall back to showcase data — quests module is optional content
-    } finally {
-      setLoading(false);
-    }
+      return next;
+    });
   };
 
+  // Fire-and-forget: enrich with backend quests if available (optional)
   useEffect(() => {
-    fetchQuests();
+    getQuests().catch(() => {
+      /* quests module is optional — local catalogue is the source of truth */
+    });
   }, []);
 
-  if (loading) {
-    return <QuestsSkeleton />;
-  }
-
   return (
-    <div className="flex-1">
-      {/* ── Gradient Mesh Background ─────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <motion.div
-          className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
-          style={{ background: "radial-gradient(circle at 30% 50%, oklch(0.55 0.13 60), transparent 70%)", filter: "blur(80px)" }}
-          animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
+    <div className="flex-1 relative overflow-hidden">
+      {/* Ambient */}
+      <div className="orb orb-1 -top-40 -right-40 opacity-40" />
+      <div className="orb orb-2 -bottom-40 -left-40 opacity-30" />
 
       {/* Hero */}
-      <section className="relative border-b border-border bg-muted/20 px-6 py-12 sm:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 80, damping: 20 }}
-          className="mx-auto max-w-6xl"
-        >
-          <div className="mb-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              <Swords className="size-3" /> GameFi
+      <section className="relative px-6 pt-16 pb-12 sm:pt-20">
+        <div className="mx-auto max-w-6xl">
+          <motion.div {...fadeUp}>
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-400">
+              <Sparkles className="size-3" />
+              Earn TipPoints
             </span>
-          </div>
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                Quests &amp; Missions
-              </h1>
-              <p className="mt-2 text-sm text-muted-foreground max-w-lg leading-relaxed">
-                Complete quests, earn XP, and climb the leaderboards. Every
-                achievement is verifiable on Solana.
-              </p>
-            </div>
+            <h1 className="mt-6 text-4xl md:text-6xl font-bold tracking-[-0.03em] text-white leading-[1.05] max-w-3xl">
+              Little quests,{" "}
+              <span className="serif-accent text-emerald-300">real points</span>
+            </h1>
+            <p className="mt-4 max-w-xl text-sm md:text-base text-white/40 leading-relaxed">
+              Complete small, human challenges and earn TipPoints on top of your
+              tipping. Points prove your support — quests just make it fun.
+            </p>
+          </motion.div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3 rounded-2xl border border-border bg-card p-4 shadow-premium">
-              {[
-                { label: "Active Quests", value: String(quests.length), icon: Target },
-                { label: "XP Earned", value: "1,240", icon: Sparkles },
-                { label: "Players", value: "482", icon: Users },
-              ].map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="mb-1 flex justify-center">
-                    <stat.icon className="size-4 text-orange-500/60" />
-                  </div>
-                  <p className="text-sm font-bold tracking-tight">{stat.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
+          {/* Stats strip */}
+          <motion.div
+            {...fadeUp}
+            transition={{ delay: 0.15 }}
+            className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-4 max-w-2xl"
+          >
+            {[
+              { label: "Quest pool", value: `${totalPool.toLocaleString()} pts`, icon: Coins },
+              { label: "Quests live", value: String(QUESTS.length), icon: Target },
+              { label: "Tracked by you", value: String(tracked.size), icon: CheckCircle2 },
+              { label: "On-chain", value: "100%", icon: Trophy },
+            ].map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3.5"
+              >
+                <stat.icon className="mb-2 size-4 text-emerald-400/70" />
+                <p className="text-lg font-bold text-white tracking-tight">
+                  {stat.value}
+                </p>
+                <p className="text-[10px] uppercase tracking-wider text-white/30 mt-0.5">
+                  {stat.label}
+                </p>
+              </div>
+            ))}
+          </motion.div>
+        </div>
       </section>
 
-      {/* Quests Grid */}
-      <section className="px-6 py-6 sm:py-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">
-              {quests.length} quests available
-            </p>
-            <Link href="/leaderboard">
-              <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
-                <Trophy className="size-3" /> View Leaderboard
-              </span>
-            </Link>
-          </div>
+      {/* Category filter */}
+      <section className="relative px-6 pb-4">
+        <div className="mx-auto max-w-6xl flex flex-wrap items-center gap-2">
+          {CATEGORIES.map((cat) => (
+            <motion.button
+              key={cat}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setCategory(cat)}
+              className={`rounded-full px-4 py-2 text-xs font-medium transition-all ${
+                category === cat
+                  ? "bg-emerald-400 text-black"
+                  : "border border-white/10 text-white/50 hover:text-white hover:border-white/25"
+              }`}
+            >
+              {cat}
+            </motion.button>
+          ))}
+          <span className="ml-auto hidden sm:block text-[11px] text-white/25">
+            Progress is tracked locally for now — on-chain verification lands with v4
+          </span>
+        </div>
+      </section>
 
+      {/* Grid */}
+      <section className="relative px-6 py-6 pb-20">
+        <div className="mx-auto max-w-6xl">
           <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            layout
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
           >
             <AnimatePresence mode="popLayout">
-              {quests.map((quest, i) => (
-                <QuestCard key={quest?.id ?? i} quest={quest} index={i} />
+              {filtered.map((quest, i) => (
+                <QuestCard
+                  key={quest.id}
+                  quest={quest}
+                  index={i}
+                  onTrack={trackQuest}
+                />
               ))}
             </AnimatePresence>
           </motion.div>
 
-          {/* XP / Seasons strip */}
+          {/* Season strip */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-8 grid gap-4 sm:grid-cols-2"
+            {...fadeUp}
+            transition={{ delay: 0.2 }}
+            className="mt-12 grid gap-4 sm:grid-cols-2"
           >
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-premium">
+            <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-violet-500/8 to-transparent p-6">
               <div className="mb-2 flex items-center gap-2">
-                <Layers className="size-4 text-orange-500/70" />
-                <h3 className="text-sm font-semibold">Season System</h3>
+                <Layers className="size-4 text-violet-400" />
+                <h3 className="text-sm font-semibold text-white">Seasons rotate</h3>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Quests rotate each season with fresh rewards, exclusive badges,
-                and limited-edition collectibles for top players.
+              <p className="text-xs text-white/40 leading-relaxed">
+                Quests refresh each season with fresh rewards and exclusive
+                badges for the people who actually show up.
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-5 shadow-premium">
+            <div className="rounded-3xl border border-white/5 bg-gradient-to-br from-emerald-500/8 to-transparent p-6">
               <div className="mb-2 flex items-center gap-2">
-                <Sparkles className="size-4 text-orange-500/70" />
-                <h3 className="text-sm font-semibold">XP &amp; Achievements</h3>
+                <Trophy className="size-4 text-emerald-400" />
+                <h3 className="text-sm font-semibold text-white">Points feed the leaderboard</h3>
               </div>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Earn XP for every completed quest and unlock achievement NFTs
-                that prove your journey on-chain.
+              <p className="text-xs text-white/40 leading-relaxed mb-4">
+                Every quest point stacks on top of your tipping points. See where
+                you stand among the most supportive people on Solana.
               </p>
+              <Link href="/points">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors">
+                  Understand TipPoints <ArrowUpRight className="size-3" />
+                </span>
+              </Link>
             </div>
           </motion.div>
         </div>

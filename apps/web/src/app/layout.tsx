@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Space_Grotesk, JetBrains_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
-import { WalletButton } from "@/components/WalletButton";
-import { Bot, Compass, Layers, Menu } from "lucide-react";
+import { SiteHeader } from "@/components/SiteHeader";
 
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
@@ -17,11 +16,93 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["300", "400", "500", "600", "700"],
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-instrument-serif",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
-  title: "TipChain — AI-Native GameFi & DeFi Infrastructure on Solana",
+  title: "TipChain — Tip. Earn. Belong. On Solana.",
   description:
-    "The AI-native GameFi + DeFi infrastructure platform on Solana. AI agents, quests, rewards, NFT utilities, and more.",
+    "The human-first creator economy on Solana. Tip creators, earn TipPoints, back vaults, and grow together — every action verifiable on-chain.",
 };
+
+function GlobalFooter() {
+  return (
+    <footer className="relative border-t border-white/5">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#06060a] to-[#030308] pointer-events-none" />
+      <div className="relative mx-auto max-w-6xl px-6 py-12">
+        <div className="flex flex-col md:flex-row items-start justify-between gap-8">
+          <div>
+            <div className="flex items-center gap-2.5 mb-3">
+              <span className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+                T
+              </span>
+              <span className="text-sm font-semibold text-white" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
+                TipChain
+              </span>
+            </div>
+            <p className="text-xs text-white/30 leading-relaxed max-w-xs">
+              Tip the creators you love. Earn TipPoints that prove your support. Built on Solana, powered by people.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+            <div>
+              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Earn</h4>
+              <div className="space-y-2.5">
+                <a href="/creators" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Creators</a>
+                <a href="/leaderboard" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Leaderboard</a>
+                <a href="/points" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">TipPoints</a>
+                <a href="/quests" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Quests</a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Give</h4>
+              <div className="space-y-2.5">
+                <a href="/vaults" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Vaults</a>
+                <a href="/referrals" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Referrals</a>
+                <a href="/history" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">History</a>
+                <a href="/dashboard" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Dashboard</a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Build</h4>
+              <div className="space-y-2.5">
+                <a href="/ai" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">AI Agents</a>
+                <a href="/marketplace" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Marketplace</a>
+                <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">GitHub</a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Network</h4>
+              <div className="space-y-2.5 text-xs text-white/30">
+                <div className="flex items-center gap-2">
+                  <span className="pulse-dot" /> Solana Devnet
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block size-1.5 rounded-full bg-cyan-400/50" /> Helius RPC
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-block size-1.5 rounded-full bg-emerald-400/50" /> Operational
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10 pt-6 hairline flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-[10px] text-white/20">© 2026 TipChain. Built on Solana.</span>
+          <span className="text-[10px] text-white/20">
+            v3.0 — human-first creator economy
+          </span>
+        </div>
+      </div>
+    </footer>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -31,76 +112,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable} h-full`}
     >
-      <body className="min-h-full flex flex-col antialiased">
+      <body className="min-h-full flex flex-col antialiased bg-background text-foreground overflow-x-hidden">
+        <div className="grain" aria-hidden />
         <Providers>
-          <header className="fixed top-0 right-0 left-0 z-50 flex justify-center">
-            <nav
-              className="mx-4 mt-3 glass-card rounded-2xl"
-              style={{ maxWidth: "min(94vw, 1020px)", minWidth: "320px" }}
-            >
-              <div className="flex h-11 items-center justify-between px-4">
-                {/* Logo */}
-                <a href="/" className="flex items-center gap-2.5 shrink-0 group">
-                  <span className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold group-hover:bg-emerald-500/20 transition-colors">
-                    T
-                  </span>
-                  <span className="text-sm font-semibold text-white tracking-tight hidden sm:inline" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                    TipChain
-                  </span>
-                </a>
-
-                {/* Desktop Navigation */}
-                <div className="hidden lg:flex items-center gap-1">
-                  <a href="/" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Home
-                  </a>
-                  <a href="/ai" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all flex items-center gap-1.5">
-                    <Bot className="size-3.5" /> AI
-                  </a>
-                  <a href="/quests" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Quests
-                  </a>
-                  <a href="/marketplace" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Marketplace
-                  </a>
-                  <a href="/creators" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Creators
-                  </a>
-                  <a href="/leaderboard" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Leaderboard
-                  </a>
-                  <a href="/points" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Points
-                  </a>
-                  <a href="/vaults" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Vaults
-                  </a>
-                  <a href="/referrals" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    Referrals
-                  </a>
-                  <a href="/history" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
-                    History
-                  </a>
-                  <a href="/dashboard" className="px-3 py-1.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-1.5">
-                    <Layers className="size-3.5" /> Dashboard
-                  </a>
-                </div>
-
-                {/* Right side */}
-                <div className="flex items-center gap-2">
-                  <WalletButton />
-                  {/* Mobile menu toggle */}
-                  <button className="lg:hidden flex items-center justify-center size-8 rounded-lg text-white/60 hover:text-white hover:bg-white/5 transition-all">
-                    <Menu className="size-4" />
-                  </button>
-                </div>
-              </div>
-            </nav>
-          </header>
-
-          <main className="flex-1 flex flex-col">{children}</main>
+          <SiteHeader />
+          <main className="flex-1 flex flex-col pt-16">{children}</main>
+          <GlobalFooter />
         </Providers>
       </body>
     </html>

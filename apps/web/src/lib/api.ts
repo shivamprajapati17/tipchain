@@ -377,6 +377,18 @@ export async function supportVault(data: {
   });
 }
 
+export async function getVaultTransactions(
+  vaultId: string,
+  limit = 20,
+  offset = 0
+) {
+  return fetchJSON<{
+    vaultId: string;
+    transactions: TransactionResponse[];
+    pagination: { limit: number; offset: number; total: number };
+  }>(`/vaults/${vaultId}/transactions?limit=${limit}&offset=${offset}`);
+}
+
 // ─── Supporters ─────────────────────────────────────────────────────────────
 
 export async function getSupporterProfile(wallet: string) {

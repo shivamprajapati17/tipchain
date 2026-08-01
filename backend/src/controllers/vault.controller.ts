@@ -41,3 +41,14 @@ export const supportVault = asyncHandler(async (req: Request, res: Response) => 
   });
   sendCreated(res, result, "Vault supported");
 });
+
+export const getVaultTransactions = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { limit, skip } = extractPagination(req, 20, 50);
+    const result = await vaultService.getTransactions(req.params.id as string, {
+      limit,
+      offset: skip,
+    });
+    sendSuccess(res, result);
+  }
+);

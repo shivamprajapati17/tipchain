@@ -136,6 +136,7 @@ model Transaction {
   token          String   @default("SOL") // SOL or USDC
   txHash         String?  @unique @map("tx_hash")
   message        String?
+  vaultId        String?  @map("vault_id") // Set when created via vault support (copy-tipping)
   isConfirmed    Boolean  @default(true) @map("is_confirmed")
   createdAt      DateTime @default(now()) @map("timestamp")
 

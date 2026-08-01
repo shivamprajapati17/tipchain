@@ -1,137 +1,151 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
 import {
   ArrowRight,
   Sparkles,
-  Zap,
-  Shield,
   Coins,
   TrendingUp,
   Bot,
   Gamepad2,
-  BarChart3,
+  Trophy,
   Users,
   Layers,
-  ChevronRight,
+  ChevronDown,
+  Gift,
+  Shield,
+  Heart,
 } from "lucide-react";
 
-// ─── Animations ──────────────────────────────────────────────────────────────
+// ─── Motion primitives ──────────────────────────────────────────────────────
 
-const fadeInUp = {
+const fadeUp = {
   initial: { opacity: 0, y: 30 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.6 },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] as const },
 };
 
-const staggerItem = (i: number) => ({
-  initial: { opacity: 0, y: 20 },
+const stagger = {
+  initial: { opacity: 0, y: 24 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { delay: i * 0.08, duration: 0.5 },
-});
+  viewport: { once: true, margin: "-40px" },
+  transition: { duration: 0.55, ease: [0.21, 0.47, 0.32, 0.98] as const },
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  SPLASH — Minimal brand intro
+//  ATTENTION — Cinematic hero (2-3 line H1, no badges, no raw stats)
 // ═══════════════════════════════════════════════════════════════════════════
 
-function SplashSection() {
+function Hero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start start", "end start"],
+  });
+  const bgScale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
+  const bgOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0.15]);
+  const textY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden gradient-hero">
+    <section ref={ref} className="relative min-h-[92vh] overflow-hidden flex items-center justify-center">
+      {/* Full-bleed background with dark radial wash */}
+      <motion.div
+        style={{ scale: bgScale, opacity: bgOpacity }}
+        className="absolute inset-0"
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url(https://picsum.photos/seed/tipchainvault/1920/1080)",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/70 via-[#0a0a0f]/85 to-[#0a0a0f]" />
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(60% 50% at 50% 40%, transparent 0%, rgba(10,10,15,0.9) 100%)",
+          }}
+        />
+      </motion.div>
+
       {/* Ambient orbs */}
-      <div className="orb orb-1 -top-40 -left-40" />
-      <div className="orb orb-2 -bottom-40 -right-40" />
-      <div className="orb orb-3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+      <div className="orb orb-1 -top-40 -left-40 opacity-60" />
+      <div className="orb orb-2 -bottom-40 -right-40 opacity-50" />
 
-      {/* Grid backdrop */}
-      <div className="absolute inset-0 grid-backdrop opacity-40" />
-
-      <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+      <motion.div
+        style={{ y: textY }}
+        className="relative z-10 mx-auto max-w-6xl px-6 pt-10 pb-24 text-center"
+      >
+        <motion.h1
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.9, ease: [0.21, 0.47, 0.32, 0.98] }}
+          className="text-[clamp(2.6rem,6vw,5.2rem)] leading-[1.02] font-bold tracking-[-0.04em] text-white"
+          style={{ fontFamily: "Space Grotesk, sans-serif" }}
         >
-          {/* Badge */}
+          Tip the creators you love,
+          <br />
+          earn{" "}
+          <span
+            className="inline-block w-20 h-9 -mb-2 rounded-full bg-cover bg-center mx-1 align-middle ring-1 ring-white/20"
+            style={{ backgroundImage: "url(https://picsum.photos/seed/tipsparkle/200/80)" }}
+          />
+          <span className="text-gradient-emerald">points</span> that prove it
+        </motion.h1>
+
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.8 }}
+          className="mx-auto mt-7 max-w-2xl text-base md:text-lg text-white/50 leading-relaxed"
+        >
+          TipChain is the human-first creator economy on Solana. Every tip is a
+          signal, every point is proof — and every vault turns fans into a
+          shared fund.
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className="mt-10 flex flex-col sm:flex-row gap-4 justify-center"
+        >
+          <a
+            href="/creators"
+            className="group inline-flex items-center justify-center gap-2 h-13 px-8 py-4 rounded-2xl bg-emerald-400 text-black text-sm font-semibold hover:bg-emerald-300 transition-all shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)]"
+          >
+            Start tipping
+            <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+          </a>
+          <a
+            href="/vaults"
+            className="group inline-flex items-center justify-center gap-2 h-13 px-8 py-4 rounded-2xl glass-card text-white/80 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
+          >
+            <Layers className="size-4" />
+            Explore vaults
+          </a>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.1, duration: 0.8 }}
+          className="mt-16 flex justify-center"
+        >
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card text-xs text-emerald-400 mb-8"
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="flex flex-col items-center gap-1 text-white/25"
           >
-            <span className="pulse-dot" />
-            AI-Native GameFi & DeFi Infrastructure
-          </motion.div>
-
-          {/* Main heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.8 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-bold tracking-[-0.04em] leading-[0.9] mb-6"
-            style={{ fontFamily: "Space Grotesk, sans-serif" }}
-          >
-            <span className="text-white">BUILD ON</span>
-            <br />
-            <span className="text-gradient-emerald">SOLANA</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="max-w-2xl mx-auto text-sm md:text-base text-white/40 leading-relaxed mb-10"
-          >
-            AI agents · Quests · XP rewards · NFT utilities · DeFi hub · Analytics · Governance
-            <br />
-            <span className="text-white/30 text-xs">The all-in-one infrastructure layer for the next generation of Web3 applications.</span>
-          </motion.p>
-
-          {/* CTA buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 0.6 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <a
-              href="/dashboard"
-              className="group inline-flex items-center justify-center gap-2 h-11 px-7 rounded-xl bg-emerald-500 text-black text-sm font-semibold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/20"
-            >
-              Launch App
-              <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a
-              href="/ai"
-              className="group inline-flex items-center justify-center gap-2 h-11 px-7 rounded-xl glass-card text-white/70 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
-            >
-              <Bot className="size-4" />
-              Meet TipChain AI
-              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </motion.div>
-
-          {/* Stats row */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.0, duration: 0.6 }}
-            className="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16"
-          >
-            {[
-              { label: "Protocol Volume", value: "$1M+" },
-              { label: "Ecosystem Partners", value: "100+" },
-              { label: "AI Agents", value: "1K+" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-white tracking-tight">{stat.value}</div>
-                <div className="text-xs text-white/30 mt-1 tracking-wider uppercase">{stat.label}</div>
-              </div>
-            ))}
+            <span className="text-[10px] uppercase tracking-[0.25em]">Scroll</span>
+            <ChevronDown className="size-4" />
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
 
       {/* Bottom fade */}
       <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#0a0a0f] to-transparent" />
@@ -140,421 +154,167 @@ function SplashSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ECOSYSTEM
+//  INTEREST — Infinite marquee of core actions
 // ═══════════════════════════════════════════════════════════════════════════
 
-const MODULES = [
+const MARQUEE_ITEMS = [
+  "Tip in SOL",
+  "Earn TipPoints",
+  "Back a vault",
+  "Share a referral",
+  "Climb the leaderboard",
+  "Follow creators",
+  "Send a message",
+  "Prove it on-chain",
+];
+
+function Marquee() {
+  const row = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return (
+    <section className="relative border-y border-white/5 overflow-hidden py-10">
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-24 z-10 bg-gradient-to-r from-[#0a0a0f] to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-24 z-10 bg-gradient-to-l from-[#0a0a0f] to-transparent" />
+      <div className="marquee-track">
+        {row.map((item, i) => (
+          <span
+            key={i}
+            className="flex items-center gap-6 px-6 text-sm md:text-base text-white/25 font-medium whitespace-nowrap"
+            style={{ fontFamily: "Space Grotesk, sans-serif" }}
+          >
+            <Heart className="size-3.5 text-emerald-500/40" />
+            {item}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  INTEREST — Gapless bento (grid-flow-dense, interlocking spans, no voids)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const BENTO = [
   {
-    icon: Bot,
-    title: "AI Agent Marketplace",
-    desc: "Deploy, discover, and monetize AI agents. Built-in agent wallets, autonomous trading, and on-chain verification.",
-    color: "emerald",
-    href: "/ai",
-  },
-  {
-    icon: Gamepad2,
-    title: "Quest Engine",
-    desc: "Gamified on-chain quests with XP, achievements, and reward pools. Drive engagement through challenges.",
-    color: "cyan",
-    href: "/quests",
-  },
-  {
+    span: "lg:col-span-7 lg:row-span-2",
     icon: Coins,
-    title: "DeFi Hub",
-    desc: "Stake, swap, lend, and yield farm. Integrated Solana DeFi primitives with aggregated liquidity.",
-    color: "purple",
-    href: "/defi",
+    title: "Tip with meaning",
+    desc: "Attach a message, send SOL or USDC, and leave a permanent record on Solana. No accounts, no walls — just support.",
+    image: "https://picsum.photos/seed/tipexchange/1000/900",
+    gradient: "from-emerald-500/10 via-transparent to-transparent",
+    iconColor: "text-emerald-400 bg-emerald-500/10",
   },
   {
+    span: "lg:col-span-5",
+    icon: Trophy,
+    title: "TipPoints",
+    desc: "Every SOL of activity earns 1,000 points. Rise from Bronze to Hyper and show the world how much you care.",
+    image: "https://picsum.photos/seed/tiptrophy/600/420",
+    gradient: "from-amber-500/10 via-transparent to-transparent",
+    iconColor: "text-amber-400 bg-amber-500/10",
+  },
+  {
+    span: "lg:col-span-5",
     icon: Layers,
-    title: "NFT Utilities",
-    desc: "Dynamic NFTs, soulbound tokens, gated access, and royalty enforcement for creators.",
-    color: "emerald",
-    href: "/nfts",
+    title: "Creator vaults",
+    desc: "Fund a curated basket of creators in one move. Your SOL splits across them by the weights you choose.",
+    image: "https://picsum.photos/seed/tipvault/600/420",
+    gradient: "from-violet-500/10 via-transparent to-transparent",
+    iconColor: "text-violet-400 bg-violet-500/10",
   },
   {
-    icon: BarChart3,
-    title: "Analytics Suite",
-    desc: "Real-time dashboards, portfolio tracking, on-chain analytics, and custom reporting.",
-    color: "cyan",
-    href: "/dashboard",
+    span: "lg:col-span-7 lg:row-span-2",
+    icon: Gift,
+    title: "Referrals that pay",
+    desc: "Share your code, grow the circle, and earn commission on every referral you bring home.",
+    image: "https://picsum.photos/seed/tipgift/1000/900",
+    gradient: "from-cyan-500/10 via-transparent to-transparent",
+    iconColor: "text-cyan-400 bg-cyan-500/10",
   },
   {
+    span: "lg:col-span-5",
+    icon: Users,
+    title: "A real community",
+    desc: "Follow creators, read their updates, and feel the warmth of a platform built around humans — not hype.",
+    image: "https://picsum.photos/seed/tipcommunity/600/420",
+    gradient: "from-fuchsia-500/10 via-transparent to-transparent",
+    iconColor: "text-fuchsia-400 bg-fuchsia-500/10",
+  },
+  {
+    span: "lg:col-span-7",
     icon: Shield,
-    title: "Governance",
-    desc: "DAO tooling, proposal systems, voting, and treasury management for decentralized decision-making.",
-    color: "purple",
-    href: "/governance",
+    title: "Verifiable, always",
+    desc: "Every tip, point, and payout maps to an on-chain transaction. Trust is not claimed — it is proven.",
+    image: "https://picsum.photos/seed/tipshield/1000/420",
+    gradient: "from-emerald-500/5 via-transparent to-transparent",
+    iconColor: "text-emerald-400 bg-emerald-500/10",
   },
 ];
 
-function EcosystemSection() {
+function Bento() {
   return (
-    <section className="relative py-28 overflow-hidden border-t border-white/5">
+    <section className="section-chapter relative overflow-hidden">
       <div className="absolute inset-0 grid-backdrop opacity-20" />
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
-        <motion.div {...fadeInUp}>
-          <div className="section-tag mb-3">Ecosystem</div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
-            Everything in one
-            <br />
-            <span className="text-gradient-emerald">unified platform</span>
+      <div className="relative z-10 mx-auto max-w-6xl px-6">
+        <motion.div {...fadeUp} className="mb-16 max-w-3xl">
+          <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] text-white leading-[1.05]">
+            Everything you need to{" "}
+            <span className="serif-accent text-emerald-300">show up</span> for
+            the people you believe in
           </h2>
-          <p className="max-w-lg text-sm text-white/30 mb-16">
-            Seven integrated modules that work together seamlessly. Pick what you need, deploy in minutes.
+          <p className="mt-5 text-sm md:text-base text-white/40 leading-relaxed max-w-xl">
+            Six primitives, one human-first economy. No farming games, no
+            inflated stats — just genuine support, beautifully surfaced.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {MODULES.map((mod, i) => {
-            const Icon = mod.icon;
-            const glowClass =
-              mod.color === "emerald"
-                ? "hover:border-emerald-500/30 hover:shadow-emerald-500/10"
-                : mod.color === "cyan"
-                ? "hover:border-cyan-500/30 hover:shadow-cyan-500/10"
-                : "hover:border-purple-500/30 hover:shadow-purple-500/10";
-            const iconColor =
-              mod.color === "emerald"
-                ? "text-emerald-400 bg-emerald-500/10"
-                : mod.color === "cyan"
-                ? "text-cyan-400 bg-cyan-500/10"
-                : "text-purple-400 bg-purple-500/10";
-
-            return (
-              <motion.a
-                key={mod.title}
-                href={mod.href}
-                {...staggerItem(i)}
-                className={`group glass-card rounded-2xl p-6 hover:!bg-white/[0.08] transition-all duration-300 ${glowClass}`}
-              >
-                <div className={`flex items-center justify-center size-10 rounded-xl mb-4 ${iconColor} group-hover:scale-110 transition-transform`}>
-                  <Icon className="size-5" />
-                </div>
-                <h3 className="text-base font-semibold text-white mb-2">{mod.title}</h3>
-                <p className="text-xs text-white/40 leading-relaxed">{mod.desc}</p>
-              </motion.a>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  AI SECTION
-// ═══════════════════════════════════════════════════════════════════════════
-
-function AISection() {
-  return (
-    <section className="relative py-28 overflow-hidden gradient-ai border-t border-white/5">
-      <div className="orb orb-1 top-0 right-0" />
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div {...fadeInUp}>
-            <div className="section-tag mb-3">AI Infrastructure</div>
-            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
-              Deploy & manage
-              <br />
-              <span className="text-gradient-emerald">AI agents</span>
-              <br />
-              on Solana
-            </h2>
-            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
-              Autonomous agents with wallets, on-chain memory, MCP tools, and LangGraph orchestration.
-              Build trading bots, content agents, or community managers in minutes.
-            </p>
-            <div className="space-y-4 mb-10">
-              {[
-                "Agent wallet with private key management",
-                "On-chain memory & state persistence",
-                "MCP tool integration & LangGraph workflows",
-                "Autonomous trading & DeFi operations",
-              ].map((feature, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className="flex items-center justify-center size-5 rounded-full bg-emerald-500/10 mt-0.5 shrink-0">
-                    <Zap className="size-3 text-emerald-400" />
-                  </div>
-                  <span className="text-sm text-white/60">{feature}</span>
-                </div>
-              ))}
-            </div>
-            <a
-              href="/ai"
-              className="group inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium hover:bg-emerald-500/20 transition-all"
-            >
-              Explore AI Agents
-              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative"
-          >
-            <div className="glass-card rounded-2xl p-6 glow-cyan">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
-                <div className="flex items-center justify-center size-8 rounded-lg bg-cyan-500/10">
-                  <Bot className="size-4 text-cyan-400" />
-                </div>
-                <div>
-                  <div className="text-sm font-semibold text-white">TipChain AI</div>
-                  <div className="text-xs text-white/30">v2.0 — Online</div>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="pulse-dot" />
-                  <span className="text-[10px] text-emerald-400">Active</span>
-                </div>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { role: "agent", msg: "Analyzing portfolio risk exposure..." },
-                  { role: "agent", msg: "Found 3 arbitrage opportunities on Orca." },
-                  { role: "user", msg: "Execute if profit > 2%" },
-                  { role: "agent", msg: "✅ Executed. Profit: 2.4% in 12s." },
-                ].map((item, i) => (
-                  <div
-                    key={i}
-                    className={`flex items-start gap-3 ${item.role === "user" ? "justify-end" : ""}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-xl px-4 py-2.5 text-xs ${
-                        item.role === "agent"
-                          ? "bg-white/5 text-white/70"
-                          : "bg-emerald-500/10 text-emerald-300"
-                      }`}
-                    >
-                      {item.msg}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2">
-                <span className="text-[10px] text-white/20">Type a message...</span>
-                <span className="ml-auto text-[10px] text-white/20">$TC token required</span>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  GAMEFI SECTION
-// ═══════════════════════════════════════════════════════════════════════════
-
-function GameFiSection() {
-  return (
-    <section className="relative py-28 overflow-hidden gradient-gamefi border-t border-white/5">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-            className="relative order-2 lg:order-1"
-          >
-            <div className="glass-card rounded-2xl p-6 glow-purple">
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Active Quests", value: "24" },
-                  { label: "XP Earned", value: "128,450" },
-                  { label: "Rewards Pool", value: "5,000 $TC" },
-                  { label: "Players", value: "3,247" },
-                ].map((stat) => (
-                  <div key={stat.label} className="glass rounded-xl p-4 text-center">
-                    <div className="text-xl font-bold text-white">{stat.value}</div>
-                    <div className="text-[10px] text-white/30 mt-1 uppercase tracking-wider">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4 space-y-2">
-                {[
-                  { quest: "Daily Compass", xp: 250, progress: 80 },
-                  { quest: "Liquidity Provider", xp: 500, progress: 45 },
-                  { quest: "Agent Deployer", xp: 1000, progress: 20 },
-                ].map((q) => (
-                  <div key={q.quest} className="glass rounded-xl p-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-white/70 font-medium">{q.quest}</span>
-                      <span className="text-[10px] text-emerald-400">+{q.xp} XP</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
-                        style={{ width: `${q.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div {...fadeInUp} className="order-1 lg:order-2">
-            <div className="section-tag mb-3">GameFi</div>
-            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
-              Play, earn, and
-              <br />
-              <span className="text-gradient-emerald">level up</span>
-              <br />
-              on Solana
-            </h2>
-            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
-              Gamified quest system with XP, skill trees, achievement badges, and reward pools.
-              Complete challenges, earn rewards, and climb the leaderboard.
-            </p>
-            <a
-              href="/quests"
-              className="group inline-flex items-center gap-2 h-10 px-5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 text-sm font-medium hover:bg-purple-500/20 transition-all"
-            >
-              View Quests
-              <ChevronRight className="size-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  DEFI SECTION
-// ═══════════════════════════════════════════════════════════════════════════
-
-function DeFiSection() {
-  return (
-    <section className="relative py-28 overflow-hidden gradient-defi border-t border-white/5">
-      <div className="orb orb-2 -bottom-40 -left-40" />
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          <motion.div {...fadeInUp}>
-            <div className="section-tag mb-3">DeFi Hub</div>
-            <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
-              Full-spectrum
-              <br />
-              <span className="text-gradient-emerald">DeFi operations</span>
-              <br />
-              integrated
-            </h2>
-            <p className="text-sm text-white/40 leading-relaxed mb-8 max-w-md">
-              Stake, swap, lend, and yield farm across Solana. Aggregated liquidity, MEV protection,
-              and cross-protocol portfolio management.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {["Staking", "Swaps", "Lending", "Yield", "LP Positions"].map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1.5 text-xs rounded-lg bg-white/5 text-white/50 border border-white/5"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
-          >
-            <div className="glass-card rounded-2xl p-6 glow-green">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-sm font-semibold text-white">Portfolio Overview</h3>
-                <span className="text-[10px] text-emerald-400">+12.4% this week</span>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { asset: "SOL", balance: "145.8", value: "$24,367", change: "+5.2%" },
-                  { asset: "USDC", balance: "12,450.0", value: "$12,450", change: "0.0%" },
-                  { asset: "$TC", balance: "8,320.0", value: "$4,992", change: "+18.7%" },
-                  { asset: "EPT", balance: "1,240.0", value: "$3,720", change: "-2.1%" },
-                ].map((row) => (
-                  <div key={row.asset} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center justify-center size-8 rounded-lg bg-white/5 text-xs font-bold text-white/70">
-                        {row.asset.charAt(0)}
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-white">{row.asset}</div>
-                        <div className="text-xs text-white/30">{row.balance}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-white">{row.value}</div>
-                      <div className={`text-xs ${row.change.startsWith("+") ? "text-emerald-400" : row.change === "0.0%" ? "text-white/30" : "text-red-400"}`}>
-                        {row.change}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  MARKETPLACE
-// ═══════════════════════════════════════════════════════════════════════════
-
-function MarketplaceSection() {
-  const items = [
-    { title: "AI Trading Bot", price: "500 $TC", sales: 234, tag: "Agent" },
-    { title: "Quest Template Pack", price: "100 $TC", sales: 892, tag: "Template" },
-    { title: "Soulbound Badge", price: "50 $TC", sales: 1247, tag: "NFT" },
-    { title: "Analytics Dashboard", price: "Free", sales: 3412, tag: "Tool" },
-  ];
-
-  return (
-    <section className="relative py-28 overflow-hidden border-t border-white/5">
-      <div className="absolute inset-0 grid-backdrop opacity-20" />
-      <div className="relative z-10 mx-auto max-w-7xl px-6">
-        <motion.div {...fadeInUp}>
-          <div className="section-tag mb-3">Marketplace</div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
-            Discover & trade
-            <br />
-            <span className="text-gradient-emerald">ecosystem assets</span>
-          </h2>
-          <p className="max-w-lg text-sm text-white/30 mb-16">
-            Agent templates, NFTs, tools, and modules. Build, sell, and buy in the TipChain marketplace.
-          </p>
-        </motion.div>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {items.map((item, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 lg:grid-flow-dense gap-4">
+          {BENTO.map((card, i) => (
             <motion.a
-              key={item.title}
-              href="/marketplace"
-              {...staggerItem(i)}
-              className="group glass-card rounded-2xl p-5 hover:!bg-white/[0.08] transition-all"
+              key={card.title}
+              href={
+                card.title === "TipPoints"
+                  ? "/points"
+                  : card.title === "Creator vaults"
+                    ? "/vaults"
+                    : card.title === "Referrals that pay"
+                      ? "/referrals"
+                      : card.title === "A real community"
+                        ? "/creators"
+                        : card.title === "Verifiable, always"
+                          ? "/leaderboard"
+                          : "/creators"
+              }
+              {...stagger}
+              transition={{
+                ...stagger.transition,
+                delay: i * 0.05,
+              }}
+              className={`group relative overflow-hidden rounded-3xl border border-white/5 bg-gradient-to-br ${card.gradient} bg-white/[0.02] p-6 md:p-8 transition-all duration-500 hover:border-emerald-500/25 hover:bg-white/[0.04] ${card.span}`}
             >
-              <div className="flex items-center justify-center h-28 rounded-xl bg-white/[0.02] mb-4 border border-white/5 group-hover:border-white/10 transition-colors">
-                <div className="text-3xl">
-                  {item.tag === "Agent" ? "🤖" : item.tag === "Template" ? "📦" : item.tag === "NFT" ? "🏅" : "📊"}
+              <div className="absolute inset-0 overflow-hidden">
+                <img
+                  src={card.image}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-25 grayscale contrast-125 group-hover:opacity-40 group-hover:grayscale-0 transition-all duration-700 ease-out group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent" />
+              </div>
+
+              <div className="relative z-10 flex h-full min-h-[14rem] flex-col justify-end">
+                <div className={`mb-4 flex items-center justify-center size-10 rounded-xl ${card.iconColor} group-hover:scale-110 transition-transform`}>
+                  <card.icon className="size-5" />
                 </div>
-              </div>
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-sm font-semibold text-white">{item.title}</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
-                  {item.tag}
+                <h3 className="text-lg md:text-2xl font-semibold text-white mb-2 tracking-tight">
+                  {card.title}
+                </h3>
+                <p className="text-xs md:text-sm text-white/45 leading-relaxed max-w-md">
+                  {card.desc}
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-emerald-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                  Explore <ArrowRight className="size-3" />
                 </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-emerald-400">{item.price}</span>
-                <span className="text-[10px] text-white/30">{item.sales} sales</span>
               </div>
             </motion.a>
           ))}
@@ -565,259 +325,222 @@ function MarketplaceSection() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ROADMAP
+//  DESIRE — Pinned section: sticky title + scrolling proof gallery
 // ═══════════════════════════════════════════════════════════════════════════
 
-function RoadmapSection() {
-  const phases = [
-    {
-      phase: "Phase 1",
-      title: "Infrastructure",
-      status: "Live",
-      items: ["Wallet & Identity", "Creator Profiles", "Tip Engine"],
-      color: "emerald",
-    },
-    {
-      phase: "Phase 2",
-      title: "AI",
-      status: "In Progress",
-      items: ["AI Agent Marketplace", "LangGraph Integration", "MCP Tools"],
-      color: "cyan",
-    },
-    {
-      phase: "Phase 3",
-      title: "GameFi",
-      status: "Coming Soon",
-      items: ["Quest Engine", "XP & Badges", "Reward Pools"],
-      color: "purple",
-    },
-    {
-      phase: "Phase 4",
-      title: "DeFi",
-      status: "Planned",
-      items: ["Staking Pool", "DEX Aggregator", "Yield Strategies"],
-      color: "emerald",
-    },
-    {
-      phase: "Phase 5",
-      title: "Platform SDK",
-      status: "Planned",
-      items: ["TypeScript SDK", "React Hooks", "CLI Tools"],
-      color: "cyan",
-    },
-  ];
+const PROOF_ITEMS = [
+  { icon: TrendingUp, title: "Live leaderboards", body: "See who shows up most — in SOL and in TipPoints — updated from real transactions." },
+  { icon: Bot, title: "AI that helps, not sells", body: "A creator assistant that drafts messages and helps you grow, without hype." },
+  { icon: Gamepad2, title: "Quests worth doing", body: "Small, human challenges that reward real behaviour — not empty grinding." },
+  { icon: Sparkles, title: "Moments that matter", body: "Milestones, badges and warm signals that celebrate every level of support." },
+];
+
+function ProofCard({
+  item,
+  index,
+  total,
+  scrollYProgress,
+}: {
+  item: (typeof PROOF_ITEMS)[number];
+  index: number;
+  total: number;
+  scrollYProgress: MotionValue<number>;
+}) {
+  const start = index / total;
+  const end = (index + 1) / total;
+  const scale = useTransform(scrollYProgress, [start, end], [0.82, 1]);
+  const opacity = useTransform(scrollYProgress, [start, end], [0.25, 1]);
 
   return (
-    <section className="relative py-28 overflow-hidden border-t border-white/5">
-      <div className="mx-auto max-w-7xl px-6">
-        <motion.div {...fadeInUp}>
-          <div className="section-tag mb-3">Roadmap</div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-4">
-            Building the future
-            <br />
-            <span className="text-gradient-emerald">phase by phase</span>
-          </h2>
-          <p className="max-w-lg text-sm text-white/30 mb-16">
-            Our development roadmap spans infrastructure through full platform SDK.
-          </p>
-        </motion.div>
-
-        <div className="grid md:grid-cols-5 gap-4">
-          {phases.map((phase, i) => {
-            const borderColor =
-              phase.color === "emerald"
-                ? "border-emerald-500/30"
-                : phase.color === "cyan"
-                ? "border-cyan-500/30"
-                : "border-purple-500/30";
-            const statusColor =
-              phase.status === "Live"
-                ? "text-emerald-400"
-                : phase.status === "In Progress"
-                ? "text-cyan-400"
-                : "text-white/30";
-
-            return (
-              <motion.div
-                key={phase.phase}
-                {...staggerItem(i)}
-                className={`glass-card rounded-2xl p-5 ${borderColor} border`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">
-                    {phase.phase}
-                  </span>
-                  <span className={`text-[10px] font-medium ${statusColor}`}>{phase.status}</span>
-                </div>
-                <h3 className="text-base font-semibold text-white mb-3">{phase.title}</h3>
-                <ul className="space-y-2">
-                  {phase.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs text-white/40">
-                      <div className="size-1 rounded-full bg-white/20" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            );
-          })}
+    <motion.div
+      style={{ scale, opacity }}
+      className="group rounded-3xl border border-white/8 bg-white/[0.03] p-7 backdrop-blur-sm hover:border-emerald-500/25 transition-colors duration-300"
+    >
+      <div className="flex items-start gap-4">
+        <div className="flex items-center justify-center size-11 rounded-2xl bg-emerald-500/10 text-emerald-400 shrink-0">
+          <item.icon className="size-5" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-1.5">{item.title}</h3>
+          <p className="text-sm text-white/45 leading-relaxed">{item.body}</p>
         </div>
       </div>
-    </section>
+    </motion.div>
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════
-//  CTA — Final
-// ═══════════════════════════════════════════════════════════════════════════
+function ProofGallery() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end end"],
+  });
 
-function CTASection() {
   return (
-    <section className="relative py-32 overflow-hidden border-t border-white/5 gradient-hero">
-      <div className="orb orb-1 -top-60 -right-60" />
-      <div className="orb orb-2 -bottom-60 -left-60" />
-      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
-        <motion.div {...fadeInUp}>
-          <div className="section-tag mb-4 justify-center before:!bg-emerald-500">
-            Get Started
-          </div>
-          <h2 className="text-4xl sm:text-5xl font-bold tracking-[-0.03em] text-white mb-6">
-            Ready to build on
-            <br />
-            <span className="text-gradient-emerald">TipChain?</span>
-          </h2>
-          <p className="text-sm text-white/30 max-w-lg mx-auto mb-10">
-            Connect your wallet, create your profile, and start exploring the TipChain ecosystem.
-            AI agents, quests, DeFi — all in one place.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/dashboard"
-              className="group inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl bg-emerald-500 text-black text-sm font-semibold hover:bg-emerald-400 transition-all shadow-lg shadow-emerald-500/25"
+    <section ref={ref} className="section-chapter relative overflow-hidden">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12">
+          {/* Sticky title */}
+          <div className="lg:sticky lg:top-28 lg:self-start">
+            <motion.h2
+              style={{ opacity: scrollYProgress }}
+              className="text-4xl md:text-5xl font-bold tracking-[-0.03em] text-white leading-[1.05] mb-5"
             >
-              Launch Dashboard
-              <ArrowRight className="size-4 group-hover:translate-x-0.5 transition-transform" />
-            </a>
-            <a
-              href="/creators"
-              className="group inline-flex items-center justify-center gap-2 h-12 px-8 rounded-xl glass-card text-white/60 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
-            >
-              <Users className="size-4" />
-              Explore Creators
-            </a>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  FOOTER
-// ═══════════════════════════════════════════════════════════════════════════
-
-const WHITEPAPER_URL =
-  "https://docs.google.com/document/d/1Q1NoKZlZSb_xE7pHY9kbPaliufmySOONzFl1cVZ95iI/edit?usp=sharing";
-
-function Footer() {
-  return (
-    <footer className="relative gradient-footer border-t border-white/5">
-      <div className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2.5 mb-4">
-              <span className="flex items-center justify-center size-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
-                T
-              </span>
-              <span className="text-sm font-semibold text-white" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
-                TipChain
-              </span>
-            </div>
-            <p className="text-xs text-white/30 leading-relaxed max-w-xs">
-              AI-native GameFi & DeFi infrastructure platform on Solana. Build, earn, and govern.
+              Built on{" "}
+              <span className="text-gradient-emerald">proof</span>,
+              <br />
+              <span className="serif-accent text-white/80">not promises</span>
+            </motion.h2>
+            <p className="text-sm text-white/40 leading-relaxed max-w-sm">
+              Every feature is a transaction waiting to happen. Scroll through
+              what TipChain actually does — then go do it.
             </p>
           </div>
 
-          {/* Platform */}
-          <div>
-            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Platform</h4>
-            <div className="space-y-2.5">
-              {["AI Agents", "Quests", "DeFi Hub", "Marketplace", "Governance"].map((link) => (
-                <a
-                  key={link}
-                  href={`/${link.toLowerCase().replace(/\s+/g, "")}`}
-                  className="block text-xs text-white/30 hover:text-white/60 transition-colors"
-                >
-                  {link}
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Developers */}
-          <div>
-            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Developers</h4>
-            <div className="space-y-2.5">
-              <a href="/docs/sdk" className="block text-xs text-white/30 hover:text-white/60 transition-colors">SDK</a>
-              <a href="/docs/api-reference" className="block text-xs text-white/30 hover:text-white/60 transition-colors">API Reference</a>
-              <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">Whitepaper</a>
-              <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">GitHub</a>
-            </div>
-          </div>
-
-          {/* Network */}
-          <div>
-            <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Network</h4>
-            <div className="space-y-2.5">
-              <div className="flex items-center gap-2 text-xs text-white/30">
-                <span className="pulse-dot" />
-                Solana Devnet
-              </div>
-              <div className="flex items-center gap-2 text-xs text-white/30">
-                <span className="inline-block size-1.5 rounded-full bg-cyan-400/50" />
-                Helius RPC
-              </div>
-              <div className="flex items-center gap-2 text-xs text-white/30">
-                <span className="inline-block size-1.5 rounded-full bg-emerald-400/50" />
-                Status: Operational
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom */}
-        <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-[10px] text-white/20">
-            © 2026 TipChain. Built on Solana.
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-[10px] text-white/20">v2.0</span>
-            <span className="text-[10px] text-white/20">$TC</span>
-            <span className="text-[10px] text-white/20">Powered by Solana</span>
+          {/* Scrolling proof cards with scale/fade */}
+          <div className="space-y-5">
+            {PROOF_ITEMS.map((item, i) => (
+              <ProofCard
+                key={item.title}
+                item={item}
+                index={i}
+                total={PROOF_ITEMS.length}
+                scrollYProgress={scrollYProgress}
+              />
+            ))}
           </div>
         </div>
       </div>
-    </footer>
+    </section>
   );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  MAIN
+//  DESIRE — Scrubbed word reveal
+// ═══════════════════════════════════════════════════════════════════════════
+
+const REVEAL_TEXT =
+  "TipChain turns the act of tipping into a language of its own — every coin, every message, every shared vault says something real about the people you back and the economy you choose to build together.";
+
+const REVEAL_WORDS = REVEAL_TEXT.split(" ");
+
+function RevealWord({
+  word,
+  index,
+  total,
+  scrollYProgress,
+}: {
+  word: string;
+  index: number;
+  total: number;
+  scrollYProgress: MotionValue<number>;
+}) {
+  const start = index / total;
+  const end = (index + 1) / total;
+  const opacity = useTransform(scrollYProgress, [start, end], [0.08, 1]);
+  return (
+    <motion.span style={{ opacity }} className="inline-block mr-[0.28em]">
+      {word}
+    </motion.span>
+  );
+}
+
+function ScrubbedReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 0.85", "end 0.45"],
+  });
+
+  return (
+    <section ref={ref} className="section-chapter relative overflow-hidden border-t border-white/5">
+      <div className="orb orb-3 -top-40 left-1/2 -translate-x-1/2 opacity-40" />
+      <div className="relative mx-auto max-w-4xl px-6 text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="mb-10 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-400/80"
+        >
+          The TipChain philosophy
+        </motion.h2>
+        <p className="text-2xl md:text-4xl leading-snug font-medium text-white/90 tracking-tight" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
+          {REVEAL_WORDS.map((word, i) => (
+            <RevealWord
+              key={i}
+              word={word}
+              index={i}
+              total={REVEAL_WORDS.length}
+              scrollYProgress={scrollYProgress}
+            />
+          ))}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  ACTION — Final CTA
+// ═══════════════════════════════════════════════════════════════════════════
+
+function FinalCTA() {
+  return (
+    <section className="section-chapter relative overflow-hidden border-t border-white/5">
+      <div
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{
+          backgroundImage: "url(https://picsum.photos/seed/tipfinal/1920/600)",
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/70 to-[#0a0a0f]" />
+      <div className="orb orb-1 -bottom-60 left-1/4 opacity-50" />
+
+      <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
+        <motion.div {...fadeUp}>
+          <h2 className="text-4xl md:text-6xl font-bold tracking-[-0.03em] text-white leading-[1.05]">
+            Your next tip could be{" "}
+            <span className="serif-accent text-emerald-300">someone's day</span>
+          </h2>
+          <p className="mx-auto mt-6 max-w-lg text-sm md:text-base text-white/45 leading-relaxed">
+            Connect your wallet, pick a creator you believe in, and send the
+            first tip. It takes ten seconds and it means everything.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
+            <a
+              href="/creators"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-emerald-400 text-black text-sm font-semibold hover:bg-emerald-300 transition-all shadow-[0_0_40px_rgba(16,185,129,0.35)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)]"
+            >
+              Find a creator
+              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a
+              href="/dashboard"
+              className="group inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl glass-card text-white/80 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
+            >
+              Open dashboard
+            </a>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  MAIN — AIDA flow, footer lives in the root layout
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col">
-      <SplashSection />
-      <EcosystemSection />
-      <AISection />
-      <GameFiSection />
-      <DeFiSection />
-      <MarketplaceSection />
-      <RoadmapSection />
-      <CTASection />
-      <Footer />
-    </div>
+    <main className="overflow-x-hidden w-full max-w-full flex-1">
+      <Hero />
+      <Marquee />
+      <Bento />
+      <ProofGallery />
+      <ScrubbedReveal />
+      <FinalCTA />
+    </main>
   );
 }
