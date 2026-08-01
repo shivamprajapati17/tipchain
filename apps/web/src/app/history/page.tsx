@@ -1,0 +1,417 @@
+"use client";
+
+import { useWallet, useWalletSession } from "@solana/react-hooks";
+import {
+  History,
+  ArrowDownLeft,
+  ArrowUpRight,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
+  Filter,
+  Inbox,
+  Wallet,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { getTransactions, lamportsToSol } from "@/lib/api";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const TOKENS = ["ALL", "SOL", "USDC"];
+const DIRECTIONS = ["all", "sent", "received"];
+const DAYS = [
+  { key: "", label: "All" },
+  { key: "7", label: "7D" },
+  { key: "30", label: "30D" },
+  { key: "90", label: "90D" },
+];
+
+function truncateAddress(address: string) {
+  if (!address || address.length < 12) return address;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+function formatTime(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+// ─── Not Connected ──────────────────────────────────────────────────────────
+
+function NotConnected() {
+  return (
+    <div className="flex flex-1 items-center justify-center px-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center max-w-sm"
+      >
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
+          <History className="size-7 text-muted-foreground" />
+        </div>
+        <h1 className="mb-2 text-xl font-semibold">Tip History</h1>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Connect your wallet to browse every tip you&apos;ve sent and received
+          on TipChain, with filters by token, direction, and time.
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Use the wallet button in the top-right to connect.
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Main Page ──────────────────────────────────────────────────────────────
+
+export default function HistoryPage() {
+  const { status } = useWallet();
+  const session = useWalletSession();
+  const walletAddress = session?.account.address ?? "";
+
+  const [txs, setTxs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [token, setToken] = useState("ALL");
+  const [direction, setDirection] = useState("all");
+  const [days, setDays] = useState("");
+  const [limit, setLimit] = useState(25);
+
+  const fetchHistory = useCallback(async () => {
+    if (!walletAddress) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getTransactions(walletAddress, limit, {
+        token,
+        direction,
+        days,
+      });
+      setTxs(data.transactions);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load history");
+    } finally {
+      setLoading(false);
+    }
+  }, [walletAddress, token, direction, days, limit]);
+
+  useEffect(() => {
+    if (walletAddress) fetchHistory();
+    else setLoading(false);
+  }, [walletAddress, fetchHistory]);
+
+  if (status !== "connected" || !session) return <NotConnected />;
+
+  const totalSent = txs
+    .filter((t) => t.direction === "sent")
+    .reduce((s, t) => s + lamportsToSol(t.amount), 0);
+  const totalReceived = txs
+    .filter((t) => t.direction !== "sent")
+    .reduce((s, t) => s + lamportsToSol(t.amount), 0);
+
+  return (
+    <div className="flex-1 px-6 py-8">
+      {/* Gradient mesh */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <motion.div
+          className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
+          style={{
+            background:
+              "radial-gradient(circle at 30% 50%, oklch(0.55 0.13 250), transparent 70%)",
+            filter: "blur(80px)",
+          }}
+          animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+
+      <div className="mx-auto max-w-4xl relative">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6"
+        >
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="flex size-10 items-center justify-center rounded-xl bg-blue-500/10"
+              whileHover={{ scale: 1.1 }}
+            >
+              <History className="size-5 text-blue-500" />
+            </motion.div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">Tip History</h1>
+              <p className="text-sm text-muted-foreground">
+                Every tip you&apos;ve sent and received, on-chain
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 grid grid-cols-3 gap-3"
+        >
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-premium">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Sent
+            </p>
+            <p className="text-lg font-bold tracking-tight text-blue-500">
+              {totalSent.toFixed(2)} SOL
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-premium">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Received
+            </p>
+            <p className="text-lg font-bold tracking-tight text-emerald-500">
+              {totalReceived.toFixed(2)} SOL
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-premium">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+              Transactions
+            </p>
+            <p className="text-lg font-bold tracking-tight">{txs.length}</p>
+          </div>
+        </motion.div>
+
+        {/* Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 shadow-premium sm:flex-row sm:items-center"
+        >
+          <div className="flex items-center gap-1.5 text-muted-foreground">
+            <Filter className="size-3.5" />
+            <span className="text-xs font-medium">Filters</span>
+          </div>
+
+          {/* Token */}
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-background/50 p-1">
+            {TOKENS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setToken(t)}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  token === t
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* Direction */}
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-background/50 p-1">
+            {DIRECTIONS.map((d) => (
+              <button
+                key={d}
+                onClick={() => setDirection(d)}
+                className={`rounded-md px-3 py-1 text-xs font-medium capitalize transition-all ${
+                  direction === d
+                    ? "bg-blue-500/15 text-blue-600 dark:text-blue-400"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+
+          {/* Time */}
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-background/50 p-1">
+            {DAYS.map((d) => (
+              <button
+                key={d.label}
+                onClick={() => setDays(d.key)}
+                className={`rounded-md px-3 py-1 text-xs font-medium transition-all ${
+                  days === d.key
+                    ? "bg-amber-500/15 text-amber-600 dark:text-amber-400"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="ml-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 rounded-xl text-xs"
+              onClick={fetchHistory}
+              disabled={loading}
+            >
+              {loading ? (
+                <Loader2 className="size-3 animate-spin" />
+              ) : (
+                <RefreshCw className="size-3" />
+              )}
+              Refresh
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Error */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 flex items-center gap-2 rounded-xl bg-destructive/10 px-4 py-3 text-xs text-destructive"
+          >
+            <AlertCircle className="size-3.5 shrink-0" />
+            {error}
+            <button
+              onClick={fetchHistory}
+              className="ml-auto underline hover:no-underline"
+            >
+              Retry
+            </button>
+          </motion.div>
+        )}
+
+        {/* Transaction list */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-2xl border border-border bg-card shadow-premium"
+        >
+          <div className="border-b border-border px-5 py-4">
+            <h2 className="text-sm font-semibold">Transactions</h2>
+          </div>
+
+          {loading ? (
+            <div className="space-y-2 p-4">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="h-14 rounded-xl bg-muted/30 shimmer"
+                />
+              ))}
+            </div>
+          ) : txs.length > 0 ? (
+            <div className="divide-y divide-border/50">
+              <AnimatePresence initial={false}>
+                {txs.map((tx) => {
+                  const isSent = tx.direction === "sent";
+                  return (
+                    <motion.div
+                      key={tx.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center gap-4 px-5 py-3.5 hover:bg-muted/20 transition-colors"
+                    >
+                      <div
+                        className={`flex size-9 shrink-0 items-center justify-center rounded-xl border ${
+                          isSent
+                            ? "border-blue-500/20 bg-blue-500/10 text-blue-500"
+                            : "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                        }`}
+                      >
+                        {isSent ? (
+                          <ArrowUpRight className="size-4" />
+                        ) : (
+                          <ArrowDownLeft className="size-4" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">
+                          {isSent ? "Sent tip to" : "Received tip from"}{" "}
+                          <span className="font-mono text-xs">
+                            {truncateAddress(
+                              isSent ? tx.receiverWallet : tx.senderWallet
+                            )}
+                          </span>
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {formatTime(tx.timestamp)} · {tx.token}
+                          {tx.message ? ` · "${tx.message}"` : ""}
+                        </p>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <p
+                          className={`text-sm font-bold ${
+                            isSent ? "text-blue-500" : "text-emerald-500"
+                          }`}
+                        >
+                          {isSent ? "−" : "+"}
+                          {lamportsToSol(tx.amount).toFixed(4)} {tx.token}
+                        </p>
+                        {tx.txHash && (
+                          <a
+                            href={`https://solscan.io/tx/${tx.txHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] text-muted-foreground/50 hover:text-emerald-500 transition-colors"
+                          >
+                            View on Solscan →
+                          </a>
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <div className="px-5 py-14 text-center">
+              <Inbox className="mx-auto mb-3 size-6 text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">
+                No transactions match these filters.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground/60">
+                Try widening the time range or clearing filters.
+              </p>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Load more */}
+        {txs.length >= limit && !loading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-4 text-center"
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 rounded-xl text-xs"
+              onClick={() => setLimit((l) => l + 25)}
+            >
+              Load More
+            </Button>
+          </motion.div>
+        )}
+
+        {/* Wallet hint */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-6 flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 shadow-premium"
+        >
+          <Wallet className="size-4 text-muted-foreground" />
+          <p className="text-xs text-muted-foreground">
+            Showing history for{" "}
+            <code className="font-mono">{truncateAddress(walletAddress)}</code>
+          </p>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

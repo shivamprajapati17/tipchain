@@ -12,6 +12,8 @@ import socialRoutes from "./social.routes";
 import apiKeyRoutes from "./apiKey.routes";
 import blinksRoutes from "./blinks.routes";
 import jupiterRoutes from "./jupiter.routes";
+import pointsRoutes from "./points.routes";
+import vaultRoutes from "./vault.routes";
 
 const router = Router();
 
@@ -28,6 +30,8 @@ router.use(socialRoutes);
 router.use(apiKeyRoutes);
 router.use(blinksRoutes);
 router.use(jupiterRoutes);
+router.use(pointsRoutes);
+router.use(vaultRoutes);
 
 // Phase 7-8 routes
 import daoRoutes from "./dao.routes";

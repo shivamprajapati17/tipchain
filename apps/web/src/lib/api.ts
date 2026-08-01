@@ -87,6 +87,44 @@ export type LeaderboardEntry = {
   tipCount: number;
 };
 
+export type PointsEntry = {
+  rank: number;
+  walletAddress: string;
+  points: number;
+  tipCount: number;
+  sentPoints: number;
+  receivedPoints: number;
+  tier: string;
+};
+
+export type WalletPoints = {
+  wallet: string;
+  points: number;
+  sentPoints: number;
+  receivedPoints: number;
+  tipCount: number;
+  rank: number | null;
+  tier: string;
+  nextTier: string | null;
+};
+
+export type VaultResponse = {
+  id: string;
+  name: string;
+  description: string;
+  ownerWallet: string;
+  imageUrl: string | null;
+  category: string | null;
+  creatorWallets: string[];
+  allocations: number[];
+  totalTipped: string;
+  supporterCount: number;
+  tipCount: number;
+  isActive: boolean;
+  createdAt: string;
+  supporters?: { walletAddress: string; totalTipped: string; tipCount: number }[];
+};
+
 export type BadgeResponse = {
   id: string;
   name: string;
@@ -216,11 +254,23 @@ export async function updateCreator(
 
 // ─── Transactions ───────────────────────────────────────────────────────────
 
-export async function getTransactions(wallet?: string, limit = 20) {
+export async function getTransactions(
+  wallet?: string,
+  limit = 20,
+  filters?: { token?: string; direction?: string; days?: string }
+) {
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (filters?.token && filters.token !== "ALL") query.set("token", filters.token);
+  if (filters?.direction && filters.direction !== "all") query.set("direction", filters.direction);
+  if (filters?.days) query.set("days", filters.days);
   const path = wallet
-    ? `/transactions/${wallet}?limit=${limit}`
-    : `/transactions?limit=${limit}`;
-  return fetchJSON<{ transactions: TransactionResponse[]; wallet?: string }>(path);
+    ? `/transactions/${wallet}?${query}`
+    : `/transactions?${query}`;
+  return fetchJSON<{
+    transactions: TransactionResponse[];
+    wallet?: string;
+    pagination?: { page: number; limit: number; total: number; totalPages: number };
+  }>(path);
 }
 
 export async function recordTransaction(data: {
@@ -239,8 +289,92 @@ export async function recordTransaction(data: {
 
 // ─── Leaderboard ────────────────────────────────────────────────────────────
 
-export async function getLeaderboard(limit = 25) {
-  return fetchJSON<{ leaderboard: LeaderboardEntry[] }>(`/leaderboard?limit=${limit}`);
+export async function getLeaderboard(
+  limit = 25,
+  filters?: { period?: string; token?: string }
+) {
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (filters?.period) query.set("period", filters.period);
+  if (filters?.token) query.set("token", filters.token);
+  return fetchJSON<{ leaderboard: LeaderboardEntry[] }>(`/leaderboard?${query}`);
+}
+
+// ─── TipPoints ──────────────────────────────────────────────────────────────
+
+export async function getPointsLeaderboard(
+  limit = 25,
+  period = "all",
+  token?: string
+) {
+  const query = new URLSearchParams({ limit: String(limit), period });
+  if (token && token !== "ALL") query.set("token", token);
+  return fetchJSON<{ leaderboard: PointsEntry[]; period: string }>(
+    `/points/leaderboard?${query}`
+  );
+}
+
+export async function getWalletPoints(wallet: string, period = "all") {
+  return fetchJSON<WalletPoints>(`/points/${wallet}?period=${period}`);
+}
+
+// ─── Vaults (copy-tipping) ─────────────────────────────────────────────────
+
+export async function getVaults(limit = 24, offset = 0) {
+  return fetchJSON<{
+    vaults: VaultResponse[];
+    pagination: { limit: number; offset: number; total: number };
+  }>(`/vaults?limit=${limit}&offset=${offset}`);
+}
+
+export async function getVault(id: string) {
+  return fetchJSON<VaultResponse>(`/vaults/${id}`);
+}
+
+export async function createVault(data: {
+  name: string;
+  description?: string;
+  ownerWallet: string;
+  creatorWallets: string[];
+  allocations?: number[];
+  imageUrl?: string;
+  category?: string;
+}) {
+  return fetchJSON<VaultResponse>("/vaults", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateVault(id: string, data: Record<string, unknown>) {
+  return fetchJSON<VaultResponse>(`/vaults/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteVault(id: string, ownerWallet?: string) {
+  return fetchJSON<{ success: boolean }>(`/vaults/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify({ ownerWallet }),
+  });
+}
+
+export async function supportVault(data: {
+  vaultId: string;
+  supporterWallet: string;
+  amount: number;
+  token?: string;
+  message?: string;
+}) {
+  return fetchJSON<{
+    success: boolean;
+    vaultId: string;
+    splits: { creatorWallet: string; amount: string }[];
+    vault: VaultResponse | null;
+  }>(`/vaults/${data.vaultId}/support`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 }
 
 // ─── Supporters ─────────────────────────────────────────────────────────────

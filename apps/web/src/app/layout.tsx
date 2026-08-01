@@ -38,7 +38,7 @@ export default function RootLayout({
           <header className="fixed top-0 right-0 left-0 z-50 flex justify-center">
             <nav
               className="mx-4 mt-3 glass-card rounded-2xl"
-              style={{ maxWidth: "min(90vw, 800px)", minWidth: "320px" }}
+              style={{ maxWidth: "min(94vw, 1020px)", minWidth: "320px" }}
             >
               <div className="flex h-11 items-center justify-between px-4">
                 {/* Logo */}
@@ -70,6 +70,18 @@ export default function RootLayout({
                   </a>
                   <a href="/leaderboard" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
                     Leaderboard
+                  </a>
+                  <a href="/points" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                    Points
+                  </a>
+                  <a href="/vaults" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                    Vaults
+                  </a>
+                  <a href="/referrals" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                    Referrals
+                  </a>
+                  <a href="/history" className="px-3 py-1.5 text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 rounded-lg transition-all">
+                    History
                   </a>
                   <a href="/dashboard" className="px-3 py-1.5 text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg transition-all flex items-center gap-1.5">
                     <Layers className="size-3.5" /> Dashboard

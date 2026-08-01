@@ -29,9 +29,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   getCreatorByWallet,
   getTransactions,
+  getWalletPoints,
   lamportsToSol,
   type TransactionResponse,
   type SupporterResponse,
+  type WalletPoints,
 } from "@/lib/api";
 import { RevenueChart } from "@/components/charts/RevenueChart";
 import { TipAnalyticsChart } from "@/components/charts/TipAnalyticsChart";
@@ -242,6 +244,112 @@ const WideDataStream = memo(function WideDataStream({
             </motion.div>
           ))}
         </motion.div>
+      </div>
+    </div>
+  );
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  TIPPOINTS CARD (Hyperliquid-inspired points program)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const TierBadge = memo(function TierBadge({ tier }: { tier: string }) {
+  const styles: Record<string, string> = {
+    Bronze: "border-amber-700/40 bg-amber-700/15 text-amber-400",
+    Silver: "border-zinc-400/40 bg-zinc-400/15 text-zinc-300",
+    Gold: "border-yellow-500/40 bg-yellow-500/15 text-yellow-300",
+    Platinum: "border-cyan-400/40 bg-cyan-500/15 text-cyan-300",
+    Hyper: "border-fuchsia-500/40 bg-fuchsia-500/15 text-fuchsia-300",
+  };
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${styles[tier] ?? "border-border bg-muted text-muted-foreground"}`}
+    >
+      {tier}
+    </span>
+  );
+});
+
+const TipPointsCard = memo(function TipPointsCard({
+  points,
+  loading,
+}: {
+  points: WalletPoints | null;
+  loading: boolean;
+}) {
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-premium">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          className="absolute -right-10 -top-10 size-40 rounded-full opacity-15"
+          style={{
+            background:
+              "radial-gradient(circle, oklch(0.55 0.2 300), transparent 70%)",
+            filter: "blur(30px)",
+          }}
+          animate={{ scale: [1, 1.3, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+      </div>
+      <div className="relative border-b border-border px-5 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex size-6 items-center justify-center rounded-lg bg-fuchsia-500/10">
+              <Sparkles className="size-3.5 text-fuchsia-500" />
+            </div>
+            <span className="text-xs font-semibold text-muted-foreground">
+              TipPoints
+            </span>
+          </div>
+          {!loading && points && points.rank !== null && (
+            <span className="text-[10px] font-medium text-muted-foreground">
+              Rank #{points.rank}
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="relative p-5">
+        {loading ? (
+          <div className="space-y-3">
+            <div className="h-7 w-28 rounded-md shimmer" />
+            <div className="h-4 w-40 rounded-md shimmer" />
+          </div>
+        ) : points ? (
+          <>
+            <div className="mb-2 flex items-end gap-2">
+              <p className="text-3xl font-bold tracking-tight text-fuchsia-400">
+                {points.points.toLocaleString()}
+              </p>
+              <span className="mb-1 text-xs text-muted-foreground">pts</span>
+            </div>
+            <div className="mb-4 flex items-center gap-2">
+              <TierBadge tier={points.tier} />
+              {points.nextTier && (
+                <span className="text-[10px] text-muted-foreground">
+                  Next: {points.nextTier}
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                <p className="text-xs font-semibold">
+                  {points.sentPoints.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-muted-foreground">Sent</p>
+              </div>
+              <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
+                <p className="text-xs font-semibold">
+                  {points.receivedPoints.toLocaleString()}
+                </p>
+                <p className="text-[10px] text-muted-foreground">Received</p>
+              </div>
+            </div>
+          </>
+        ) : (
+          <p className="text-xs text-muted-foreground">
+            No points yet — start tipping to earn TipPoints.
+          </p>
+        )}
       </div>
     </div>
   );
@@ -847,6 +955,8 @@ export default function DashboardPage() {
   const [recentTips, setRecentTips] = useState<TransactionResponse[]>([]);
   const [topSupporters, setTopSupporters] = useState<SupporterResponse[]>([]);
   const [profileExists, setProfileExists] = useState(false);
+  const [walletPoints, setWalletPoints] = useState<WalletPoints | null>(null);
+  const [pointsLoading, setPointsLoading] = useState(true);
 
   const fetchDashboard = useCallback(async () => {
     if (!walletAddress) return;
@@ -867,6 +977,16 @@ export default function DashboardPage() {
       setTopSupporters(creatorData.topSupporters.slice(0, 5));
       setRecentTips(creatorData.recentTransactions.slice(0, 5));
       setProfileExists(true);
+
+      // TipPoints (best-effort — non-critical)
+      try {
+        const pts = await getWalletPoints(walletAddress);
+        setWalletPoints(pts);
+      } catch {
+        setWalletPoints(null);
+      } finally {
+        setPointsLoading(false);
+      }
     } catch (err) {
       if (
         err instanceof Error &&
@@ -876,6 +996,8 @@ export default function DashboardPage() {
         setCreatorProfile(null);
         setRecentTips([]);
         setTopSupporters([]);
+        setWalletPoints(null);
+        setPointsLoading(false);
 
         try {
           const txData = await getTransactions(walletAddress, 5);
@@ -1004,6 +1126,16 @@ export default function DashboardPage() {
               balanceFetching={balanceFetching}
               loading={loading}
             />
+          </motion.div>
+
+          {/* ── TipPoints Card ────────────────────────────────────────────── */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 80, damping: 20, delay: 0.15 }}
+            className="mb-6"
+          >
+            <TipPointsCard points={walletPoints} loading={pointsLoading} />
           </motion.div>
 
           {/* ── Archetype 2 + 3: Bento Grid (70/30 split) ──────────────────── */}

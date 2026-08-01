@@ -1,11 +1,17 @@
-version: "3.8"
-
 # ─── TipChain — Docker Compose ─────────────────────────────────────────────
-# Full-stack deployment with PostgreSQL, Redis, backend API, and frontend.
+# Full-stack production deployment with PostgreSQL, Redis, backend, frontend,
+# and n8n for AI automation.
 #
-# Usage:
+# Quick start:
 #   docker compose up -d
 #   docker compose logs -f
+#
+# Production:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Stop:
+#   docker compose down
+#   docker compose down -v  # ⚠️ Deletes volumes (DB data!)
 
 services:
   # ── Database ──────────────────────────────────────────────────────────────
@@ -26,8 +32,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - tipchain-net
 
-  # ── Cache ─────────────────────────────────────────────────────────────────
+  # ── Cache & Queue ─────────────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
     container_name: tipchain-redis
@@ -41,62 +49,117 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - tipchain-net
 
   # ── Backend API ───────────────────────────────────────────────────────────
   backend:
     build:
-      context: ../backend
-      dockerfile: ../docker/Dockerfile.backend
+      context: ..
+      dockerfile: docker/Dockerfile.backend
     container_name: tipchain-backend
     restart: unless-stopped
     ports:
       - "4000:4000"
     environment:
+      NODE_ENV: production
+      PORT: 4000
       DATABASE_URL: "postgresql://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/tipchain?schema=public"
       REDIS_URL: "redis://redis:6379"
-      PORT: 4000
       FRONTEND_URL: "http://localhost:3000"
       SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
       SOLANA_NETWORK: ${SOLANA_NETWORK:-devnet}
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret}
+      RATE_LIMIT_WINDOW_MS: "60000"
+      RATE_LIMIT_MAX_REQUESTS: "100"
+      DEFAULT_PAGE_SIZE: "20"
+      MAX_PAGE_SIZE: "100"
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+    networks:
+      - tipchain-net
+    volumes:
+      - backend_logs:/app/logs
 
   # ── Frontend ──────────────────────────────────────────────────────────────
   frontend:
     build:
-      context: ../apps/web
-      dockerfile: ../../docker/Dockerfile.frontend
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
     container_name: tipchain-frontend
     restart: unless-stopped
     ports:
       - "3000:3000"
     environment:
+      NODE_ENV: production
       NEXT_PUBLIC_API_URL: "http://localhost:4000"
       NEXT_PUBLIC_SOLANA_NETWORK: ${SOLANA_NETWORK:-devnet}
       NEXT_PUBLIC_SOLANA_RPC: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
     depends_on:
       - backend
+    networks:
+      - tipchain-net
 
-  # ── Reverse Proxy (optional) ──────────────────────────────────────────────
-  # Uncomment for production with custom domain
-  # nginx:
-  #   image: nginx:alpine
-  #   container_name: tipchain-nginx
-  #   restart: unless-stopped
-  #   ports:
-  #     - "80:80"
-  #     - "443:443"
-  #   volumes:
-  #     - ./nginx.conf:/etc/nginx/nginx.conf
-  #     - ./ssl:/etc/nginx/ssl
-  #   depends_on:
-  #     - frontend
-  #     - backend
+  # ── n8n (AI Automation) ───────────────────────────────────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: tipchain-n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_HOST: localhost
+      N8N_METRICS: "false"
+      N8N_SKIP_WEBHOOK_DEREGISTRATION_SHUTDOWN: "true"
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678}
+      TIPCHAIN_API_URL: "http://backend:4000"
+      TIPCHAIN_API_KEY: ${TIPCHAIN_API_KEY:-}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      MONITORED_WALLET: ${MONITORED_WALLET:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@tipchain.dev}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows
+    depends_on:
+      - backend
+    networks:
+      - tipchain-net
+
+  # ── Reverse Proxy (Nginx) ─────────────────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: tipchain-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - frontend
+      - backend
+      - n8n
+    networks:
+      - tipchain-net
+
+networks:
+  tipchain-net:
+    driver: bridge
 
 volumes:
   postgres_data:
   redis_data:
+  n8n_data:
+  backend_logs:

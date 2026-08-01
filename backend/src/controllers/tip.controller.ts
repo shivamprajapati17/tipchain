@@ -17,17 +17,38 @@ export const sendSplTip = asyncHandler(async (req: Request, res: Response) => {
 export const getHistory = asyncHandler(async (req: Request, res: Response) => {
   const { page, limit } = extractPagination(req);
   const token = req.query.token as string | undefined;
+  const direction = req.query.direction as "sent" | "received" | undefined;
+  const days = req.query.days ? Number(req.query.days) : undefined;
   const startDate = req.query.startDate as string | undefined;
   const endDate = req.query.endDate as string | undefined;
 
-  const result = await tipService.getHistory({ page, limit, token, startDate, endDate });
+  const result = await tipService.getHistory({
+    page,
+    limit,
+    token,
+    direction,
+    days,
+    startDate,
+    endDate,
+  });
   sendSuccess(res, result);
 });
 
 export const getByWallet = asyncHandler(async (req: Request, res: Response) => {
   const wallet = req.params.wallet as string;
   const { page, limit } = extractPagination(req);
-  const result = await tipService.getHistory({ page, limit, wallet });
+  const token = req.query.token as string | undefined;
+  const direction = req.query.direction as "sent" | "received" | undefined;
+  const days = req.query.days ? Number(req.query.days) : undefined;
+
+  const result = await tipService.getHistory({
+    page,
+    limit,
+    wallet,
+    token,
+    direction,
+    days,
+  });
   sendSuccess(res, result);
 });
 
@@ -47,6 +68,8 @@ export const getBySupporter = asyncHandler(async (req: Request, res: Response) =
 
 export const getLeaderboard = asyncHandler(async (req: Request, res: Response) => {
   const limit = Math.min(Number(req.query.limit) || 25, 100);
-  const leaderboard = await tipService.getLeaderboard(limit);
-  sendSuccess(res, { leaderboard });
+  const period = (req.query.period as string) || "all";
+  const token = req.query.token as string | undefined;
+  const leaderboard = await tipService.getLeaderboard({ limit, period, token });
+  sendSuccess(res, { leaderboard, period });
 });

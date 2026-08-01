@@ -9,3 +9,5 @@ export * as socialController from "./social.controller";
 export * as badgeController from "./badge.controller";
 export * as referralController from "./referral.controller";
 export * as apiKeyController from "./apiKey.controller";
+export * as pointsController from "./points.controller";
+export * as vaultController from "./vault.controller";

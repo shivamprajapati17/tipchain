@@ -6,6 +6,9 @@ import logger from "../utils/logger";
 const REFERRALS_KEY = "_referrals";
 const USES_KEY = "_referral_uses";
 
+// Commission paid to the referrer as a % of the referred wallet's tips
+const COMMISSION_RATE = 0.1; // 10%
+
 interface ReferralCode {
   code: string;
   creatorWallet: string;
@@ -55,11 +58,48 @@ class ReferralService {
     if (!creator) throw new NotFoundError("Creator");
 
     const data = this.getStoredData(creator);
+
+    // Enrich each use with the referred wallet's tip total + computed commission
+    const referredWallets = data.uses
+      .map((u: ReferralUse) => u.wallet)
+      .filter((w: string | undefined): w is string => Boolean(w));
+
+    const tipTotals = new Map<string, bigint>();
+    const tipCounts = new Map<string, number>();
+    if (referredWallets.length > 0) {
+      const txs = await prisma.transaction.findMany({
+        where: { senderWallet: { in: referredWallets } },
+        select: { senderWallet: true, amount: true },
+      });
+      for (const tx of txs) {
+        tipTotals.set(tx.senderWallet, (tipTotals.get(tx.senderWallet) ?? BigInt(0)) + tx.amount);
+        tipCounts.set(tx.senderWallet, (tipCounts.get(tx.senderWallet) ?? 0) + 1);
+      }
+    }
+
+    const totalReferredTips = [...tipTotals.values()].reduce((a, b) => a + b, BigInt(0));
+    const totalCommission = (totalReferredTips * BigInt(Math.round(COMMISSION_RATE * 100))) / BigInt(100);
+
+    const enrichedUses = data.uses.map((u: ReferralUse) => ({
+      code: u.code,
+      wallet: u.wallet ?? null,
+      usedAt: u.usedAt,
+      tipped: u.wallet ? (tipTotals.get(u.wallet) ?? BigInt(0)).toString() : "0",
+      tipCount: u.wallet ? (tipCounts.get(u.wallet) ?? 0) : 0,
+      commission:
+        u.wallet && tipTotals.has(u.wallet)
+          ? ((tipTotals.get(u.wallet)! * BigInt(Math.round(COMMISSION_RATE * 100))) / BigInt(100)).toString()
+          : "0",
+    }));
+
     return {
       wallet,
       codes: data.codes,
       totalUses: data.uses.length,
-      uses: data.uses,
+      uses: enrichedUses,
+      commissionRate: COMMISSION_RATE,
+      totalReferredTips: totalReferredTips.toString(),
+      totalCommission: totalCommission.toString(),
     };
   }
 

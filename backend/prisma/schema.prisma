@@ -52,6 +52,41 @@ model Transaction {
   @@map("transactions")
 }
 
+model Vault {
+  id             String   @id @default(cuid())
+  name           String
+  description    String   @default("")
+  ownerWallet    String   @map("owner_wallet")
+  imageUrl       String?  @map("image_url")
+  category       String?
+  creatorWallets String   @default("[]") @map("creator_wallets") // JSON array
+  allocations    String   @default("[]") @map("allocations") // JSON array of weights
+  totalTipped    BigInt   @default(0) @map("total_tipped")
+  supporterCount Int      @default(0) @map("supporter_count")
+  tipCount       Int      @default(0) @map("tip_count")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  supporters     VaultSupporter[]
+
+  @@map("vaults")
+}
+
+model VaultSupporter {
+  id            String   @id @default(cuid())
+  vaultId       String   @map("vault_id")
+  walletAddress String   @map("wallet_address")
+  totalTipped   BigInt   @default(0) @map("total_tipped")
+  tipCount      Int      @default(0) @map("tip_count")
+  lastTipAt     DateTime @default(now()) @map("last_tip_at")
+
+  vault         Vault    @relation(fields: [vaultId], references: [id], onDelete: Cascade)
+
+  @@unique([vaultId, walletAddress])
+  @@map("vault_supporters")
+}
+
 model ApiKey {
   id            String   @id @default(cuid())
   creatorId     String   @map("creator_id")

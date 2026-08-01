@@ -7,14 +7,22 @@ import {
   Coins,
   Users,
   ArrowUpRight,
-  Loader2,
   AlertCircle,
   RefreshCw,
+  Zap,
+  Layers,
+  Filter,
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getLeaderboard, lamportsToSol, type LeaderboardEntry } from "@/lib/api";
+import {
+  getLeaderboard,
+  getPointsLeaderboard,
+  lamportsToSol,
+  type LeaderboardEntry,
+  type PointsEntry,
+} from "@/lib/api";
 
 // ─── Motion Variants ────────────────────────────────────────────────────────
 
@@ -35,14 +43,37 @@ const fadeSlideUp = {
   },
 } as const;
 
-const scaleIn = {
-  hidden: { opacity: 0, scale: 0.85 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { type: "spring" as const, stiffness: 150, damping: 18 },
-  },
-} as const;
+// ─── Constants ──────────────────────────────────────────────────────────────
+
+const PERIODS = [
+  { key: "all", label: "All Time" },
+  { key: "30d", label: "30D" },
+  { key: "7d", label: "7D" },
+] as const;
+
+const TOKENS = [
+  { key: "ALL", label: "All" },
+  { key: "SOL", label: "SOL" },
+  { key: "USDC", label: "USDC" },
+] as const;
+
+const TIER_STYLES: Record<string, string> = {
+  Bronze: "from-amber-700/40 to-amber-800/40 text-amber-300 border-amber-700/40",
+  Silver: "from-zinc-400/30 to-zinc-500/30 text-zinc-200 border-zinc-400/40",
+  Gold: "from-yellow-400/40 to-amber-500/40 text-yellow-300 border-yellow-500/40",
+  Platinum: "from-cyan-400/40 to-sky-500/40 text-cyan-200 border-cyan-400/40",
+  Hyper: "from-fuchsia-500/40 to-purple-600/40 text-fuchsia-300 border-fuchsia-500/40",
+};
+
+function TierBadge({ tier }: { tier: string }) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border bg-gradient-to-r px-2 py-0.5 text-[10px] font-semibold ${TIER_STYLES[tier] ?? "border-border bg-muted text-muted-foreground"}`}
+    >
+      {tier}
+    </span>
+  );
+}
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -95,7 +126,7 @@ function RankBadge({ rank }: { rank: number }) {
   );
 }
 
-// ─── Leaderboard Row ────────────────────────────────────────────────────────
+// ─── Leaderboard Row (SOL mode) ─────────────────────────────────────────────
 
 function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
   const totalSol = lamportsToSol(entry.totalTipped);
@@ -137,18 +168,160 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
         </p>
       </div>
 
-      <motion.div
-        className="text-right"
-        whileHover={{ scale: 1.05 }}
-      >
+      <motion.div className="text-right" whileHover={{ scale: 1.05 }}>
         <p
           className={`text-base font-bold tracking-tight ${
-            isTop3 ? "text-emerald-700" : ""
+            isTop3 ? "text-emerald-700 dark:text-emerald-400" : ""
           }`}
         >
           {totalSol.toFixed(2)} SOL
         </p>
       </motion.div>
+    </motion.div>
+  );
+}
+
+// ─── Points Row (TipPoints mode) ────────────────────────────────────────────
+
+function PointsRow({ entry }: { entry: PointsEntry }) {
+  const isTop3 = entry.rank <= 3;
+
+  return (
+    <motion.div
+      variants={fadeSlideUp}
+      layout
+      whileHover={{
+        x: 6,
+        transition: { type: "spring", stiffness: 300, damping: 20 },
+      }}
+      className={`group flex items-center gap-4 rounded-xl px-4 py-4 transition-all duration-500 ${
+        isTop3
+          ? "bg-gradient-to-r from-fuchsia-50/80 to-transparent dark:from-fuchsia-500/10 dark:to-transparent"
+          : "hover:bg-muted/20"
+      }`}
+    >
+      <RankBadge rank={entry.rank} />
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold">
+            {truncateAddress(entry.walletAddress)}
+          </span>
+          <a
+            href={`https://solscan.io/account/${entry.walletAddress}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-muted-foreground/50 hover:text-fuchsia-500 transition-colors duration-200"
+          >
+            <ArrowUpRight className="size-3.5" />
+          </a>
+          {isTop3 && <PulseDot />}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {entry.tipCount} {entry.tipCount === 1 ? "tip" : "tips"} · sent{" "}
+          {entry.sentPoints.toLocaleString()} · received{" "}
+          {entry.receivedPoints.toLocaleString()} pts
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <TierBadge tier={entry.tier} />
+        <motion.div className="text-right" whileHover={{ scale: 1.05 }}>
+          <p
+            className={`text-base font-bold tracking-tight flex items-center gap-1 ${
+              isTop3 ? "text-fuchsia-700 dark:text-fuchsia-400" : ""
+            }`}
+          >
+            <Zap className="size-3.5" />
+            {entry.points.toLocaleString()}
+          </p>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ─── Filter Bar ─────────────────────────────────────────────────────────────
+
+function FilterBar({
+  mode,
+  period,
+  token,
+  onModeChange,
+  onPeriodChange,
+  onTokenChange,
+}: {
+  mode: "sol" | "points";
+  period: string;
+  token: string;
+  onModeChange: (m: "sol" | "points") => void;
+  onPeriodChange: (p: string) => void;
+  onTokenChange: (t: string) => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      {/* Mode toggle */}
+      <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1">
+        <button
+          onClick={() => onModeChange("sol")}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            mode === "sol"
+              ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Coins className="size-3.5" /> SOL
+        </button>
+        <button
+          onClick={() => onModeChange("points")}
+          className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+            mode === "points"
+              ? "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <Zap className="size-3.5" /> TipPoints
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        {/* Period tabs */}
+        <div className="flex items-center gap-1 rounded-xl border border-border bg-card p-1">
+          {PERIODS.map((p) => (
+            <button
+              key={p.key}
+              onClick={() => onPeriodChange(p.key)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                period === p.key
+                  ? "bg-primary/15 text-emerald-600 dark:text-emerald-400"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Token filter */}
+        <div className="flex items-center gap-1.5">
+          <Filter className="size-3 text-muted-foreground/50" />
+          <select
+            value={token}
+            onChange={(e) => onTokenChange(e.target.value)}
+            className="rounded-xl border border-border bg-card px-3 py-2 text-xs text-muted-foreground outline-none focus:border-emerald-500/30 cursor-pointer"
+          >
+            {TOKENS.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -255,7 +428,11 @@ function EmptyState() {
 // ─── Main Page ──────────────────────────────────────────────────────────────
 
 export default function LeaderboardPage() {
+  const [mode, setMode] = useState<"sol" | "points">("sol");
+  const [period, setPeriod] = useState("all");
+  const [token, setToken] = useState("ALL");
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
+  const [pointsEntries, setPointsEntries] = useState<PointsEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -263,8 +440,13 @@ export default function LeaderboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getLeaderboard(25);
-      setEntries(data.leaderboard);
+      if (mode === "points") {
+        const data = await getPointsLeaderboard(25, period, token);
+        setPointsEntries(data.leaderboard);
+      } else {
+        const data = await getLeaderboard(25, { period, token });
+        setEntries(data.leaderboard);
+      }
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load leaderboard"
@@ -276,7 +458,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     fetchLeaderboard();
-  }, []);
+  }, [mode, period, token]);
 
   if (loading) {
     return <LeaderboardSkeleton />;
@@ -286,10 +468,14 @@ export default function LeaderboardPage() {
     return <LeaderboardError message={error} onRetry={fetchLeaderboard} />;
   }
 
+  const activeEntries = mode === "points" ? pointsEntries : entries;
   const totalTipped = entries.reduce(
     (sum, e) => sum + lamportsToSol(e.totalTipped),
     0
   );
+  const totalPoints = pointsEntries.reduce((sum, e) => sum + e.points, 0);
+
+  const isPoints = mode === "points";
 
   return (
     <div className="flex-1">
@@ -299,14 +485,12 @@ export default function LeaderboardPage() {
           <motion.div
             className="absolute -left-20 -top-20 size-[300px] rounded-full opacity-10"
             style={{
-              background:
-                "radial-gradient(circle, oklch(0.45 0.12 160), transparent 70%)",
+              background: `radial-gradient(circle, ${
+                isPoints ? "oklch(0.55 0.2 300)" : "oklch(0.45 0.12 160)"
+              }, transparent 70%)`,
               filter: "blur(60px)",
             }}
-            animate={{
-              scale: [1, 1.2, 1],
-              x: [0, 20, 0],
-            }}
+            animate={{ scale: [1, 1.2, 1], x: [0, 20, 0] }}
             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
@@ -318,50 +502,94 @@ export default function LeaderboardPage() {
           className="relative mx-auto max-w-3xl text-center"
         >
           <div className="mb-2">
-            <span className="inline-flex items-center rounded-full border border-border bg-background/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              Rankings
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+              {isPoints ? (
+                <>
+                  <Zap className="size-3 text-fuchsia-500" /> TipPoints
+                </>
+              ) : (
+                "Rankings"
+              )}
             </span>
           </div>
           <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            Supporter Leaderboard
+            {isPoints ? "TipPoints Leaderboard" : "Supporter Leaderboard"}
           </h1>
           <p className="mb-8 text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
-            The top supporters on TipChain, ranked by total amount tipped to
-            creators on Solana. Every tip is verifiable on-chain.
+            {isPoints
+              ? "Earn TipPoints every time you send or receive a tip — 1,000 points per SOL. Climb the tiers: Bronze → Silver → Gold → Platinum → Hyper."
+              : "The top supporters on TipChain, ranked by total amount tipped to creators on Solana. Every tip is verifiable on-chain."}
           </p>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-3 max-w-md mx-auto">
-            {[
-              {
-                label: "Supporters",
-                value: String(entries.length),
-                icon: Users,
-              },
-              {
-                label: "Total Tipped",
-                value: `${totalTipped.toFixed(2)} SOL`,
-                icon: Coins,
-              },
-              {
-                label: "Total Tips",
-                value: String(
-                  entries.reduce((sum, e) => sum + e.tipCount, 0)
-                ),
-                icon: Star,
-              },
-            ].map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-xl border border-border bg-card p-3 text-center shadow-premium"
-              >
-                <div className="mb-1 flex justify-center">
-                  <stat.icon className="size-4 text-emerald-600/60" />
-                </div>
-                <p className="text-sm font-bold tracking-tight">{stat.value}</p>
-                <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-              </div>
-            ))}
+            {isPoints
+              ? [
+                  {
+                    label: "Top Tier",
+                    value: pointsEntries[0]?.tier ?? "—",
+                    icon: Layers,
+                  },
+                  {
+                    label: "Points Pool",
+                    value: totalPoints.toLocaleString(),
+                    icon: Zap,
+                  },
+                  {
+                    label: "Ranked",
+                    value: String(pointsEntries.length),
+                    icon: Trophy,
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-xl border border-border bg-card p-3 text-center shadow-premium"
+                  >
+                    <div className="mb-1 flex justify-center">
+                      <stat.icon className="size-4 text-fuchsia-500/70" />
+                    </div>
+                    <p className="text-sm font-bold tracking-tight">
+                      {stat.value}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))
+              : [
+                  {
+                    label: "Supporters",
+                    value: String(entries.length),
+                    icon: Users,
+                  },
+                  {
+                    label: "Total Tipped",
+                    value: `${totalTipped.toFixed(2)} SOL`,
+                    icon: Coins,
+                  },
+                  {
+                    label: "Total Tips",
+                    value: String(
+                      entries.reduce((sum, e) => sum + e.tipCount, 0)
+                    ),
+                    icon: Star,
+                  },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-xl border border-border bg-card p-3 text-center shadow-premium"
+                  >
+                    <div className="mb-1 flex justify-center">
+                      <stat.icon className="size-4 text-emerald-600/60" />
+                    </div>
+                    <p className="text-sm font-bold tracking-tight">
+                      {stat.value}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
           </div>
         </motion.div>
       </section>
@@ -369,7 +597,16 @@ export default function LeaderboardPage() {
       {/* Leaderboard */}
       <section className="px-6 py-6 sm:py-8">
         <div className="mx-auto max-w-3xl">
-          {entries.length > 0 ? (
+          <FilterBar
+            mode={mode}
+            period={period}
+            token={token}
+            onModeChange={setMode}
+            onPeriodChange={setPeriod}
+            onTokenChange={setToken}
+          />
+
+          {activeEntries.length > 0 ? (
             <motion.div
               variants={staggerContainer}
               initial="hidden"
@@ -377,16 +614,20 @@ export default function LeaderboardPage() {
               className="space-y-1"
             >
               <AnimatePresence mode="popLayout">
-                {entries.map((entry) => (
-                  <LeaderboardRow key={entry.walletAddress} entry={entry} />
-                ))}
+                {isPoints
+                  ? pointsEntries.map((entry) => (
+                      <PointsRow key={entry.walletAddress} entry={entry} />
+                    ))
+                  : entries.map((entry) => (
+                      <LeaderboardRow key={entry.walletAddress} entry={entry} />
+                    ))}
               </AnimatePresence>
             </motion.div>
           ) : (
             <EmptyState />
           )}
 
-          {entries.length > 0 && (
+          {activeEntries.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -394,8 +635,9 @@ export default function LeaderboardPage() {
               className="mt-8 text-center"
             >
               <p className="text-xs text-muted-foreground">
-                Rankings are based on total SOL/USDC tipped across all
-                creators. All transactions are recorded on Solana.
+                {isPoints
+                  ? "TipPoints are earned on both sides of every tip and reset seasonally. All activity is recorded on Solana."
+                  : "Rankings are based on total SOL/USDC tipped across all creators. All transactions are recorded on Solana."}
               </p>
             </motion.div>
           )}

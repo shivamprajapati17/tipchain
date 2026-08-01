@@ -75,19 +75,30 @@ export class TipService {
     limit?: number;
     wallet?: string;
     token?: string;
+    direction?: "sent" | "received";
+    days?: number;
     startDate?: string;
     endDate?: string;
   }) {
-    const { page = 1, limit = 20, wallet, token, startDate, endDate } = params;
+    const { page = 1, limit = 20, wallet, token, direction, days, startDate, endDate } = params;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (wallet) {
-      where.OR = [{ senderWallet: wallet }, { receiverWallet: wallet }];
+      if (direction === "sent") {
+        where.senderWallet = wallet;
+      } else if (direction === "received") {
+        where.receiverWallet = wallet;
+      } else {
+        where.OR = [{ senderWallet: wallet }, { receiverWallet: wallet }];
+      }
     }
-    if (token) where.token = token;
+    if (token && token !== "ALL") where.token = token;
+    if (days && !startDate) {
+      where.createdAt = { gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) };
+    }
     if (startDate || endDate) {
-      where.createdAt = {};
+      where.createdAt = where.createdAt ?? {};
       if (startDate) where.createdAt.gte = new Date(startDate);
       if (endDate) where.createdAt.lte = new Date(endDate);
     }
@@ -128,20 +139,30 @@ export class TipService {
     };
   }
 
-  async getLeaderboard(limit = 25) {
-    const supporters = await prisma.supporter.groupBy({
-      by: ["walletAddress"],
-      _sum: { totalTipped: true },
-      _count: { walletAddress: true },
-      orderBy: { _sum: { totalTipped: "desc" } },
+  async getLeaderboard(params: { limit?: number; period?: string; token?: string } = {}) {
+    const { limit = 25, period = "all", token } = params;
+
+    // Period-filtered leaderboard aggregates transactions within the window
+    const days: Record<string, number> = { "7d": 7, "30d": 30 };
+    const since = days[period] ? new Date(Date.now() - days[period] * 24 * 60 * 60 * 1000) : null;
+    const where: any = {};
+    if (since) where.createdAt = { gte: since };
+    if (token && token !== "ALL") where.token = token;
+
+    const supporters = await prisma.transaction.groupBy({
+      by: ["senderWallet"],
+      where,
+      _sum: { amount: true },
+      _count: { senderWallet: true },
+      orderBy: { _sum: { amount: "desc" } },
       take: limit,
     });
 
     return supporters.map((s: any, index: number) => ({
       rank: index + 1,
-      walletAddress: s.walletAddress,
-      totalTipped: (s._sum.totalTipped ?? BigInt(0)).toString(),
-      tipCount: s._count.walletAddress,
+      walletAddress: s.senderWallet,
+      totalTipped: (s._sum.amount ?? BigInt(0)).toString(),
+      tipCount: s._count.senderWallet,
     }));
   }
 

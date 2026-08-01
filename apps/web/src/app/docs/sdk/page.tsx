@@ -566,7 +566,7 @@ function ResourcesSection() {
 
         <div className="brutal-grid" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))" }}>
           {[
-            { title: "API REFERENCE", desc: "Complete REST API endpoint documentation with request/response schemas.", href: "/docs/api", label: "API DOCS >>" },
+            { title: "API REFERENCE", desc: "Complete REST API endpoint documentation with request/response schemas.", href: "/docs/api-reference", label: "API DOCS >>" },
             { title: "SOURCE CODE", desc: "Browse the SDK source on GitHub. MIT licensed and open for contributions.", href: "https://github.com/shivamprajapati17/tipchain12", label: "GITHUB >>" },
             { title: "ARCHITECTURE", desc: "System architecture overview — backend, database, Solana integration.", href: "/dashboard", label: "ARCHITECTURE >>" },
           ].map((resource) => (

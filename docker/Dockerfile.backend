@@ -1,41 +1,72 @@
 # ─── TipChain Backend Dockerfile ────────────────────────────────────────────
 # Multi-stage build for smallest possible production image
-# Build context should be: backend/
+# Build context should be: ../backend/
+#
+# Build:
+#   docker build -f docker/Dockerfile.backend -t tipchain-backend .
+# Run:
+#   docker run -p 4000:4000 --env-file .env tipchain-backend
 
-# ── Stage 1: Build ──────────────────────────────────────────────────────────
+# ── Stage 1: Install ────────────────────────────────────────────────────────
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+# Install build essentials for native modules
+RUN apk add --no-cache python3 make g++
+
+# Install dependencies (cached layer)
+COPY backend/package.json backend/package-lock.json ./
+RUN npm ci --only=production && \
+    cp -R node_modules /prod_modules && \
+    npm ci
+
+# ── Stage 2: Build ──────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies (files are at root of build context)
-COPY package.json package-lock.json ./
-RUN npm ci
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
 
-# Generate Prisma client
-COPY prisma ./prisma
+# Copy Prisma schema
+COPY backend/prisma ./prisma
 RUN npx prisma generate
 
-# Build TypeScript
-COPY tsconfig.json ./
-COPY src ./src
+# Copy source
+COPY backend/tsconfig.json ./
+COPY backend/src ./src
 RUN npm run build
 
-# ── Stage 2: Production ─────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+# ── Stage 3: Production ─────────────────────────────────────────────────────
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 tipchain
+
+# Copy production deps
+COPY --from=deps /prod_modules ./node_modules
+
 # Copy built artifacts
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+COPY backend/package.json ./
 
-# Copy package.json for scripts
-COPY package.json ./
+# Create logs directory
+RUN mkdir -p logs && chown -R tipchain:nodejs .
+
+USER tipchain
 
 EXPOSE 4000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+ENV NODE_ENV=production
+ENV PORT=4000
+ENV NEXT_TELEMETRY_DISABLED=1
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:4000/health || exit 1
 
 CMD ["node", "dist/index.js"]

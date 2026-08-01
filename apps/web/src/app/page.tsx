@@ -760,7 +760,7 @@ function Footer() {
             <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Developers</h4>
             <div className="space-y-2.5">
               <a href="/docs/sdk" className="block text-xs text-white/30 hover:text-white/60 transition-colors">SDK</a>
-              <a href="/docs/api" className="block text-xs text-white/30 hover:text-white/60 transition-colors">API Reference</a>
+              <a href="/docs/api-reference" className="block text-xs text-white/30 hover:text-white/60 transition-colors">API Reference</a>
               <a href={WHITEPAPER_URL} target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">Whitepaper</a>
               <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-white/60 transition-colors">GitHub</a>
             </div>
