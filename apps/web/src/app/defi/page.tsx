@@ -44,11 +44,21 @@ import {
   type SwapQuote as SwapQuoteType,
   type SwapToken,
 } from "@/lib/api";
+import {
+  getDirectSwapQuote,
+  getDirectSwapInstructions,
+  getDirectSwapTokens,
+  ALCHEMY_MAINNET_RPC,
+} from "@/lib/jupiterDirect";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const SOL_MINT = "So11111111111111111111111111111111111111112";
 const USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+
+const DEVNET_RPC = process.env.NEXT_PUBLIC_HELIUS_API_KEY
+  ? `https://devnet.helius-rpc.com/?api-key=${process.env.NEXT_PUBLIC_HELIUS_API_KEY}`
+  : "https://api.devnet.solana.com";
 
 const DEFAULT_TOKENS: SwapToken[] = [
   { address: SOL_MINT, symbol: "SOL", name: "Solana", decimals: 9, isKnown: true },
@@ -127,15 +137,67 @@ function TokenAvatar({ token, size = "size-8" }: { token: SwapToken | null; size
   );
 }
 
+/** Live health probe against the Alchemy Solana mainnet RPC from the browser. */
+function AlchemyStatus() {
+  const [state, setState] = useState<"checking" | "live" | "down">("checking");
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(ALCHEMY_MAINNET_RPC, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "getLatestBlockhash",
+            params: [{ commitment: "confirmed" }],
+          }),
+        });
+        const json = await res.json();
+        if (!cancelled) setState(json?.result?.value?.blockhash ? "live" : "down");
+      } catch {
+        if (!cancelled) setState("down");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return (
+    <div className="inline-flex items-center gap-1.5 rounded-full border border-white/8 bg-white/[0.02] px-3 py-1 text-[10px] font-medium">
+      {state === "checking" && (
+        <>
+          <Loader2 className="size-3 animate-spin text-white/40" />
+          <span className="text-white/50">Checking Alchemy mainnet RPC...</span>
+        </>
+      )}
+      {state === "live" && (
+        <>
+          <span className="size-1.5 rounded-full bg-emerald-400" />
+          <span className="text-emerald-300">Alchemy mainnet RPC · live</span>
+        </>
+      )}
+      {state === "down" && (
+        <>
+          <span className="size-1.5 rounded-full bg-rose-400" />
+          <span className="text-rose-300">Alchemy mainnet RPC unreachable</span>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ─── Swap Widget ────────────────────────────────────────────────────────────
 
 function SwapWidget() {
   const { connected } = useWalletConnection();
   const session = useWalletSession();
   const { send, isSending, signature, error: sendError, reset } = useSendTransaction();
-  const { requestAirdrop } = useWalletActions();
+  const { requestAirdrop, setCluster } = useWalletActions();
   const balance = useBalance(session?.account.address);
 
+  const [network, setNetwork] = useState<"devnet" | "mainnet">("devnet");
   const [inputToken, setInputToken] = useState<SwapToken>(DEFAULT_TOKENS[0]);
   const [outputToken, setOutputToken] = useState<SwapToken>(DEFAULT_TOKENS[1]);
   const [inputAmount, setInputAmount] = useState("1");
@@ -152,6 +214,23 @@ function SwapWidget() {
 
   const solBalance = Number(balance.lamports ?? 0) / 1e9;
 
+  const switchNetwork = async (next: "devnet" | "mainnet") => {
+    if (next === network) return;
+    setQuote(null);
+    setQuoteError(null);
+    setSentSig(null);
+    reset();
+    try {
+      await setCluster(next === "mainnet" ? ALCHEMY_MAINNET_RPC : DEVNET_RPC);
+      setNetwork(next);
+    } catch {
+      // cluster switch failed; keep the current network
+    }
+  };
+
+  const normalizeTokenResults = (data: unknown): SwapToken[] =>
+    Array.isArray(data) ? (data as SwapToken[]) : (((data as any)?.tokens ?? []) as SwapToken[]);
+
   // Debounced quote fetch
   useEffect(() => {
     if (quoteTimer.current) clearTimeout(quoteTimer.current);
@@ -165,8 +244,18 @@ function SwapWidget() {
     setQuoting(true);
     quoteTimer.current = setTimeout(async () => {
       try {
-        const data = await getSwapQuote(inputToken.address, outputToken.address, rawAmount.toString(), slippage);
-        setQuote(data.quote);
+        if (network === "mainnet") {
+          const direct = await getDirectSwapQuote(
+            inputToken.address,
+            outputToken.address,
+            rawAmount.toString(),
+            slippage
+          );
+          setQuote(direct);
+        } else {
+          const data = await getSwapQuote(inputToken.address, outputToken.address, rawAmount.toString(), slippage);
+          setQuote(data.quote);
+        }
         setQuoteError(null);
       } catch (err) {
         setQuote(null);
@@ -178,14 +267,17 @@ function SwapWidget() {
     return () => {
       if (quoteTimer.current) clearTimeout(quoteTimer.current);
     };
-  }, [inputAmount, inputToken, outputToken, slippage]);
+  }, [inputAmount, inputToken, outputToken, slippage, network]);
 
   const openPicker = async (side: "in" | "out") => {
     setPicking(side);
     setSearchQuery("");
     try {
-      const data = await searchSwapTokens("SOL");
-      setSearchResults(data.tokens.slice(0, 12));
+      const data =
+        network === "mainnet"
+          ? await getDirectSwapTokens("SOL")
+          : await searchSwapTokens("SOL");
+      setSearchResults(normalizeTokenResults(data).slice(0, 12));
     } catch {
       setSearchResults([]);
     }
@@ -195,8 +287,11 @@ function SwapWidget() {
     setSearchQuery(q);
     if (!q.trim()) return;
     try {
-      const data = await searchSwapTokens(q);
-      setSearchResults(data.tokens.slice(0, 12));
+      const data =
+        network === "mainnet"
+          ? await getDirectSwapTokens(q)
+          : await searchSwapTokens(q);
+      setSearchResults(normalizeTokenResults(data).slice(0, 12));
     } catch {
       setSearchResults([]);
     }
@@ -228,7 +323,10 @@ function SwapWidget() {
     setSentSig(null);
     reset();
     try {
-      const instructionsData = await getSwapInstructions(quote, session.account.address);
+      const instructionsData =
+        network === "mainnet"
+          ? await getDirectSwapInstructions(quote, session.account.address)
+          : await getSwapInstructions(quote, session.account.address);
       const instructionB64 = [
         instructionsData.tokenLedgerInstruction,
         ...instructionsData.computeBudgetInstructions,
@@ -267,7 +365,24 @@ function SwapWidget() {
       <div className="rounded-3xl border border-white/8 bg-white/[0.03] p-5 shadow-premium backdrop-blur-sm">
         {/* Balance row */}
         <div className="flex items-center justify-between px-1 pb-3">
-          <span className="text-[10px] uppercase tracking-widest text-white/30">Jupiter swap</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-widest text-white/30">Jupiter swap</span>
+            <div className="flex items-center rounded-full border border-white/8 bg-white/[0.02] p-0.5">
+              {(["devnet", "mainnet"] as const).map((n) => (
+                <button
+                  key={n}
+                  onClick={() => switchNetwork(n)}
+                  className={`rounded-full px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider transition-colors ${
+                    network === n
+                      ? "bg-emerald-500/15 text-emerald-300"
+                      : "text-white/40 hover:text-white/70"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </div>
           {connected && session ? (
             <span className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-400">
               <Wallet className="size-3" />
@@ -431,7 +546,7 @@ function SwapWidget() {
                 <span className="flex items-center gap-2 text-emerald-400">
                   <Check className="size-3.5" /> Swap sent —{" "}
                   <a
-                    href={`https://explorer.solana.com/tx/${sentSig}?cluster=devnet`}
+                    href={`https://explorer.solana.com/tx/${sentSig}${network === "devnet" ? "?cluster=devnet" : ""}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 underline decoration-emerald-400/40 underline-offset-2 hover:decoration-emerald-400"
@@ -446,7 +561,7 @@ function SwapWidget() {
               )}
             </div>
           )}
-          {connected && session && (
+          {connected && session && network === "devnet" && (
             <button
               onClick={handleAirdrop}
               disabled={airdropping}
@@ -458,6 +573,13 @@ function SwapWidget() {
           )}
         </div>
       </div>
+
+      {/* Alchemy mainnet status */}
+      {network === "mainnet" && (
+        <div className="mt-4 flex justify-center">
+          <AlchemyStatus />
+        </div>
+      )}
 
       {/* Quick pairs */}
       <div className="mt-4">
@@ -866,8 +988,9 @@ export default function DefiPage() {
                 <SwapWidget />
                 <p className="mx-auto mt-6 max-w-md text-center text-[11px] leading-relaxed text-white/30">
                   Swaps route through the Jupiter aggregator for the best price.
-                  Execution requires a connected wallet. Network: Solana devnet —
-                  swap to mainnet for live liquidity.
+                  Execution requires a connected wallet. Devnet mode relays
+                  quotes via the TipChain API; Mainnet mode queries Jupiter
+                  directly and executes on the Alchemy Solana RPC.
                 </p>
               </div>
             )}

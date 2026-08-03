@@ -6,6 +6,11 @@ const JUPITER_LITE_API_BASE = "https://lite-api.jup.ag/v6";
 const JUPITER_TOKEN_BASES = ["https://token.jup.ag", "https://token.lite-api.jup.ag"];
 const JUPITER_FETCH_TIMEOUT_MS = 12_000;
 
+// Alchemy Solana mainnet RPC used for the mainnet swap route (execution + health).
+const ALCHEMY_MAINNET_RPC =
+  process.env.SOLANA_MAINNET_RPC ||
+  "https://solana-mainnet.g.alchemy.com/v2/n7DahlsU99piB6nKG2mq3";
+
 // Jupiter's public APIs are friendlier when they see a real client user-agent
 // and are sometimes picky about bare Node fetch calls. An optional API key
 // (env JUPITER_API_KEY, free from api.jup.ag) bypasses Cloudflare blocks that
@@ -165,6 +170,54 @@ export async function getQuote(
       error: error instanceof Error ? error.message : "Unknown error",
     });
     return null;
+  }
+}
+
+/**
+ * Ping the Alchemy Solana mainnet RPC (getLatestBlockhash) so the frontend can
+ * show whether the mainnet swap route is reachable.
+ */
+export async function getAlchemyHealth(): Promise<{
+  reachable: boolean;
+  blockhash?: string | null;
+  slot?: number | null;
+  status?: number;
+  error?: string;
+}> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), JUPITER_FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetch(ALCHEMY_MAINNET_RPC, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "getLatestBlockhash",
+          params: [{ commitment: "confirmed" }],
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        return { reachable: false, status: response.status };
+      }
+
+      const json = await response.json();
+      return {
+        reachable: true,
+        blockhash: json?.result?.value?.blockhash ?? null,
+        slot: json?.result?.context?.slot ?? null,
+      };
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch (error) {
+    return {
+      reachable: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 }
 

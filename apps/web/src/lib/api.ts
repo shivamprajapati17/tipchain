@@ -735,6 +735,17 @@ export async function searchSwapTokens(q: string) {
   return fetchJSON<{ tokens: SwapToken[] }>(`/api/swap/tokens?q=${encodeURIComponent(q)}`);
 }
 
+export async function getAlchemySwapHealth() {
+  return fetchJSON<{
+    rpc: string;
+    reachable: boolean;
+    blockhash: string | null;
+    slot: number | null;
+    status: number | null;
+    error: string | null;
+  }>("/api/swap/alchemy-health");
+}
+
 export async function getLending() {
   return fetchJSON<any>("/api/defi/lending");
 }

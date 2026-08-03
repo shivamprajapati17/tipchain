@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler";
-import { getQuote, getSwapInstructions, searchTokens, getTokenInfo } from "../services/jupiter.service";
+import { sendSuccess } from "../utils/apiResponse";
+import { getQuote, getSwapInstructions, searchTokens, getTokenInfo, getAlchemyHealth } from "../services/jupiter.service";
 
 /**
  * GET /api/swap/quote
@@ -70,6 +71,22 @@ export const getSwapTxInstructions = asyncHandler(async (req: Request, res: Resp
   res.json({
     success: true,
     data: instructions,
+  });
+});
+
+/**
+ * GET /api/swap/alchemy-health
+ * Ping the Alchemy Solana mainnet RPC used by the mainnet swap route.
+ */
+export const getAlchemyHealthEndpoint = asyncHandler(async (_req: Request, res: Response) => {
+  const health = await getAlchemyHealth();
+  sendSuccess(res, {
+    rpc: health.reachable ? "alchemy-mainnet" : "unreachable",
+    reachable: health.reachable,
+    blockhash: health.blockhash ?? null,
+    slot: health.slot ?? null,
+    status: health.status ?? null,
+    error: health.error ?? null,
   });
 });
 
