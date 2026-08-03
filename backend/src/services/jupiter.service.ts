@@ -2,6 +2,8 @@ import logger from "../utils/logger";
 
 const JUPITER_API_BASE = "https://quote-api.jup.ag/v6";
 const JUPITER_SWAP_API_BASE = "https://swap-api.jup.ag/v6";
+const JUPITER_LITE_API_BASE = "https://lite-api.jup.ag/v6";
+const JUPITER_TOKEN_BASES = ["https://token.jup.ag", "https://token.lite-api.jup.ag"];
 const JUPITER_FETCH_TIMEOUT_MS = 12_000;
 
 // Jupiter's public APIs are friendlier when they see a real client user-agent
@@ -124,9 +126,10 @@ export async function getQuote(
       asLegacyTransaction: "false",
     });
 
-    // Primary: quote-api.jup.ag. Fallback: swap-api.jup.ag (same v6 API).
+    // Primary: quote-api.jup.ag. Fallbacks: swap-api.jup.ag, then lite-api.jup.ag
+    // (lite-api is designed to be permissive for server-side use).
     let response: Response | null = null;
-    for (const base of [JUPITER_API_BASE, JUPITER_SWAP_API_BASE]) {
+    for (const base of [JUPITER_API_BASE, JUPITER_SWAP_API_BASE, JUPITER_LITE_API_BASE]) {
       try {
         response = await jupFetch(`${base}/quote?${params}`);
         if (response.ok) break;
@@ -211,11 +214,20 @@ export function getTokenInfo(mintAddress: string) {
  */
 export async function searchTokens(query: string) {
   try {
-    const response = await jupFetch(
-      `https://token.jup.ag/strict/${encodeURIComponent(query)}`
-    );
+    let response: Response | null = null;
+    for (const base of JUPITER_TOKEN_BASES) {
+      try {
+        response = await jupFetch(`${base}/strict/${encodeURIComponent(query)}`);
+        if (response.ok) break;
+      } catch (err) {
+        logger.warn("Jupiter token base unreachable", {
+          base,
+          error: err instanceof Error ? err.message : "Unknown error",
+        });
+      }
+    }
 
-    if (!response.ok) return [];
+    if (!response || !response.ok) return [];
 
     const tokens = await response.json();
 
