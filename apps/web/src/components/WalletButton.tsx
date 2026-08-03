@@ -1,13 +1,20 @@
 "use client";
 
-import { useWalletConnection } from "@solana/react-hooks";
+import { useWalletConnection, useBalance } from "@solana/react-hooks";
 import { Button } from "@/components/ui/button";
-import { Wallet, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { Wallet, LogOut, ChevronDown, Loader2, ExternalLink } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 function truncateAddress(address: string) {
   return `${address.slice(0, 4)}...${address.slice(-4)}`;
 }
+
+const INSTALL_LINKS = [
+  { name: "Phantom", href: "https://phantom.app" },
+  { name: "Solflare", href: "https://solflare.com" },
+  { name: "Backpack", href: "https://backpack.app" },
+  { name: "Coinbase Wallet", href: "https://www.coinbase.com/wallet" },
+];
 
 export function WalletButton() {
   const {
@@ -21,6 +28,10 @@ export function WalletButton() {
     error,
     isReady,
   } = useWalletConnection();
+
+  // Show the connected wallet's SOL balance in the dropdown.
+  const balance = useBalance(wallet?.account.address);
+  const solBalance = Number(balance.lamports ?? 0) / 1e9;
 
   const [isOpen, setIsOpen] = useState(false);
   const [connectError, setConnectError] = useState<string | null>(null);
@@ -80,6 +91,12 @@ export function WalletButton() {
             <div className="px-3 pb-2 font-mono text-xs text-foreground break-all">
               {wallet.account.address}
             </div>
+            <div className="mx-2 mb-2 flex items-center justify-between rounded-md bg-emerald-500/10 px-3 py-2">
+              <span className="text-xs text-muted-foreground">Balance</span>
+              <span className="font-mono text-xs font-semibold text-emerald-400">
+                {solBalance.toLocaleString(undefined, { maximumFractionDigits: 4 })} SOL
+              </span>
+            </div>
             <div className="border-t border-border pt-1">
               <button
                 onClick={() => {
@@ -122,8 +139,24 @@ export function WalletButton() {
           )}
 
           {connectors.length === 0 ? (
-            <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              No wallet extensions found. Install Phantom or Solflare.
+            <div className="px-3 py-3">
+              <div className="px-1 pb-2 text-center text-sm text-muted-foreground">
+                No wallet extensions detected. Install one to get started.
+              </div>
+              <div className="space-y-1">
+                {INSTALL_LINKS.map((w) => (
+                  <a
+                    key={w.name}
+                    href={w.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-foreground/80 hover:bg-accent transition-colors"
+                  >
+                    <span>{w.name}</span>
+                    <ExternalLink className="size-3.5 text-muted-foreground" />
+                  </a>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="space-y-1">

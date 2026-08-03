@@ -671,6 +671,86 @@ export async function queryAIAgent(agentType: string, message: string, context?:
   });
 }
 
+// ─── DeFi Hub (Phase 4) ──────────────────────────────────────────────────────
+
+export type SwapToken = {
+  address: string;
+  symbol: string;
+  name: string;
+  decimals: number;
+  logoURI?: string;
+  dailyVolume?: string;
+  isKnown?: boolean;
+};
+
+export type SwapQuote = {
+  inputMint: string;
+  outputMint: string;
+  inAmount: string;
+  outAmount: string;
+  otherAmountThreshold: string;
+  priceImpactPct: string;
+  routePlan: Array<{ swapInfo: { ammKey: string; label: string }; percent: number }>;
+  platformFee: string | null;
+  contextSlot: number;
+  timeTaken: number;
+};
+
+export async function getSwapQuote(
+  inputMint: string,
+  outputMint: string,
+  amount: string,
+  slippageBps = 50
+) {
+  const query = new URLSearchParams({
+    inputMint,
+    outputMint,
+    amount,
+    slippageBps: String(slippageBps),
+  });
+  return fetchJSON<{
+    quote: SwapQuote;
+    inputToken: { symbol: string; name: string; decimals: number } | null;
+    outputToken: { symbol: string; name: string; decimals: number } | null;
+    priceImpact: string;
+    routeCount: number;
+  }>(`/api/swap/quote?${query}`);
+}
+
+export async function getSwapInstructions(quoteResponse: SwapQuote, userPublicKey: string) {
+  return fetchJSON<{
+    tokenLedgerInstruction: string | null;
+    computeBudgetInstructions: string[];
+    setupInstructions: string[];
+    swapInstruction: string;
+    cleanupInstruction: string | null;
+    addressLookupTableAddresses: string[];
+  }>("/api/swap/instructions", {
+    method: "POST",
+    body: JSON.stringify({ quoteResponse, userPublicKey }),
+  });
+}
+
+export async function searchSwapTokens(q: string) {
+  return fetchJSON<{ tokens: SwapToken[] }>(`/api/swap/tokens?q=${encodeURIComponent(q)}`);
+}
+
+export async function getLending() {
+  return fetchJSON<any>("/api/defi/lending");
+}
+
+export async function getYieldFarming() {
+  return fetchJSON<any>("/api/defi/yield-farming");
+}
+
+export async function getTreasury() {
+  return fetchJSON<any>("/api/defi/treasury");
+}
+
+export async function getCrossChainBridge() {
+  return fetchJSON<any>("/api/defi/cross-chain-bridge");
+}
+
 // ─── GameFi / DeFi / Creator Economy Modules ─────────────────────────────────
 
 export async function getQuests() {

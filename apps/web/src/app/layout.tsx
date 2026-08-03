@@ -73,6 +73,7 @@ function GlobalFooter() {
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Build</h4>
               <div className="space-y-2.5">
                 <a href="/ai" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">AI Agents</a>
+                <a href="/defi" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">DeFi Hub</a>
                 <a href="/marketplace" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Marketplace</a>
                 <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">GitHub</a>
               </div>
