@@ -25,6 +25,7 @@ import {
   Shield,
   Heart,
   Quote,
+  Globe,
 } from "lucide-react";
 
 // ─── Motion primitives ──────────────────────────────────────────────────────
@@ -638,6 +639,125 @@ function Testimonials() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+//  ROADMAP + INVESTORS — the TipChain master generation blueprint phases
+// ═══════════════════════════════════════════════════════════════════════════
+
+const ROADMAP_PHASES = [
+  {
+    phase: "Core Platform",
+    status: "Live",
+    note: "Wallets, profiles, tips, vaults, referrals",
+  },
+  {
+    phase: "AI Agents",
+    status: "Live",
+    note: "8 AI assistants on /ai",
+  },
+  {
+    phase: "GameFi",
+    status: "Live",
+    note: "Quests, XP, seasons, missions, guilds",
+  },
+  {
+    phase: "DeFi",
+    status: "In progress",
+    note: "Swaps, staking, pools, treasury",
+  },
+  {
+    phase: "SDK & Ecosystem",
+    status: "Next",
+    note: "SDK, CLI, plugin system, docs",
+  },
+];
+
+function Roadmap() {
+  return (
+    <section className="section-chapter relative overflow-hidden border-t border-white/5">
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+        <div className="orb orb-2 -top-40 right-0 opacity-30" />
+      </div>
+      <div className="mx-auto max-w-6xl px-6 py-28 md:py-36">
+        <motion.div
+          {...stagger}
+          className="mx-auto max-w-2xl text-center"
+        >
+          <motion.h2
+            {...stagger}
+            className="text-3xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-5xl"
+          >
+            Built in public, phase by{" "}
+            <span className="serif-accent text-emerald-400">phase</span>
+          </motion.h2>
+          <motion.p
+            {...stagger}
+            className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/45 md:text-base"
+          >
+            From creator payments to AI, GameFi, DeFi, and a full developer
+            ecosystem — every phase ships on-chain and in the open.
+          </motion.p>
+        </motion.div>
+
+        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {ROADMAP_PHASES.map((step, i) => (
+            <motion.div
+              key={step.phase}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ delay: i * 0.06, duration: 0.45 }}
+              className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all hover:border-white/10 hover:bg-white/[0.04]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-[10px] text-white/30">Phase {i + 1}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
+                    step.status === "Live"
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : step.status === "In progress"
+                        ? "bg-amber-500/15 text-amber-400"
+                        : "bg-white/5 text-white/40"
+                  }`}
+                >
+                  {step.status}
+                </span>
+              </div>
+              <div className="mt-3 text-sm font-semibold text-white">{step.phase}</div>
+              <div className="mt-1 text-[11px] leading-relaxed text-white/40">{step.note}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
+        >
+          <a
+            href="/tokenomics"
+            className="group inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.35)]"
+          >
+            <Coins className="size-4 transition-transform group-hover:scale-110" />
+            Explore tokenomics
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+          </a>
+          <a
+            href="https://github.com/shivamprajapati17/tipchain12"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/80 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
+          >
+            <Globe className="size-4" />
+            View the code
+          </a>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 //  ACTION — Final CTA
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -697,6 +817,7 @@ export default function Home() {
       <ProofGallery />
       <ScrubbedReveal />
       <Testimonials />
+      <Roadmap />
       <FinalCTA />
     </main>
   );

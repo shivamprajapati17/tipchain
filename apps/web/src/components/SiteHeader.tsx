@@ -37,7 +37,10 @@ export function SiteHeader() {
           </a>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-0.5">
+          <div
+            className="hidden lg:flex items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ maskImage: "linear-gradient(to right, transparent, black 12px, black calc(100% - 12px), transparent)" }}
+          >
             {NAV_LINKS.map((link) => {
               const Icon = link.icon;
               const active = isActive(link.href);

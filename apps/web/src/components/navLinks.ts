@@ -1,4 +1,4 @@
-import { Bot, Compass, Layers, Sparkles, type LucideIcon } from "lucide-react";
+import { Bot, Coins, Compass, Layers, Sparkles, type LucideIcon } from "lucide-react";
 
 export type NavLink = {
   href: string;
@@ -15,6 +15,7 @@ export const NAV_LINKS: NavLink[] = [
   { href: "/creators", label: "Creators" },
   { href: "/leaderboard", label: "Leaderboard" },
   { href: "/points", label: "Points", icon: Sparkles },
+  { href: "/tokenomics", label: "Token", icon: Coins },
   { href: "/vaults", label: "Vaults" },
   { href: "/referrals", label: "Referrals" },
   { href: "/history", label: "History" },

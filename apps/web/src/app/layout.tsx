@@ -57,6 +57,7 @@ function GlobalFooter() {
                 <a href="/leaderboard" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Leaderboard</a>
                 <a href="/points" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">TipPoints</a>
                 <a href="/quests" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Quests</a>
+                <a href="/tokenomics" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Tokenomics</a>
               </div>
             </div>
             <div>
