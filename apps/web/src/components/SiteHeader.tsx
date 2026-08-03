@@ -3,22 +3,11 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, Compass, Layers, Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { WalletButton } from "@/components/WalletButton";
-
-const NAV_LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/ai", label: "AI", icon: Bot },
-  { href: "/quests", label: "Quests" },
-  { href: "/marketplace", label: "Marketplace" },
-  { href: "/creators", label: "Creators" },
-  { href: "/leaderboard", label: "Leaderboard" },
-  { href: "/points", label: "Points", icon: Sparkles },
-  { href: "/vaults", label: "Vaults" },
-  { href: "/referrals", label: "Referrals" },
-  { href: "/history", label: "History" },
-  { href: "/dashboard", label: "Dashboard", icon: Layers, highlight: true },
-];
+import { NotificationBell } from "@/components/NotificationBell";
+import { CommandPalette } from "@/components/CommandPalette";
+import { NAV_LINKS, Compass } from "@/components/navLinks";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -80,7 +69,9 @@ export function SiteHeader() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <CommandPalette />
+            <NotificationBell />
             <WalletButton />
             <motion.button
               whileTap={{ scale: 0.9 }}
