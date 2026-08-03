@@ -7,11 +7,14 @@ const JUPITER_TOKEN_BASES = ["https://token.jup.ag", "https://token.lite-api.jup
 const JUPITER_FETCH_TIMEOUT_MS = 12_000;
 
 // Jupiter's public APIs are friendlier when they see a real client user-agent
-// and are sometimes picky about bare Node fetch calls.
-const JUPITER_HEADERS = {
+// and are sometimes picky about bare Node fetch calls. An optional API key
+// (env JUPITER_API_KEY, free from api.jup.ag) bypasses Cloudflare blocks that
+// can affect datacenter IPs (e.g. Render).
+const JUPITER_HEADERS: Record<string, string> = {
   "Accept": "application/json",
   "Content-Type": "application/json",
   "User-Agent": "TipChain/1.0 (creator-economy-platform)",
+  ...(process.env.JUPITER_API_KEY ? { "x-api-key": process.env.JUPITER_API_KEY } : {}),
 };
 
 /**
