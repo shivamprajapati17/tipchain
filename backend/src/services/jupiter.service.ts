@@ -1,6 +1,34 @@
 import logger from "../utils/logger";
 
 const JUPITER_API_BASE = "https://quote-api.jup.ag/v6";
+const JUPITER_SWAP_API_BASE = "https://swap-api.jup.ag/v6";
+const JUPITER_FETCH_TIMEOUT_MS = 12_000;
+
+// Jupiter's public APIs are friendlier when they see a real client user-agent
+// and are sometimes picky about bare Node fetch calls.
+const JUPITER_HEADERS = {
+  "Accept": "application/json",
+  "Content-Type": "application/json",
+  "User-Agent": "TipChain/1.0 (creator-economy-platform)",
+};
+
+/**
+ * fetch with an AbortSignal timeout so a slow/blocked Jupiter call fails fast
+ * instead of hanging the API route.
+ */
+async function jupFetch(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), JUPITER_FETCH_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...init,
+      headers: { ...JUPITER_HEADERS, ...(init?.headers ?? {}) },
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -96,13 +124,23 @@ export async function getQuote(
       asLegacyTransaction: "false",
     });
 
-    const response = await fetch(`${JUPITER_API_BASE}/quote?${params}`, {
-      headers: { "Accept": "application/json" },
-    });
+    // Primary: quote-api.jup.ag. Fallback: swap-api.jup.ag (same v6 API).
+    let response: Response | null = null;
+    for (const base of [JUPITER_API_BASE, JUPITER_SWAP_API_BASE]) {
+      try {
+        response = await jupFetch(`${base}/quote?${params}`);
+        if (response.ok) break;
+        logger.warn("Jupiter quote endpoint responded non-OK", { base, status: response.status });
+      } catch (err) {
+        logger.warn("Jupiter quote endpoint unreachable", {
+          base,
+          error: err instanceof Error ? err.message : "Unknown error",
+        });
+      }
+    }
 
-    if (!response.ok) {
-      const text = await response.text();
-      logger.error("Jupiter quote error", { status: response.status, body: text });
+    if (!response || !response.ok) {
+      logger.error("Jupiter quote error after fallbacks");
       return null;
     }
 
@@ -134,9 +172,8 @@ export async function getSwapInstructions(
   wrapUnwrapSOL: boolean = true
 ): Promise<SwapInstructions | null> {
   try {
-    const response = await fetch(`${JUPITER_API_BASE}/swap-instructions`, {
+    const response = await jupFetch(`${JUPITER_SWAP_API_BASE}/swap-instructions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         quoteResponse,
         userPublicKey,
@@ -174,9 +211,8 @@ export function getTokenInfo(mintAddress: string) {
  */
 export async function searchTokens(query: string) {
   try {
-    const response = await fetch(
-      `https://token.jup.ag/strict/${encodeURIComponent(query)}`,
-      { headers: { "Accept": "application/json" } }
+    const response = await jupFetch(
+      `https://token.jup.ag/strict/${encodeURIComponent(query)}`
     );
 
     if (!response.ok) return [];
