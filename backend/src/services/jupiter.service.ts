@@ -6,20 +6,24 @@ const JUPITER_LITE_API_BASE = "https://lite-api.jup.ag/v6";
 const JUPITER_TOKEN_BASES = ["https://token.jup.ag", "https://token.lite-api.jup.ag"];
 const JUPITER_FETCH_TIMEOUT_MS = 12_000;
 
-// Alchemy Solana mainnet RPC used for the mainnet swap route (execution + health).
-const ALCHEMY_MAINNET_RPC =
-  process.env.SOLANA_MAINNET_RPC ||
-  "https://solana-mainnet.g.alchemy.com/v2/n7DahlsU99piB6nKG2mq3";
+// Public Solana mainnet RPC used for the mainnet swap route (execution + health).
+const SOLANA_MAINNET_RPC =
+  process.env.SOLANA_MAINNET_RPC || "https://api.mainnet-beta.solana.com";
 
 // Jupiter's public APIs are friendlier when they see a real client user-agent
-// and are sometimes picky about bare Node fetch calls. An optional API key
-// (env JUPITER_API_KEY, free from api.jup.ag) bypasses Cloudflare blocks that
-// can affect datacenter IPs (e.g. Render).
+// and are sometimes picky about bare Node fetch calls. The API key (env
+// JUPITER_API_KEY, free from api.jup.ag) bypasses Cloudflare blocks that can
+// affect datacenter IPs (e.g. Render). Jupiter keys are public rate-limit keys,
+// so the key below is a safe default fallback for instant datacenter access.
+const JUPITER_API_KEY =
+  process.env.JUPITER_API_KEY ||
+  "jup_57ccc2432485d89da54f7afb148ef9e1601f172c8c9bcd87ace6a36cf318e3ed";
+
 const JUPITER_HEADERS: Record<string, string> = {
   "Accept": "application/json",
   "Content-Type": "application/json",
   "User-Agent": "TipChain/1.0 (creator-economy-platform)",
-  ...(process.env.JUPITER_API_KEY ? { "x-api-key": process.env.JUPITER_API_KEY } : {}),
+  "x-api-key": JUPITER_API_KEY,
 };
 
 /**
@@ -174,10 +178,10 @@ export async function getQuote(
 }
 
 /**
- * Ping the Alchemy Solana mainnet RPC (getLatestBlockhash) so the frontend can
- * show whether the mainnet swap route is reachable.
+ * Ping the Solana mainnet RPC (getLatestBlockhash) so the frontend can show
+ * whether the mainnet swap route is reachable.
  */
-export async function getAlchemyHealth(): Promise<{
+export async function getMainnetRpcHealth(): Promise<{
   reachable: boolean;
   blockhash?: string | null;
   slot?: number | null;
@@ -188,7 +192,7 @@ export async function getAlchemyHealth(): Promise<{
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), JUPITER_FETCH_TIMEOUT_MS);
     try {
-      const response = await fetch(ALCHEMY_MAINNET_RPC, {
+      const response = await fetch(SOLANA_MAINNET_RPC, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -204,7 +208,9 @@ export async function getAlchemyHealth(): Promise<{
         return { reachable: false, status: response.status };
       }
 
-      const json = await response.json();
+      const json = (await response.json()) as {
+        result?: { value?: { blockhash?: string | null }; context?: { slot?: number | null } };
+      };
       return {
         reachable: true,
         blockhash: json?.result?.value?.blockhash ?? null,

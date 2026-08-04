@@ -3,9 +3,16 @@
 // The backend proxies Jupiter for the Devnet route, but some hosters' datacenter
 // IPs are blocked by jup.ag's Cloudflare. Browsers (residential IPs) reach the
 // Jupiter API fine, so on Mainnet we query it directly from the client and
-// execute through the Alchemy Solana mainnet RPC.
+// execute through the public Solana mainnet RPC.
 
 import type { SwapQuote } from "./api";
+
+// Jupiter API key (free from https://api.jup.ag). Jupiter keys are public
+// rate-limit keys designed for client-side use — they lift the free tier and
+// bypass datacenter/Cloudflare blocks.
+const JUPITER_API_KEY =
+  process.env.NEXT_PUBLIC_JUPITER_API_KEY ||
+  "jup_57ccc2432485d89da54f7afb148ef9e1601f172c8c9bcd87ace6a36cf318e3ed";
 
 const JUPITER_BASES = [
   "https://quote-api.jup.ag/v6",
@@ -13,9 +20,9 @@ const JUPITER_BASES = [
   "https://lite-api.jup.ag/v6",
 ];
 
-export const ALCHEMY_MAINNET_RPC =
+export const SOLANA_MAINNET_RPC =
   process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC ||
-  "https://solana-mainnet.g.alchemy.com/v2/n7DahlsU99piB6nKG2mq3";
+  "https://api.mainnet-beta.solana.com";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -25,7 +32,11 @@ async function directFetch(url: string, init?: RequestInit): Promise<Response> {
   try {
     return await fetch(url, {
       ...init,
-      headers: { Accept: "application/json", ...(init?.headers ?? {}) },
+      headers: {
+        Accept: "application/json",
+        "x-api-key": JUPITER_API_KEY,
+        ...(init?.headers ?? {}),
+      },
       signal: controller.signal,
     });
   } finally {

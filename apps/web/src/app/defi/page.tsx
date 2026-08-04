@@ -48,7 +48,7 @@ import {
   getDirectSwapQuote,
   getDirectSwapInstructions,
   getDirectSwapTokens,
-  ALCHEMY_MAINNET_RPC,
+  SOLANA_MAINNET_RPC,
 } from "@/lib/jupiterDirect";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -137,14 +137,14 @@ function TokenAvatar({ token, size = "size-8" }: { token: SwapToken | null; size
   );
 }
 
-/** Live health probe against the Alchemy Solana mainnet RPC from the browser. */
-function AlchemyStatus() {
+/** Live health probe against the Solana mainnet RPC from the browser. */
+function MainnetStatus() {
   const [state, setState] = useState<"checking" | "live" | "down">("checking");
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch(ALCHEMY_MAINNET_RPC, {
+        const res = await fetch(SOLANA_MAINNET_RPC, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -169,19 +169,19 @@ function AlchemyStatus() {
       {state === "checking" && (
         <>
           <Loader2 className="size-3 animate-spin text-white/40" />
-          <span className="text-white/50">Checking Alchemy mainnet RPC...</span>
+          <span className="text-white/50">Checking Solana mainnet RPC...</span>
         </>
       )}
       {state === "live" && (
         <>
           <span className="size-1.5 rounded-full bg-emerald-400" />
-          <span className="text-emerald-300">Alchemy mainnet RPC · live</span>
+          <span className="text-emerald-300">Solana mainnet RPC · live</span>
         </>
       )}
       {state === "down" && (
         <>
           <span className="size-1.5 rounded-full bg-rose-400" />
-          <span className="text-rose-300">Alchemy mainnet RPC unreachable</span>
+          <span className="text-rose-300">Solana mainnet RPC unreachable</span>
         </>
       )}
     </div>
@@ -221,7 +221,7 @@ function SwapWidget() {
     setSentSig(null);
     reset();
     try {
-      await setCluster(next === "mainnet" ? ALCHEMY_MAINNET_RPC : DEVNET_RPC);
+      await setCluster(next === "mainnet" ? SOLANA_MAINNET_RPC : DEVNET_RPC);
       setNetwork(next);
     } catch {
       // cluster switch failed; keep the current network
@@ -574,10 +574,10 @@ function SwapWidget() {
         </div>
       </div>
 
-      {/* Alchemy mainnet status */}
+      {/* Mainnet RPC status */}
       {network === "mainnet" && (
         <div className="mt-4 flex justify-center">
-          <AlchemyStatus />
+          <MainnetStatus />
         </div>
       )}
 
@@ -990,7 +990,8 @@ export default function DefiPage() {
                   Swaps route through the Jupiter aggregator for the best price.
                   Execution requires a connected wallet. Devnet mode relays
                   quotes via the TipChain API; Mainnet mode queries Jupiter
-                  directly and executes on the Alchemy Solana RPC.
+                  directly with your Jupiter API key and executes on the Solana
+                  mainnet RPC.
                 </p>
               </div>
             )}
