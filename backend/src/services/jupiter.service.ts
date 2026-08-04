@@ -1,14 +1,22 @@
 import logger from "../utils/logger";
 
+// The api.jup.ag gateway (the host the official @jup-ag/cli uses) is reachable
+// from datacenter + residential networks when authenticated with an API key,
+// so it is tried first everywhere. The classic hosts remain as fallbacks for
+// networks where they resolve.
+const JUPITER_V1_BASE = "https://api.jup.ag/swap/v1";
 const JUPITER_API_BASE = "https://quote-api.jup.ag/v6";
 const JUPITER_SWAP_API_BASE = "https://swap-api.jup.ag/v6";
-const JUPITER_LITE_API_BASE = "https://lite-api.jup.ag/v6";
-const JUPITER_TOKEN_BASES = ["https://token.jup.ag", "https://token.lite-api.jup.ag"];
+const JUPITER_TOKEN_BASES = [
+  "https://api.jup.ag/tokens/v2",
+  "https://token.jup.ag",
+  "https://token.lite-api.jup.ag",
+];
 const JUPITER_FETCH_TIMEOUT_MS = 12_000;
 
 // Public Solana mainnet RPC used for the mainnet swap route (execution + health).
 const SOLANA_MAINNET_RPC =
-  process.env.SOLANA_MAINNET_RPC || "https://api.mainnet-beta.solana.com";
+  process.env.SOLANA_MAINNET_RPC || "https://solana-rpc.publicnode.com";
 
 // Jupiter's public APIs are friendlier when they see a real client user-agent
 // and are sometimes picky about bare Node fetch calls. The API key (env
@@ -141,7 +149,7 @@ export async function getQuote(
     // Primary: quote-api.jup.ag. Fallbacks: swap-api.jup.ag, then lite-api.jup.ag
     // (lite-api is designed to be permissive for server-side use).
     let response: Response | null = null;
-    for (const base of [JUPITER_API_BASE, JUPITER_SWAP_API_BASE, JUPITER_LITE_API_BASE]) {
+    for (const base of [JUPITER_V1_BASE, JUPITER_API_BASE, JUPITER_SWAP_API_BASE]) {
       try {
         response = await jupFetch(`${base}/quote?${params}`);
         if (response.ok) break;
@@ -237,20 +245,33 @@ export async function getSwapInstructions(
   wrapUnwrapSOL: boolean = true
 ): Promise<SwapInstructions | null> {
   try {
-    const response = await jupFetch(`${JUPITER_SWAP_API_BASE}/swap-instructions`, {
-      method: "POST",
-      body: JSON.stringify({
-        quoteResponse,
-        userPublicKey,
-        wrapUnwrapSOL,
-        dynamicComputeUnitLimit: true,
-        prioritizationFeeLamports: "auto",
-      }),
+    const body = JSON.stringify({
+      quoteResponse,
+      userPublicKey,
+      wrapUnwrapSOL,
+      dynamicComputeUnitLimit: true,
+      prioritizationFeeLamports: "auto",
     });
 
-    if (!response.ok) {
-      const text = await response.text();
-      logger.error("Jupiter swap instructions error", { status: response.status, body: text });
+    let response: Response | null = null;
+    for (const base of [JUPITER_V1_BASE, JUPITER_SWAP_API_BASE, JUPITER_API_BASE]) {
+      try {
+        response = await jupFetch(`${base}/swap-instructions`, {
+          method: "POST",
+          body,
+        });
+        if (response.ok) break;
+        logger.warn("Jupiter swap-instructions endpoint non-OK", { base, status: response.status });
+      } catch (err) {
+        logger.warn("Jupiter swap-instructions endpoint unreachable", {
+          base,
+          error: err instanceof Error ? err.message : "Unknown error",
+        });
+      }
+    }
+
+    if (!response || !response.ok) {
+      logger.error("Jupiter swap instructions error after fallbacks");
       return null;
     }
 
@@ -279,7 +300,12 @@ export async function searchTokens(query: string) {
     let response: Response | null = null;
     for (const base of JUPITER_TOKEN_BASES) {
       try {
-        response = await jupFetch(`${base}/strict/${encodeURIComponent(query)}`);
+        const isV2 = base === "https://api.jup.ag/tokens/v2";
+        response = await jupFetch(
+          isV2
+            ? `${base}/search?query=${encodeURIComponent(query)}`
+            : `${base}/strict/${encodeURIComponent(query)}`
+        );
         if (response.ok) break;
       } catch (err) {
         logger.warn("Jupiter token base unreachable", {
@@ -293,17 +319,20 @@ export async function searchTokens(query: string) {
 
     const tokens = await response.json();
 
-    // Map to a simpler format
-    return (Array.isArray(tokens) ? tokens : []).map((t: any) => ({
-      address: t.address,
-      symbol: t.symbol,
-      name: t.name,
-      decimals: t.decimals,
-      logoURI: t.logoURI,
-      dailyVolume: t.dailyVolume,
-      // Mark if it's from our known tokens list
-      isKnown: !!KNOWN_TOKENS[t.address],
-    }));
+    // Map to a simpler format (v2 search returns {id, icon}, strict returns {address, logoURI})
+    return (Array.isArray(tokens) ? tokens : []).map((t: any) => {
+      const address = t.address ?? t.id;
+      return {
+        address,
+        symbol: t.symbol,
+        name: t.name,
+        decimals: t.decimals,
+        logoURI: t.logoURI ?? t.icon,
+        dailyVolume: t.dailyVolume,
+        // Mark if it's from our known tokens list
+        isKnown: !!KNOWN_TOKENS[address],
+      };
+    });
   } catch (error) {
     logger.error("Jupiter token search failed", { query });
     return [];

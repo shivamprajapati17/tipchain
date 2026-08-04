@@ -1,28 +1,33 @@
 // Direct (browser-to-Jupiter) swap helpers for the Mainnet route.
 //
-// The backend proxies Jupiter for the Devnet route, but some hosters' datacenter
-// IPs are blocked by jup.ag's Cloudflare. Browsers (residential IPs) reach the
-// Jupiter API fine, so on Mainnet we query it directly from the client and
-// execute through the public Solana mainnet RPC.
+// The backend proxies Jupiter for the Devnet route, but several jup.ag hosts
+// (quote-api, swap-api, token.jup.ag) are DNS/connection-blocked from some
+// residential + datacenter IPs. The official Jupiter API gateway
+// (https://api.jup.ag, the one the @jup-ag/cli uses) is reachable from those
+// networks when authenticated with an API key, so it is tried first. Execution
+// goes through the public Solana mainnet RPC (publicnode), which allows
+// browser CORS requests (api.mainnet-beta.solana.com returns 403 for this
+// user's IP range).
 
-import type { SwapQuote } from "./api";
+import type { SwapQuote, SwapToken } from "./api";
 
 // Jupiter API key (free from https://api.jup.ag). Jupiter keys are public
 // rate-limit keys designed for client-side use — they lift the free tier and
-// bypass datacenter/Cloudflare blocks.
+// unlock the api.jup.ag gateway.
 const JUPITER_API_KEY =
   process.env.NEXT_PUBLIC_JUPITER_API_KEY ||
   "jup_57ccc2432485d89da54f7afb148ef9e1601f172c8c9bcd87ace6a36cf318e3ed";
 
+const JUPITER_V1_BASE = "https://api.jup.ag/swap/v1";
 const JUPITER_BASES = [
+  JUPITER_V1_BASE,
   "https://quote-api.jup.ag/v6",
   "https://swap-api.jup.ag/v6",
-  "https://lite-api.jup.ag/v6",
 ];
 
 export const SOLANA_MAINNET_RPC =
   process.env.NEXT_PUBLIC_SOLANA_MAINNET_RPC ||
-  "https://api.mainnet-beta.solana.com";
+  "https://solana-rpc.publicnode.com";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -112,13 +117,42 @@ export async function getDirectSwapInstructions(
 
 // ─── Token search ───────────────────────────────────────────────────────────
 
-export async function getDirectSwapTokens(q: string) {
+export async function getDirectSwapTokens(q: string): Promise<SwapToken[]> {
+  // Primary: the api.jup.ag token search (returns {id, icon, ...}[]).
+  try {
+    const res = await directFetch(
+      `https://api.jup.ag/tokens/v2/search?query=${encodeURIComponent(q)}`
+    );
+    if (res.ok) {
+      const raw = (await res.json()) as Array<{
+        id: string;
+        name: string;
+        symbol: string;
+        icon?: string;
+        decimals: number;
+      }>;
+      return raw.slice(0, 12).map((t) => ({
+        address: t.id,
+        symbol: t.symbol,
+        name: t.name,
+        decimals: t.decimals,
+        logoURI: t.icon,
+      }));
+    }
+  } catch {
+    // fall through to the strict endpoint
+  }
+
+  // Fallback: the classic strict token list (already SwapToken-shaped).
   const bases = ["https://token.jup.ag", "https://token.lite-api.jup.ag"];
   let lastError: unknown = new Error("All Jupiter token endpoints unreachable");
   for (const base of bases) {
     try {
       const res = await directFetch(`${base}/strict/${encodeURIComponent(q)}`);
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const raw = (await res.json()) as SwapToken[];
+        return raw.slice(0, 12);
+      }
       lastError = new Error(`Jupiter token search error (${res.status})`);
     } catch (err) {
       lastError = err;
