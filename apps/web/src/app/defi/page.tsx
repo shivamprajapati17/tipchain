@@ -261,7 +261,16 @@ function SwapWidget() {
         setQuoteError(null);
       } catch (err) {
         setQuote(null);
-        setQuoteError(err instanceof Error ? err.message : "Failed to fetch quote");
+        const msg =
+          err instanceof Error ? err.message : "Failed to fetch quote";
+        const m = msg.toLowerCase();
+        setQuoteError(
+          m.includes("failed to fetch") ||
+            m.includes("network") ||
+            m.includes("load failed")
+            ? "Network error — couldn't reach Jupiter. Check your connection and try again."
+            : msg
+        );
       } finally {
         setQuoting(false);
       }

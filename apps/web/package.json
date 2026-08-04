@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.5.0",
+    "@metamask/multichain-api-client": "^0.12.0",
+    "@metamask/solana-wallet-standard": "^1.0.0",
     "@phosphor-icons/react": "^2.1.10",
     "@solana/client": "^1.7.0",
     "@solana/instructions": "^6.9.0",

@@ -16,6 +16,38 @@ const INSTALL_LINKS = [
   { name: "Coinbase Wallet", href: "https://www.coinbase.com/wallet" },
 ];
 
+function isMetaMaskInstalled() {
+  if (typeof window === "undefined") return false;
+  const eth = (window as Window & { ethereum?: { isMetaMask?: boolean } })
+    .ethereum;
+  return Boolean(eth?.isMetaMask);
+}
+
+function friendlyConnectError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err ?? "");
+  const m = message.toLowerCase();
+  if (m.includes("metamask") || m.includes("snap") || m.includes("solana")) {
+    return "MetaMask connects through its Solana account. Approve the Solana setup prompt in MetaMask, then try again.";
+  }
+  if (
+    m.includes("failed to fetch") ||
+    m.includes("networkerror") ||
+    m.includes("network error") ||
+    m.includes("load failed")
+  ) {
+    return "Network error — check your connection and try again.";
+  }
+  if (
+    m.includes("rejected") ||
+    m.includes("denied") ||
+    m.includes("cancelled") ||
+    m.includes("canceled")
+  ) {
+    return "Connection request was rejected. Approve it in your wallet to connect.";
+  }
+  return message;
+}
+
 export function WalletButton() {
   const {
     connect,
@@ -169,11 +201,7 @@ export function WalletButton() {
                       await connect(connector.id);
                       setIsOpen(false);
                     } catch (err) {
-                      setConnectError(
-                        err instanceof Error
-                          ? err.message
-                          : "Failed to connect wallet"
-                      );
+                      setConnectError(friendlyConnectError(err));
                     }
                   }}
                   className="flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm hover:bg-accent transition-colors"
@@ -204,6 +232,13 @@ export function WalletButton() {
                   </div>
                 </button>
               ))}
+            </div>
+          )}
+
+          {isMetaMaskInstalled() && (
+            <div className="mx-2 mt-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-3 py-2 text-[10px] leading-relaxed text-blue-700 dark:text-blue-300">
+              Tip: MetaMask connects with a Solana account — the first connect
+              will ask you to add Solana to MetaMask.
             </div>
           )}
         </div>
