@@ -197,7 +197,9 @@ function SwapWidget() {
   const { requestAirdrop, setCluster } = useWalletActions();
   const balance = useBalance(session?.account.address);
 
-  const [network, setNetwork] = useState<"devnet" | "mainnet">("devnet");
+  // Mainnet is the default: Jupiter has real liquidity on mainnet, and the
+  // mainnet route queries Jupiter directly from the browser with the API key.
+  const [network, setNetwork] = useState<"devnet" | "mainnet">("mainnet");
   const [inputToken, setInputToken] = useState<SwapToken>(DEFAULT_TOKENS[0]);
   const [outputToken, setOutputToken] = useState<SwapToken>(DEFAULT_TOKENS[1]);
   const [inputAmount, setInputAmount] = useState("1");
