@@ -713,8 +713,8 @@ const ContextualUI = memo(function ContextualUI({
     },
     {
       icon: TrendingUp,
-      label: "Leaderboard",
-      href: "/leaderboard",
+      label: "Tip history",
+      href: "/history",
       color: "bg-amber-500/10 text-amber-600",
     },
     {

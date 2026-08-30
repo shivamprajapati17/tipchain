@@ -5,8 +5,7 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { WalletButton } from "@/components/WalletButton";
-import { NotificationBell } from "@/components/NotificationBell";
-import { CommandPalette } from "@/components/CommandPalette";
+
 import { NAV_LINKS, Compass } from "@/components/navLinks";
 
 export function SiteHeader() {
@@ -73,8 +72,7 @@ export function SiteHeader() {
 
           {/* Right side */}
           <div className="flex items-center gap-1.5">
-            <CommandPalette />
-            <NotificationBell />
+
             <WalletButton />
             <motion.button
               whileTap={{ scale: 0.9 }}

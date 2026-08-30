@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { Home, Compass, Layers, Sparkles, Trophy, ArrowUpRight } from "lucide-react";
+import { Home, Compass, History, ArrowUpRight } from "lucide-react";
 
 const EXPLORE_LINKS = [
   { href: "/creators", label: "Creators", icon: Compass, desc: "Find someone worth supporting" },
-  { href: "/vaults", label: "Vaults", icon: Layers, desc: "Back a shared mission" },
-  { href: "/leaderboard", label: "Leaderboard", icon: Trophy, desc: "See who tops the charts" },
-  { href: "/points", label: "TipPoints", icon: Sparkles, desc: "Earn points for every action" },
+  { href: "/history", label: "Tip history", icon: History, desc: "Review your support" },
 ];
 
 export default function NotFound() {
