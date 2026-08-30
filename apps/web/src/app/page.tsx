@@ -10,22 +10,18 @@ import {
 } from "framer-motion";
 import {
   ArrowRight,
-  Sparkles,
   Coins,
   TrendingUp,
-  Bot,
-  Gamepad2,
-  Trophy,
   Users,
-  Layers,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  Gift,
   Shield,
   Heart,
   Quote,
-  Globe,
+  Send,
+  Wallet,
+  MessageSquare,
 } from "lucide-react";
 
 // ─── Motion primitives ──────────────────────────────────────────────────────
@@ -45,7 +41,7 @@ const stagger = {
 };
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ATTENTION — Cinematic hero (2-3 line H1, no badges, no raw stats)
+//  HERO — Cinematic tipping intro
 // ═══════════════════════════════════════════════════════════════════════════
 
 function Hero() {
@@ -69,7 +65,7 @@ function Hero() {
           className="absolute inset-0 bg-cover bg-center"
           style={{
             backgroundImage:
-              "url(https://picsum.photos/seed/tipchainvault/1920/1080)",
+              "url(https://picsum.photos/seed/tiptrend/1920/1080)",
           }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/70 via-[#0a0a0f]/85 to-[#0a0a0f]" />
@@ -99,12 +95,7 @@ function Hero() {
         >
           Tip the creators you love,
           <br />
-          earn{" "}
-          <span
-            className="inline-block w-20 h-9 -mb-2 rounded-full bg-cover bg-center mx-1 align-middle ring-1 ring-white/20"
-            style={{ backgroundImage: "url(https://picsum.photos/seed/tipsparkle/200/80)" }}
-          />
-          <span className="text-gradient-emerald">points</span> that prove it
+          <span className="text-gradient-emerald">directly on Solana</span>
         </motion.h1>
 
         <motion.p
@@ -113,9 +104,9 @@ function Hero() {
           transition={{ delay: 0.25, duration: 0.8 }}
           className="mx-auto mt-7 max-w-2xl text-base md:text-lg text-white/50 leading-relaxed"
         >
-          TipChain is the human-first creator economy on Solana. Every tip is a
-          signal, every point is proof — and every vault turns fans into a
-          shared fund.
+          Send SOL or USDC tips with a message. Every transaction is
+          on-chain, transparent, and instant. No middlemen, no fees — just
+          direct support for the creators you believe in.
         </motion.p>
 
         <motion.div
@@ -135,8 +126,8 @@ function Hero() {
             href="/creators"
             className="group inline-flex items-center justify-center gap-2 h-13 px-8 py-4 rounded-2xl glass-card text-white/80 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
           >
-            <Layers className="size-4" />
-            Explore vaults
+            <Users className="size-4" />
+            Browse creators
           </a>
         </motion.div>
 
@@ -164,7 +155,7 @@ function Hero() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  INTEREST — Infinite marquee of core actions
+//  MARQUEE — Core tipping actions
 // ═══════════════════════════════════════════════════════════════════════════
 
 const MARQUEE_ITEMS = [
@@ -199,7 +190,7 @@ function Marquee() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  INTEREST — Gapless bento (grid-flow-dense, interlocking spans, no voids)
+//  BENTO — Core tipping features
 // ═══════════════════════════════════════════════════════════════════════════
 
 const BENTO = [
@@ -214,37 +205,37 @@ const BENTO = [
   },
   {
     span: "lg:col-span-5",
-    icon: Trophy,
-    title: "TipPoints",
-    desc: "Every SOL of activity earns 1,000 points. Rise from Bronze to Hyper and show the world how much you care.",
-    image: "https://picsum.photos/seed/tiptrophy/600/420",
-    gradient: "from-amber-500/10 via-transparent to-transparent",
-    iconColor: "text-amber-400 bg-amber-500/10",
-  },
-  {
-    span: "lg:col-span-5",
-    icon: Layers,
-    title: "Creator vaults",
-    desc: "Fund a curated basket of creators in one move. Your SOL splits across them by the weights you choose.",
-    image: "https://picsum.photos/seed/tipvault/600/420",
-    gradient: "from-violet-500/10 via-transparent to-transparent",
-    iconColor: "text-violet-400 bg-violet-500/10",
-  },
-  {
-    span: "lg:col-span-7 lg:row-span-2",
-    icon: Gift,
-    title: "Referrals that pay",
-    desc: "Share your code, grow the circle, and earn commission on every referral you bring home.",
-    image: "https://picsum.photos/seed/tipgift/1000/900",
+    icon: Send,
+    title: "Instant transfers",
+    desc: "Tips land in the creator's wallet in seconds. SOL or USDC, your choice. Built on Solana for speed and low fees.",
+    image: "https://picsum.photos/seed/tipsend/600/420",
     gradient: "from-cyan-500/10 via-transparent to-transparent",
     iconColor: "text-cyan-400 bg-cyan-500/10",
   },
   {
     span: "lg:col-span-5",
+    icon: MessageSquare,
+    title: "Messages that matter",
+    desc: "Every tip can carry a message. Tell a creator why you support them — it's forever on-chain.",
+    image: "https://picsum.photos/seed/tipmessage/600/420",
+    gradient: "from-violet-500/10 via-transparent to-transparent",
+    iconColor: "text-violet-400 bg-violet-500/10",
+  },
+  {
+    span: "lg:col-span-7 lg:row-span-2",
+    icon: TrendingUp,
+    title: "Track everything",
+    desc: "See your full tipping history — who you've supported, how much, and when. A dashboard built for supporters.",
+    image: "https://picsum.photos/seed/tiptrack/1000/900",
+    gradient: "from-amber-500/10 via-transparent to-transparent",
+    iconColor: "text-amber-400 bg-amber-500/10",
+  },
+  {
+    span: "lg:col-span-5",
     icon: Users,
-    title: "A real community",
-    desc: "Follow creators, read their updates, and feel the warmth of a platform built around humans — not hype.",
-    image: "https://picsum.photos/seed/tipcommunity/600/420",
+    title: "Creator profiles",
+    desc: "Every creator gets a profile with their wallet, bio, social links, and a history of support. Find who you believe in.",
+    image: "https://picsum.photos/seed/tipcreator/600/420",
     gradient: "from-fuchsia-500/10 via-transparent to-transparent",
     iconColor: "text-fuchsia-400 bg-fuchsia-500/10",
   },
@@ -252,7 +243,7 @@ const BENTO = [
     span: "lg:col-span-5",
     icon: Shield,
     title: "Verifiable, always",
-    desc: "Every tip, point, and payout maps to an on-chain transaction. Trust is not claimed — it is proven.",
+    desc: "Every tip maps to an on-chain transaction. Trust is not claimed — it is proven on Solana.",
     image: "https://picsum.photos/seed/tipshield/600/420",
     gradient: "from-emerald-500/5 via-transparent to-transparent",
     iconColor: "text-emerald-400 bg-emerald-500/10",
@@ -271,8 +262,8 @@ function Bento() {
             the people you believe in
           </h2>
           <p className="mt-5 text-sm md:text-base text-white/40 leading-relaxed max-w-xl">
-            Six primitives, one human-first economy. No farming games, no
-            inflated stats — just genuine support, beautifully surfaced.
+            Simple, direct tipping on Solana. No farming games, no inflated
+            stats — just genuine support, beautifully surfaced.
           </p>
         </motion.div>
 
@@ -280,9 +271,7 @@ function Bento() {
           {BENTO.map((card, i) => (
             <motion.a
               key={card.title}
-              href={
-                "/creators"
-              }
+              href="/creators"
               {...stagger}
               transition={{
                 ...stagger.transition,
@@ -323,14 +312,14 @@ function Bento() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  DESIRE — Pinned section: sticky title + scrolling proof gallery
+//  PROOF — How it works
 // ═══════════════════════════════════════════════════════════════════════════
 
 const PROOF_ITEMS = [
-  { icon: TrendingUp, title: "Live leaderboards", body: "See who shows up most — in SOL and in TipPoints — updated from real transactions." },
-  { icon: Bot, title: "AI that helps, not sells", body: "A creator assistant that drafts messages and helps you grow, without hype." },
-  { icon: Gamepad2, title: "Quests worth doing", body: "Small, human challenges that reward real behaviour — not empty grinding." },
-  { icon: Sparkles, title: "Moments that matter", body: "Milestones, badges and warm signals that celebrate every level of support." },
+  { icon: Wallet, title: "Connect your wallet", body: "Link your Solana wallet in one click. No accounts, no sign-ups — just your wallet." },
+  { icon: Coins, title: "Pick a creator", body: "Browse creator profiles, see their tips and supporters, and choose who to back." },
+  { icon: Send, title: "Send a tip", body: "Choose SOL or USDC, add a message, and send. It lands in seconds on-chain." },
+  { icon: TrendingUp, title: "Track your impact", body: "See your full history of support — who you've tipped, how much, and when." },
 ];
 
 function ProofCard({
@@ -390,8 +379,8 @@ function ProofGallery() {
               <span className="serif-accent text-white/80">not promises</span>
             </motion.h2>
             <p className="text-sm text-white/40 leading-relaxed max-w-sm">
-              Every feature is a transaction waiting to happen. Scroll through
-              what TipChain actually does — then go do it.
+              Every tip is a transaction waiting to happen. Scroll through
+              how TipChain works — then go do it.
             </p>
           </div>
 
@@ -414,11 +403,11 @@ function ProofGallery() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  DESIRE — Scrubbed word reveal
+//  PHILOSOPHY — Scrubbed word reveal
 // ═══════════════════════════════════════════════════════════════════════════
 
 const REVEAL_TEXT =
-  "TipChain turns the act of tipping into a language of its own — every coin, every message, every shared vault says something real about the people you back and the economy you choose to build together.";
+  "TipChain turns the act of tipping into a language of its own — every coin, every message, every supporter says something real about the people you back and the economy you choose to build together.";
 
 const REVEAL_WORDS = REVEAL_TEXT.split(" ");
 
@@ -480,7 +469,7 @@ function ScrubbedReveal() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  DESIRE — Testimonial carousel (human voices)
+//  TESTIMONIALS — Human voices
 // ═══════════════════════════════════════════════════════════════════════════
 
 const TESTIMONIALS = [
@@ -493,23 +482,23 @@ const TESTIMONIALS = [
   },
   {
     quote:
-      "TipPoints turned my support into something I can see and feel. Climbing from Bronze to Gold is strangely motivating.",
+      "I love that every tip I send shows up on-chain. It's transparent and I can prove I actually support the creators I care about.",
     name: "Dev K.",
-    role: "TipPoints Bronze → Gold",
+    role: "Active supporter",
     image: "https://picsum.photos/seed/devk/120/120",
   },
   {
     quote:
-      "I backed a vault of five creators with one tip and each of them thanked me. That simply does not happen anywhere else.",
+      "As a creator, receiving tips with personal messages means more than any subscription. It feels real.",
     name: "Priya S.",
-    role: "Vault supporter",
+    role: "Creator on TipChain",
     image: "https://picsum.photos/seed/priya/120/120",
   },
   {
     quote:
-      "My referral code brought three friends, and the commission came through exactly as promised. No fine print, no games.",
+      "Simple, fast, and no middleman taking a cut. This is how supporting creators should work.",
     name: "Arjun M.",
-    role: "Referral partner",
+    role: "Solana native",
     image: "https://picsum.photos/seed/arjun/120/120",
   },
 ];
@@ -627,126 +616,7 @@ function Testimonials() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  ROADMAP + INVESTORS — the TipChain master generation blueprint phases
-// ═══════════════════════════════════════════════════════════════════════════
-
-const ROADMAP_PHASES = [
-  {
-    phase: "Core Platform",
-    status: "Live",
-    note: "Wallets, profiles, tips, vaults, referrals",
-  },
-  {
-    phase: "AI Agents",
-    status: "Live",
-    note: "8 AI assistants on /ai",
-  },
-  {
-    phase: "GameFi",
-    status: "Live",
-    note: "Quests, XP, seasons, missions, guilds",
-  },
-  {
-    phase: "DeFi",
-    status: "In progress",
-    note: "Swaps, staking, pools, treasury",
-  },
-  {
-    phase: "SDK & Ecosystem",
-    status: "Next",
-    note: "SDK, CLI, plugin system, docs",
-  },
-];
-
-function Roadmap() {
-  return (
-    <section className="section-chapter relative overflow-hidden border-t border-white/5">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="orb orb-2 -top-40 right-0 opacity-30" />
-      </div>
-      <div className="mx-auto max-w-6xl px-6 py-28 md:py-36">
-        <motion.div
-          {...stagger}
-          className="mx-auto max-w-2xl text-center"
-        >
-          <motion.h2
-            {...stagger}
-            className="text-3xl font-bold leading-[1.05] tracking-[-0.03em] text-white md:text-5xl"
-          >
-            Built in public, phase by{" "}
-            <span className="serif-accent text-emerald-400">phase</span>
-          </motion.h2>
-          <motion.p
-            {...stagger}
-            className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/45 md:text-base"
-          >
-            From creator payments to AI, GameFi, DeFi, and a full developer
-            ecosystem — every phase ships on-chain and in the open.
-          </motion.p>
-        </motion.div>
-
-        <div className="mt-14 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {ROADMAP_PHASES.map((step, i) => (
-            <motion.div
-              key={step.phase}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ delay: i * 0.06, duration: 0.45 }}
-              className="relative rounded-2xl border border-white/5 bg-white/[0.02] p-5 transition-all hover:border-white/10 hover:bg-white/[0.04]"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] text-white/30">Phase {i + 1}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${
-                    step.status === "Live"
-                      ? "bg-emerald-500/15 text-emerald-400"
-                      : step.status === "In progress"
-                        ? "bg-amber-500/15 text-amber-400"
-                        : "bg-white/5 text-white/40"
-                  }`}
-                >
-                  {step.status}
-                </span>
-              </div>
-              <div className="mt-3 text-sm font-semibold text-white">{step.phase}</div>
-              <div className="mt-1 text-[11px] leading-relaxed text-white/40">{step.note}</div>
-            </motion.div>
-          ))}
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.15 }}
-          className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
-        >
-          <a
-            href="/dashboard"
-            className="group inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.35)]"
-          >
-            <Coins className="size-4 transition-transform group-hover:scale-110" />
-            Explore tokenomics
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </a>
-          <a
-            href="https://github.com/shivamprajapati17/tipchain12"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-white/80 transition-all hover:border-white/20 hover:bg-white/10 hover:text-white"
-          >
-            <Globe className="size-4" />
-            View the code
-          </a>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════════════
-//  ACTION — Final CTA
+//  FINAL CTA
 // ═══════════════════════════════════════════════════════════════════════════
 
 function FinalCTA() {
@@ -793,7 +663,7 @@ function FinalCTA() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  MAIN — AIDA flow, footer lives in the root layout
+//  MAIN
 // ═══════════════════════════════════════════════════════════════════════════
 
 export default function Home() {
@@ -805,7 +675,6 @@ export default function Home() {
       <ProofGallery />
       <ScrubbedReveal />
       <Testimonials />
-      <Roadmap />
       <FinalCTA />
     </main>
   );

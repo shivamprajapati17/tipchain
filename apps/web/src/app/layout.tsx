@@ -24,9 +24,9 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata: Metadata = {
-  title: "TipChain — Tip. Earn. Belong. On Solana.",
+  title: "TipChain — Direct Tipping on Solana",
   description:
-    "The human-first creator economy on Solana. Tip creators, earn TipPoints, back vaults, and grow together — every action verifiable on-chain.",
+    "Send SOL or USDC tips directly to creators on Solana. Every tip is on-chain, transparent, and instant. No middlemen, no fees.",
 };
 
 function GlobalFooter() {
@@ -43,15 +43,14 @@ function GlobalFooter() {
               <span className="text-sm font-semibold text-white" style={{ fontFamily: "Space Grotesk, sans-serif" }}>
                 TipChain
               </span>
-            </div>
-            <p className="text-xs text-white/30 leading-relaxed max-w-xs">
-              Tip the creators you love. Earn TipPoints that prove your support. Built on Solana, powered by people.
+            </div>              <p className="text-xs text-white/30 leading-relaxed max-w-xs">
+              Send SOL or USDC tips directly to creators on Solana. Every tip is on-chain, transparent, and instant.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
             <div>
-              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Earn</h4>
+              <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Explore</h4>
               <div className="space-y-2.5">
                 <a href="/creators" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Creators</a>
                 <a href="/history" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Tip history</a>
@@ -68,7 +67,7 @@ function GlobalFooter() {
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Build</h4>
               <div className="space-y-2.5">
                 <a href="/profile" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Profile</a>
-                <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">GitHub</a>
+                <a href="https://github.com/shivamprajapati17/tipchain" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">GitHub</a>
               </div>
             </div>
             <div>
@@ -91,7 +90,7 @@ function GlobalFooter() {
         <div className="mt-10 pt-6 hairline flex flex-col sm:flex-row items-center justify-between gap-3">
           <span className="text-[10px] text-white/20">© 2026 TipChain. Built on Solana.</span>
           <span className="text-[10px] text-white/20">
-            v3.0 — human-first creator economy
+            v4.0 — direct tipping on Solana
           </span>
         </div>
       </div>
