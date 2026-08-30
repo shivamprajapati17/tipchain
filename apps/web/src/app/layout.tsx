@@ -54,17 +54,12 @@ function GlobalFooter() {
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Earn</h4>
               <div className="space-y-2.5">
                 <a href="/creators" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Creators</a>
-                <a href="/leaderboard" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Leaderboard</a>
-                <a href="/points" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">TipPoints</a>
-                <a href="/quests" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Quests</a>
-                <a href="/tokenomics" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Tokenomics</a>
+                <a href="/history" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Tip history</a>
               </div>
             </div>
             <div>
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Give</h4>
               <div className="space-y-2.5">
-                <a href="/vaults" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Vaults</a>
-                <a href="/referrals" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Referrals</a>
                 <a href="/history" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">History</a>
                 <a href="/dashboard" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Dashboard</a>
               </div>
@@ -72,9 +67,7 @@ function GlobalFooter() {
             <div>
               <h4 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Build</h4>
               <div className="space-y-2.5">
-                <a href="/ai" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">AI Agents</a>
-                <a href="/defi" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">DeFi Hub</a>
-                <a href="/marketplace" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Marketplace</a>
+                <a href="/profile" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">Profile</a>
                 <a href="https://github.com/shivamprajapati17/tipchain12" target="_blank" rel="noopener noreferrer" className="block text-xs text-white/30 hover:text-emerald-400 transition-colors">GitHub</a>
               </div>
             </div>

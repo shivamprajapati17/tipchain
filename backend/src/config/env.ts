@@ -16,48 +16,12 @@ const envSchema = z.object({
   // Solana
   SOLANA_RPC_URL: z.string().url().default("https://api.devnet.solana.com"),
   SOLANA_NETWORK: z.enum(["devnet", "mainnet-beta", "testnet"]).default("devnet"),
-  HELIUS_API_KEY: z.string().optional(),
-  JUPITER_API_URL: z.string().url().default("https://quote-api.jup.ag/v6"),
 
   // JWT Authentication
   JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN: z.string().default("7d"),
   JWT_REFRESH_SECRET: z.string().min(32, "JWT_REFRESH_SECRET must be at least 32 characters"),
   JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
-
-  // Auth
-  TIPCHAIN_API_KEY: z.string().optional(),
-
-  // NVIDIA AI
-  NVIDIA_API_KEY: z.string().optional(),
-
-  // Storage
-  STORAGE_PROVIDER: z.enum(["local", "cloudinary", "s3"]).default("local"),
-  CLOUDINARY_CLOUD_NAME: z.string().optional(),
-  CLOUDINARY_API_KEY: z.string().optional(),
-  CLOUDINARY_API_SECRET: z.string().optional(),
-  AWS_ACCESS_KEY_ID: z.string().optional(),
-  AWS_SECRET_ACCESS_KEY: z.string().optional(),
-  AWS_REGION: z.string().optional(),
-  AWS_S3_BUCKET: z.string().optional(),
-
-  // Notifications
-  RESEND_API_KEY: z.string().optional(),
-  DISCORD_WEBHOOK_URL: z.string().url().optional(),
-
-  // n8n Automation Webhook (fire-and-forget domain events).
-  // NOTE: intentionally NOT in the strict schema — eventBus reads it directly
-  // via process.env with a safe localhost fallback, so an invalid value can
-  // never crash server boot.
-  // N8N_WEBHOOK_URL: z.string().url().optional(),
-
-  // Analytics
-  POSTHOG_KEY: z.string().optional(),
-  POSTHOG_HOST: z.string().url().optional(),
-
-  // Monitoring
-  SENTRY_DSN: z.string().url().optional(),
-  SENTRY_ENVIRONMENT: z.string().optional(),
 
   // Rate Limiting
   RATE_LIMIT_WINDOW_MS: z.coerce.number().positive().default(60000),
@@ -66,9 +30,6 @@ const envSchema = z.object({
   // Pagination
   DEFAULT_PAGE_SIZE: z.coerce.number().positive().default(20),
   MAX_PAGE_SIZE: z.coerce.number().positive().default(100),
-
-  // Bull Queue (optional)
-  REDIS_QUEUE_ENABLED: z.coerce.boolean().default(false),
 });
 
 export type Env = z.infer<typeof envSchema>;

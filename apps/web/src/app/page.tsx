@@ -132,7 +132,7 @@ function Hero() {
             <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
           </a>
           <a
-            href="/vaults"
+            href="/creators"
             className="group inline-flex items-center justify-center gap-2 h-13 px-8 py-4 rounded-2xl glass-card text-white/80 text-sm font-medium hover:text-white hover:bg-white/10 transition-all"
           >
             <Layers className="size-4" />
@@ -169,11 +169,9 @@ function Hero() {
 
 const MARQUEE_ITEMS = [
   "Tip in SOL",
-  "Earn TipPoints",
-  "Back a vault",
-  "Share a referral",
-  "Climb the leaderboard",
-  "Follow creators",
+  "Support creators",
+  "Track your tips",
+  "Tip directly from your wallet",
   "Send a message",
   "Prove it on-chain",
 ];
@@ -283,17 +281,7 @@ function Bento() {
             <motion.a
               key={card.title}
               href={
-                card.title === "TipPoints"
-                  ? "/points"
-                  : card.title === "Creator vaults"
-                    ? "/vaults"
-                    : card.title === "Referrals that pay"
-                      ? "/referrals"
-                      : card.title === "A real community"
-                        ? "/creators"
-                        : card.title === "Verifiable, always"
-                          ? "/leaderboard"
-                          : "/creators"
+                "/creators"
               }
               {...stagger}
               transition={{
@@ -735,7 +723,7 @@ function Roadmap() {
           className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row"
         >
           <a
-            href="/tokenomics"
+            href="/dashboard"
             className="group inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-black transition-all hover:bg-emerald-400 hover:shadow-[0_0_32px_rgba(16,185,129,0.35)]"
           >
             <Coins className="size-4 transition-transform group-hover:scale-110" />
