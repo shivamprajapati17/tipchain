@@ -1,47 +1,11 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  Search,
-  Coins,
-  Users,
-  TrendingUp,
-  SlidersHorizontal,
-  ChevronDown,
-  X,
-  AlertCircle,
-  RefreshCw,
-  ArrowUpRight,
-} from "lucide-react";
+import { Search, Users, TrendingUp, X, AlertCircle, RefreshCw, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getCreators, lamportsToSol, type CreatorResponse } from "@/lib/api";
-
-// ─── Motion Variants ────────────────────────────────────────────────────────
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05, delayChildren: 0.1 },
-  },
-} as const;
-
-const fadeSlideUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring" as const, stiffness: 80, damping: 20 },
-  },
-} as const;
-
-
-
-// ─── Types ──────────────────────────────────────────────────────────────────
-
-type SortKey = "earnings" | "supporters" | "newest";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -66,144 +30,55 @@ function CreatorCard({ creator }: { creator: CreatorResponse }) {
   const earnings = lamportsToSol(creator.totalTips);
 
   return (
-    <motion.div variants={fadeSlideUp} layout>
-      <Link href={`/creator/${creator.username}`} className="group block h-full">
-        <motion.div
-          whileHover={{ y: -4, transition: { type: "spring", stiffness: 300, damping: 20 } }}
-          className="relative h-full overflow-hidden rounded-2xl border border-border bg-gradient-to-b from-muted/20 to-muted/5 p-[2px] shadow-premium transition-all duration-500 group-hover:shadow-premium-lg"
-        >
-          <div className="rounded-[calc(1.5rem-3px)] h-full bg-card shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-            <div className="p-5 h-full">
-          {/* Hover gradient */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-500/[0.02] to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-
-          <div className="relative flex h-full flex-col">
-            {/* Avatar & Name */}
-            <div className="mb-3 flex items-center gap-3">
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 font-bold text-sm text-emerald-600/70"
-              >
-                {initials}
-              </motion.div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <h3 className="text-sm font-semibold truncate">
-                    {displayName(creator.username)}
-                  </h3>
-                  <PulseDot />
-                </div>
-                <p className="truncate text-xs text-muted-foreground">
-                  @{creator.username}
-                </p>
-              </div>
-              <motion.div
-                className="shrink-0 opacity-0 group-hover:opacity-100"
-                initial={{ x: -5 }}
-                whileHover={{ x: 2 }}
-              >
-                <ArrowUpRight className="size-4 text-muted-foreground" />
-              </motion.div>
-            </div>
-
-            {/* Bio */}
-            <p className="mb-4 text-xs text-muted-foreground leading-relaxed line-clamp-2 flex-1">
-              {creator.bio || "No bio yet."}
-            </p>
-
-            {/* Stats */}
-            <div className="flex items-center gap-4 border-t border-border pt-3">
-              <div className="flex items-center gap-1.5">
-                <TrendingUp className="size-3 text-muted-foreground/60" />
-                <span className="text-xs font-semibold">
-                  {earnings.toFixed(2)} SOL
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Users className="size-3 text-muted-foreground/60" />
-                <span className="text-xs text-muted-foreground">
-                  {creator.supporterCount}
-                </span>
-              </div>
-            </div>
-          </div>
-          </div>
-          </div>
-        </motion.div>
-      </Link>
-    </motion.div>
-  );
-}
-
-// ─── Sort Select ────────────────────────────────────────────────────────────
-
-function SortSelect({
-  value,
-  onChange,
-}: {
-  value: SortKey;
-  onChange: (key: SortKey) => void;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [ref, setRef] = useState<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref && !ref.contains(e.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [ref]);
-
-  const options: { key: SortKey; label: string }[] = [
-    { key: "earnings", label: "Total Earned" },
-    { key: "supporters", label: "Most Supporters" },
-    { key: "newest", label: "Newest First" },
-  ];
-
-  const currentLabel = options.find((o) => o.key === value)?.label ?? "Sort";
-
-  return (
-    <div className="relative" ref={setRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200"
+    <Link href={`/creator/${creator.username}`} className="group block h-full">
+      <motion.div
+        whileHover={{ y: -3 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="relative h-full rounded-2xl border border-white/5 bg-white/[0.03] p-5 transition-all duration-300 group-hover:border-emerald-500/20 group-hover:bg-white/[0.05]"
       >
-        <SlidersHorizontal className="size-3.5" />
-        {currentLabel}
-        <ChevronDown className="size-3 opacity-50" />
-      </button>
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -5, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -5, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="absolute right-0 top-full mt-1 w-44 rounded-xl border border-border bg-popover p-1 shadow-premium z-10"
-          >
-            {options.map((option) => (
-              <button
-                key={option.key}
-                onClick={() => {
-                  onChange(option.key);
-                  setIsOpen(false);
-                }}
-                className={`flex w-full items-center rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                  value === option.key
-                    ? "bg-emerald-500/10 text-emerald-700"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        <div className="flex h-full flex-col">
+          {/* Avatar & Name */}
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-emerald-500/5 to-emerald-500/10 font-bold text-sm text-emerald-400">
+              {initials}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-sm font-semibold text-white truncate">
+                  {displayName(creator.username)}
+                </h3>
+                <PulseDot />
+              </div>
+              <p className="truncate text-xs text-white/40">
+                @{creator.username}
+              </p>
+            </div>
+            <ArrowUpRight className="size-4 text-white/20 shrink-0 group-hover:text-emerald-400 transition-colors" />
+          </div>
+
+          {/* Bio */}
+          <p className="mb-4 text-xs text-white/40 leading-relaxed line-clamp-2 flex-1">
+            {creator.bio || "No bio yet."}
+          </p>
+
+          {/* Stats */}
+          <div className="flex items-center gap-4 border-t border-white/5 pt-3">
+            <div className="flex items-center gap-1.5">
+              <TrendingUp className="size-3 text-white/30" />
+              <span className="text-xs font-semibold text-white/70">
+                {earnings.toFixed(2)} SOL
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Users className="size-3 text-white/30" />
+              <span className="text-xs text-white/50">
+                {creator.supporterCount} supporters
+              </span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </Link>
   );
 }
 
@@ -216,54 +91,14 @@ function EmptyState({ query }: { query: string }) {
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-20 text-center"
     >
-      <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
-        <Search className="size-7 text-muted-foreground" />
+      <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03]">
+        <Search className="size-7 text-white/30" />
       </div>
-      <h2 className="mb-2 text-lg font-semibold">No creators found</h2>
-      <p className="mb-2 text-sm text-muted-foreground max-w-md">
+      <h2 className="mb-2 text-lg font-semibold text-white">No creators found</h2>
+      <p className="text-sm text-white/40 max-w-md">
         No results match &ldquo;{query}&rdquo;. Try adjusting your search.
       </p>
-      <Link href="/creators">
-        <Button variant="outline" size="sm" className="mt-2 rounded-xl">
-          Clear all filters
-        </Button>
-      </Link>
     </motion.div>
-  );
-}
-
-// ─── Stats Bar ──────────────────────────────────────────────────────────────
-
-function StatsBar({ creators }: { creators: CreatorResponse[] }) {
-  const totalEarnings = creators.reduce(
-    (sum, c) => sum + lamportsToSol(c.totalTips),
-    0
-  );
-  const totalSupporters = creators.reduce(
-    (sum, c) => sum + c.supporterCount,
-    0
-  );
-
-  return (
-    <div className="grid grid-cols-3 gap-3 rounded-2xl border border-border bg-card p-4 shadow-premium">
-      {[
-        { label: "Creators", value: String(creators.length), icon: Users },
-        {
-          label: "Total Earned",
-          value: `${totalEarnings.toFixed(1)} SOL`,
-          icon: TrendingUp,
-        },
-        { label: "Supporters", value: String(totalSupporters), icon: Coins },
-      ].map((stat) => (
-        <div key={stat.label} className="text-center">
-          <div className="mb-1 flex justify-center">
-            <stat.icon className="size-4 text-emerald-600/60" />
-          </div>
-          <p className="text-sm font-bold tracking-tight">{stat.value}</p>
-          <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-        </div>
-      ))}
-    </div>
   );
 }
 
@@ -271,72 +106,52 @@ function StatsBar({ creators }: { creators: CreatorResponse[] }) {
 
 function CreatorsSkeleton() {
   return (
-    <div className="flex-1">
-      <section className="border-b border-border bg-muted/20 px-6 py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-6 h-8 w-48 shimmer-slow rounded-lg" />
-          <div className="h-12 w-full shimmer-slow rounded-xl" />
-        </div>
-      </section>
-      <section className="px-6 py-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div
-                key={i}
-                className="h-52 rounded-2xl border border-border bg-card p-5 overflow-hidden relative"
-              >
-                <div className="absolute inset-0 shimmer-slow opacity-50" />
-                <div className="relative">
-                  <div className="mb-3 flex items-center gap-3">
-                    <div className="size-11 rounded-xl bg-muted" />
-                    <div className="flex-1 space-y-2">
-                      <div className="h-4 w-24 rounded-md bg-muted" />
-                      <div className="h-3 w-16 rounded-md bg-muted" />
-                    </div>
+    <div className="flex-1 px-6 py-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-8 h-8 w-48 shimmer-slow rounded-lg" />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="h-48 rounded-2xl border border-white/5 bg-white/[0.03] p-5 overflow-hidden relative"
+            >
+              <div className="absolute inset-0 shimmer-slow opacity-50" />
+              <div className="relative">
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="size-10 rounded-xl bg-white/5" />
+                  <div className="space-y-2">
+                    <div className="h-4 w-24 rounded-md bg-white/5" />
+                    <div className="h-3 w-16 rounded-md bg-white/5" />
                   </div>
-                  <div className="space-y-2 mb-4">
-                    <div className="h-3 w-full rounded-md bg-muted" />
-                    <div className="h-3 w-3/4 rounded-md bg-muted" />
-                  </div>
-                  <div className="h-4 w-1/2 rounded-md bg-muted" />
+                </div>
+                <div className="space-y-2 mb-4">
+                  <div className="h-3 w-full rounded-md bg-white/5" />
+                  <div className="h-3 w-3/4 rounded-md bg-white/5" />
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-      </section>
+      </div>
     </div>
   );
 }
 
 // ─── Error State ────────────────────────────────────────────────────────────
 
-function CreatorsError({
-  message,
-  onRetry,
-}: {
-  message: string;
-  onRetry: () => void;
-}) {
+function CreatorsError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="flex flex-1 items-center justify-center px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center max-w-sm"
-      >
-        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-border bg-card shadow-premium">
-          <AlertCircle className="size-7 text-destructive" />
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-sm">
+        <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03]">
+          <AlertCircle className="size-7 text-red-400" />
         </div>
-        <h1 className="mb-2 text-xl font-semibold">Failed to load creators</h1>
-        <p className="mb-6 text-sm text-muted-foreground">{message}</p>
-        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-          <Button onClick={onRetry} variant="outline" className="gap-2 rounded-xl">
-            <RefreshCw className="size-4" />
-            Try Again
-          </Button>
-        </motion.div>
+        <h1 className="mb-2 text-xl font-semibold text-white">Failed to load creators</h1>
+        <p className="mb-6 text-sm text-white/40">{message}</p>
+        <Button onClick={onRetry} variant="outline" className="gap-2 rounded-xl">
+          <RefreshCw className="size-4" />
+          Try Again
+        </Button>
       </motion.div>
     </div>
   );
@@ -349,7 +164,7 @@ export default function CreatorsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("earnings");
+  const [sortKey, setSortKey] = useState<"earnings" | "supporters" | "newest">("earnings");
 
   const fetchCreators = async () => {
     setLoading(true);
@@ -358,9 +173,7 @@ export default function CreatorsPage() {
       const data = await getCreators();
       setCreators(data.creators);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load creators"
-      );
+      setError(err instanceof Error ? err.message : "Failed to load creators");
     } finally {
       setLoading(false);
     }
@@ -376,142 +189,109 @@ export default function CreatorsPage() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
-        (c) =>
-          c.username.toLowerCase().includes(q) ||
-          c.bio.toLowerCase().includes(q)
+        (c) => c.username.toLowerCase().includes(q) || c.bio.toLowerCase().includes(q)
       );
     }
 
     switch (sortKey) {
       case "earnings":
-        result.sort(
-          (a, b) => lamportsToSol(b.totalTips) - lamportsToSol(a.totalTips)
-        );
+        result.sort((a, b) => lamportsToSol(b.totalTips) - lamportsToSol(a.totalTips));
         break;
       case "supporters":
         result.sort((a, b) => b.supporterCount - a.supporterCount);
         break;
       case "newest":
-        result.sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-        );
+        result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
     }
 
     return result;
   }, [searchQuery, sortKey, creators]);
 
-  if (loading) {
-    return <CreatorsSkeleton />;
-  }
-
-  if (error) {
-    return <CreatorsError message={error} onRetry={fetchCreators} />;
-  }
+  if (loading) return <CreatorsSkeleton />;
+  if (error) return <CreatorsError message={error} onRetry={fetchCreators} />;
 
   return (
     <div className="flex-1">
-      {/* ── Gradient Mesh Background ─────────────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <section className="border-b border-white/5 bg-white/[0.02] px-6 py-10 sm:py-14">
         <motion.div
-          className="absolute -right-32 -top-32 size-[500px] rounded-full opacity-10 dark:opacity-5"
-          style={{ background: "radial-gradient(circle at 30% 50%, oklch(0.45 0.12 160), transparent 70%)", filter: "blur(80px)" }}
-          animate={{ scale: [1, 1.15, 1], x: [0, 20, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-40 -left-20 size-[400px] rounded-full opacity-8 dark:opacity-3"
-          style={{ background: "radial-gradient(circle at 70% 50%, oklch(0.55 0.10 160), transparent 70%)", filter: "blur(80px)" }}
-          animate={{ scale: [1.1, 1, 1.1], x: [0, -30, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-        />
-      </div>
-
-      {/* Hero */}
-      <section className="relative border-b border-border bg-muted/20 px-6 py-12 sm:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 80, damping: 20 }}
           className="mx-auto max-w-6xl"
         >
-          <div className="mb-2">
-            <span className="inline-flex items-center rounded-full border border-border bg-background/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-              Directory
-            </span>
-          </div>
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 Explore{" "}
-                <span className="serif-accent text-emerald-600 dark:text-emerald-400">
-                  Creators
-                </span>
+                <span className="serif-accent text-emerald-400">Creators</span>
               </h1>
-              <p className="mt-2 text-sm text-muted-foreground max-w-lg leading-relaxed">
-                Discover and support amazing creators building on Solana. Find
-                developers, artists, writers, and more.
+              <p className="mt-2 text-sm text-white/40 max-w-lg">
+                Discover and support creators building on Solana.
               </p>
             </div>
-            <StatsBar creators={creators} />
+            <div className="flex items-center gap-4 text-xs text-white/40">
+              <span>{creators.length} creators</span>
+              <span className="text-white/10">|</span>
+              <span>
+                {creators.reduce((s, c) => s + lamportsToSol(c.totalTips), 0).toFixed(1)} SOL earned
+              </span>
+            </div>
           </div>
 
           {/* Search */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mt-6"
-          >
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50" />
+          <div className="mt-6 flex gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-white/30" />
               <input
                 type="text"
-                placeholder="Search creators by name, username, or bio..."
+                placeholder="Search creators..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background py-3.5 pl-11 pr-11 text-sm outline-none placeholder:text-muted-foreground/40 focus:border-emerald-500/30 focus:ring-2 focus:ring-emerald-500/10 transition-all duration-200"
+                className="w-full rounded-xl border border-white/5 bg-white/[0.04] py-3 pl-10 pr-10 text-sm text-white outline-none placeholder:text-white/25 focus:border-emerald-500/30 focus:ring-1 focus:ring-emerald-500/20 transition-all"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
                 >
                   <X className="size-4" />
                 </button>
               )}
             </div>
-          </motion.div>
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
+              className="rounded-xl border border-white/5 bg-white/[0.04] px-3 text-sm text-white/60 outline-none focus:border-emerald-500/30 cursor-pointer"
+            >
+              <option value="earnings">Total Earned</option>
+              <option value="supporters">Most Supporters</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
         </motion.div>
       </section>
 
-      {/* Content */}
+      {/* ── Grid ────────────────────────────────────────────────────── */}
       <section className="px-6 py-6 sm:py-8">
         <div className="mx-auto max-w-6xl">
-          {/* Filter Bar */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-xs text-muted-foreground">
-              {filteredCreators.length} creator
-              {filteredCreators.length !== 1 ? "s" : ""}
-            </p>
-            <SortSelect value={sortKey} onChange={setSortKey} />
-          </div>
-
-          {/* Grid */}
           {filteredCreators.length > 0 ? (
-            <motion.div
-              variants={staggerContainer}
-              initial="hidden"
-              animate="visible"
-              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-            >
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               <AnimatePresence mode="popLayout">
-                {filteredCreators.map((creator) => (
-                  <CreatorCard key={creator.walletAddress} creator={creator} />
+                {filteredCreators.map((creator, i) => (
+                  <motion.div
+                    key={creator.walletAddress}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ delay: i * 0.04, duration: 0.4 }}
+                  >
+                    <CreatorCard creator={creator} />
+                  </motion.div>
                 ))}
               </AnimatePresence>
-            </motion.div>
+            </div>
           ) : (
             <EmptyState query={searchQuery} />
           )}
