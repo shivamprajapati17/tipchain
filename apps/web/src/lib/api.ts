@@ -14,27 +14,42 @@ async function fetchJSON<T>(
   options?: RequestInit,
   noParse?: boolean
 ): Promise<T> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": TIPCHAIN_API_KEY,
-    },
-    ...options,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
-  if (noParse) return res as unknown as T;
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": TIPCHAIN_API_KEY,
+      },
+      signal: controller.signal,
+      ...options,
+    });
 
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error ?? `API error: ${res.status}`);
+    if (noParse) return res as unknown as T;
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error ?? `API error: ${res.status}`);
+    }
+
+    const json = await res.json();
+    if (json && typeof json === "object" && "success" in json && "data" in json) {
+      return json.data as T;
+    }
+    return json as T;
+  } catch (err) {
+    if (err instanceof DOMException && err.name === "AbortError") {
+      throw new Error("Server is waking up, please try again in a moment");
+    }
+    if (err instanceof TypeError && err.message.includes("fetch")) {
+      throw new Error("Backend is temporarily unavailable");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const json = await res.json();
-  // Handle wrapped API response format: { success: true, data: T, timestamp: "..." }
-  if (json && typeof json === "object" && "success" in json && "data" in json) {
-    return json.data as T;
-  }
-  return json as T;
 }
 
 // ─── Response Types ─────────────────────────────────────────────────────────
