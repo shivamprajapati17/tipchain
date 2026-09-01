@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { getCreatorByWallet, createCreator, updateCreator, type CreatorResponse } from "@/lib/api";
+import { getCreatorByWallet, registerCreator, updateCreator, type CreatorResponse } from "@/lib/api";
 
 const SOCIAL_PLATFORMS = [
   { key: "twitter", label: "X / Twitter", placeholder: "https://x.com/..." },
@@ -53,7 +53,7 @@ export default function ProfilePage() {
       setCreatorData(data.creator);
       setUsername(data.creator.username);
       setBio(data.creator.bio);
-      setSocialLinks(data.creator.socialLinks || {});
+      setSocialLinks(typeof data.creator.socialLinks === 'string' ? JSON.parse(data.creator.socialLinks || '{}') : data.creator.socialLinks || {});
       setIsNewProfile(false);
     } catch (err) {
       if (err instanceof Error && (err.message.includes("404") || err.message.includes("not found"))) {
@@ -73,7 +73,7 @@ export default function ProfilePage() {
     setSuccess(false);
     try {
       if (isNewProfile) {
-        const result = await createCreator({ walletAddress, username: username.trim(), bio, socialLinks });
+        const result = await registerCreator({ walletAddress, username: username.trim(), bio, socialLinks });
         setCreatorData(result.creator);
         setIsNewProfile(false);
         setTimeout(() => router.push("/dashboard"), 1500);

@@ -11,7 +11,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
-  getCreatorByUsername, lamportsToSol, recordTransaction,
+  getCreatorByUsername, lamportsToSol, recordTip,
   type TransactionResponse, type SupporterResponse,
 } from "@/lib/api";
 
@@ -102,7 +102,7 @@ function TipCard({ creatorWallet }: { creatorWallet: string }) {
 
       // Record in backend (best-effort)
       try {
-        await recordTransaction({
+        await recordTip({
           senderWallet: session.account.address,
           receiverWallet: creatorWallet,
           amount: parsedAmount,
