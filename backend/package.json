@@ -22,7 +22,9 @@
     "clean": "rm -rf dist logs",
     "postinstall": "prisma generate",
     "docker:build": "docker build -t tipchain-backend .",
-    "docker:run": "docker run -p 4000:4000 --env-file .env tipchain-backend"
+    "docker:run": "docker run -p 4000:4000 --env-file .env tipchain-backend",
+    "seed": "tsx src/seed.ts",
+    "seed:clear": "tsx src/seed.ts --clear"
   },
   "dependencies": {
     "@prisma/client": "^6",

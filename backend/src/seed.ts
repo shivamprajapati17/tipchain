@@ -1,84 +1,105 @@
 import { prisma } from "./lib/prisma";
 
-// ─── Mock Data ──────────────────────────────────────────────────────────────
+// ─── Demo Data ──────────────────────────────────────────────────────────────
+// Matches the creators currently live on the site (same wallet addresses, so
+// tips recorded on-chain stay consistent). `npm run db:seed` upserts these;
+// `npm run db:seed -- --clear` removes all demo data instead.
 
 const CREATORS = [
   {
-    walletAddress: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r",
-    username: "rahul",
-    bio: "Full-stack developer & Solana enthusiast. Building the future of web3.",
+    walletAddress: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV",
+    username: "solanagirl",
+    bio: "Digital artist minting on Solana. Commission open!",
     socialLinks: JSON.stringify({
-      twitter: "https://x.com/rahul_dev",
-      github: "https://github.com/rahuldev",
-      website: "https://rahuldev.xyz",
+      twitter: "https://x.com/solanagirl",
+      instagram: "https://instagram.com/solanagirl",
     }),
   },
   {
-    walletAddress: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE",
-    username: "priya",
-    bio: "Digital artist & NFT creator. Pushing the boundaries of generative art on Solana.",
+    walletAddress: "wWy9bSic3RV6yYggcPadNBWAk4Mot4PeUJh4MQGigdNB",
+    username: "cryptopod",
+    bio: "Weekly deep dives into DeFi, NFTs and the Solana ecosystem.",
     socialLinks: JSON.stringify({
-      twitter: "https://x.com/priya_art",
-      instagram: "https://instagram.com/priya_art",
+      twitter: "https://x.com/cryptopod",
+      youtube: "https://youtube.com/@cryptopod",
     }),
   },
   {
-    walletAddress: "4PsD3wX6qL2pR7vW5qT8nB1cF6dX2yH0aG3sE4r9x",
-    username: "arjun",
-    bio: "Open source contributor & Rust developer. Building Solana programs and developer tooling.",
+    walletAddress: "HSeJYTmcEw2XQpsRWGVGwAVcaAqhEGAGxjvN4v3Qfwoe",
+    username: "codewithsam",
+    bio: "Building open-source tools on Solana. Tip to support tutorials!",
     socialLinks: JSON.stringify({
-      twitter: "https://x.com/arjun_builds",
-      github: "https://github.com/arjunbuilds",
+      github: "https://github.com/codewithsam",
     }),
   },
   {
-    walletAddress: "8MHyRbX6ETA6QccwdCFCymFoTT5PRUxc6T9rFczb7QWd",
-    username: "shivam",
-    bio: "hi",
+    walletAddress: "Cr4T8wF2Nf3jMHjVz6Yuyg26pqN8L6thHuG78mDXHXsN",
+    username: "musicbyria",
+    bio: "Lo-fi beats producer. Every tip = new track.",
     socialLinks: JSON.stringify({
-      twitter: "https://x.com/Shivampra17",
+      twitter: "https://x.com/musicbyria",
+      spotify: "https://open.spotify.com/artist/ria",
     }),
   },
 ];
 
-const TIPS = [
-  { sender: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE", receiver: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r", amount: 500_000_000n, token: "SOL", message: "Love your work! Keep building 🚀" },
-  { sender: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r", receiver: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE", amount: 10_000_000_000n, token: "USDC", message: "Keep creating amazing content!" },
-  { sender: "4PsD3wX6qL2pR7vW5qT8nB1cF6dX2yH0aG3sE4r9x", receiver: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r", amount: 250_000_000n, token: "SOL", message: null },
-  { sender: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r", receiver: "4PsD3wX6qL2pR7vW5qT8nB1cF6dX2yH0aG3sE4r9x", amount: 1_000_000_000n, token: "SOL", message: "Keep building — great things ahead" },
-  { sender: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE", receiver: "4PsD3wX6qL2pR7vW5qT8nB1cF6dX2yH0aG3sE4r9x", amount: 3_000_000_000n, token: "SOL", message: "Your Rust tutorials are incredible!" },
-  { sender: "4PsD3wX6qL2pR7vW5qT8nB1cF6dX2yH0aG3sE4r9x", receiver: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE", amount: 500_000_000n, token: "SOL", message: "This NFT collection is fire 🔥" },
-  { sender: "8MHyRbX6ETA6QccwdCFCymFoTT5PRUxc6T9rFczb7QWd", receiver: "9xJ4mM3zK9L2pR7vW5qT8nB1cF6dX2yH0aG3sE4r", amount: 150_000_000n, token: "SOL", message: "Great content!" },
-  { sender: "8MHyRbX6ETA6QccwdCFCymFoTT5PRUxc6T9rFczb7QWd", receiver: "7GfH2aR9xK4mM3zL2pR7vW5qT8nB1cF6dX2yH0aG3sE", amount: 2_500_000_000n, token: "USDC", message: "Love the art style!" },
+// sender -> receiver tips (amounts in lamports). 1 SOL = 1_000_000_000 lamports.
+const TIPS: {
+  sender: string;
+  receiver: string;
+  amount: bigint;
+  token: string;
+  message: string | null;
+}[] = [
+  { sender: "wWy9bSic3RV6yYggcPadNBWAk4Mot4PeUJh4MQGigdNB", receiver: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV", amount: 500_000_000n, token: "SOL", message: "Love your art style! 🎨" },
+  { sender: "HSeJYTmcEw2XQpsRWGVGwAVcaAqhEGAGxjvN4v3Qfwoe", receiver: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV", amount: 250_000_000n, token: "SOL", message: "Commission sent, check DMs!" },
+  { sender: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV", receiver: "wWy9bSic3RV6yYggcPadNBWAk4Mot4PeUJh4MQGigdNB", amount: 1_000_000_000n, token: "SOL", message: "Best crypto podcast out there" },
+  { sender: "Cr4T8wF2Nf3jMHjVz6Yuyg26pqN8L6thHuG78mDXHXsN", receiver: "wWy9bSic3RV6yYggcPadNBWAk4Mot4PeUJh4MQGigdNB", amount: 3_000_000_000n, token: "USDC", message: "Keep the episodes coming 🎙️" },
+  { sender: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV", receiver: "HSeJYTmcEw2XQpsRWGVGwAVcaAqhEGAGxjvN4v3Qfwoe", amount: 800_000_000n, token: "SOL", message: "Your Rust tutorials are incredible" },
+  { sender: "wWy9bSic3RV6yYggcPadNBWAk4Mot4PeUJh4MQGigdNB", receiver: "HSeJYTmcEw2XQpsRWGVGwAVcaAqhEGAGxjvN4v3Qfwoe", amount: 2_000_000_000n, token: "SOL", message: null },
+  { sender: "HSeJYTmcEw2XQpsRWGVGwAVcaAqhEGAGxjvN4v3Qfwoe", receiver: "Cr4T8wF2Nf3jMHjVz6Yuyg26pqN8L6thHuG78mDXHXsN", amount: 400_000_000n, token: "SOL", message: "This lo-fi mix is on repeat 🔥" },
+  { sender: "qBPFXbPikk8db1NEzo7RJvEZsaxzwfn42zpoW9vXG3AV", receiver: "Cr4T8wF2Nf3jMHjVz6Yuyg26pqN8L6thHuG78mDXHXsN", amount: 1_500_000_000n, token: "USDC", message: "New album when? 👀" },
 ];
 
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 async function main() {
+  const shouldClear = process.argv.includes("--clear");
+
+  if (shouldClear) {
+    console.log("🧹 Clearing demo data...");
+    await prisma.transaction.deleteMany();
+    await prisma.supporter.deleteMany();
+    await prisma.creator.deleteMany();
+    console.log("   Done");
+    return;
+  }
+
   console.log("🌱 Seeding TipChain database...\n");
 
-  // Clean existing data
-  console.log("🧹 Cleaning existing data...");
-  await prisma.transaction.deleteMany();
-  await prisma.supporter.deleteMany();
-  await prisma.creator.deleteMany();
-  console.log("   Done\n");
-
-  // ── Creators ──────────────────────────────────────────────────────────
-  console.log("📝 Creating creators...");
+  // ── Creators (upsert — safe to re-run, keeps live profiles) ─────────────
+  console.log("📝 Upserting creators...");
   for (const creator of CREATORS) {
     const links = JSON.parse(creator.socialLinks);
     const uniqueSupporters = new Set(
       TIPS.filter((t) => t.receiver === creator.walletAddress).map((t) => t.sender)
     );
     const supporterCount = uniqueSupporters.size;
+    const totalTips = TIPS.filter((t) => t.receiver === creator.walletAddress).reduce(
+      (sum, t) => sum + t.amount,
+      0n
+    );
 
-    const totalTips = TIPS
-      .filter((t) => t.receiver === creator.walletAddress)
-      .reduce((sum, t) => sum + t.amount, 0n);
-
-    await prisma.creator.create({
-      data: {
+    await prisma.creator.upsert({
+      where: { walletAddress: creator.walletAddress },
+      update: {
+        username: creator.username,
+        bio: creator.bio,
+        socialLinks: JSON.stringify(links),
+        totalTips,
+        supporterCount,
+      },
+      create: {
         ...creator,
         socialLinks: JSON.stringify(links),
         totalTips,
@@ -90,47 +111,48 @@ async function main() {
   console.log("");
 
   // ── Transactions & Supporters ─────────────────────────────────────────
-  console.log("💰 Creating transactions...");
-  for (let i = 0; i < TIPS.length; i++) {
-    const tip = TIPS[i];
-    await prisma.transaction.create({
-      data: {
-        senderWallet: tip.sender,
-        receiverWallet: tip.receiver,
-        amount: tip.amount,
-        token: tip.token,
-        message: tip.message,
-        createdAt: new Date(Date.now() - (TIPS.length - i) * 86400000),
-      },
-    });
+  console.log("💰 Seeding transactions...");
+  const existing = await prisma.transaction.count();
+  if (existing > 0) {
+    console.log(`   ${existing} transactions already exist — skipping to avoid duplicates`);
+    console.log("   (Run `npm run db:seed -- --clear` first to reseed from scratch)");
+  } else {
+    for (let i = 0; i < TIPS.length; i++) {
+      const tip = TIPS[i];
+      await prisma.transaction.create({
+        data: {
+          senderWallet: tip.sender,
+          receiverWallet: tip.receiver,
+          amount: tip.amount,
+          token: tip.token,
+          message: tip.message,
+          createdAt: new Date(Date.now() - (TIPS.length - i) * 86400000),
+        },
+      });
 
-    await prisma.supporter.upsert({
-      where: {
-        walletAddress_creatorWallet: {
+      await prisma.supporter.upsert({
+        where: {
+          walletAddress_creatorWallet: {
+            walletAddress: tip.sender,
+            creatorWallet: tip.receiver,
+          },
+        },
+        update: {
+          totalTipped: { increment: tip.amount },
+          tipCount: { increment: 1 },
+        },
+        create: {
           walletAddress: tip.sender,
           creatorWallet: tip.receiver,
+          totalTipped: tip.amount,
+          tipCount: 1,
         },
-      },
-      update: {
-        totalTipped: { increment: tip.amount },
-        tipCount: { increment: 1 },
-      },
-      create: {
-        walletAddress: tip.sender,
-        creatorWallet: tip.receiver,
-        totalTipped: tip.amount,
-        tipCount: 1,
-      },
-    });
+      });
 
-    await prisma.creator.update({
-      where: { walletAddress: tip.receiver },
-      data: {
-        totalTips: { increment: tip.amount },
-      },
-    });
-
-    console.log(`   ✓ ${(Number(tip.amount) / 1e9).toFixed(2)} ${tip.token} → @${CREATORS.find((c) => c.walletAddress === tip.receiver)?.username}`);
+      const username =
+        CREATORS.find((c) => c.walletAddress === tip.receiver)?.username ?? tip.receiver;
+      console.log(`   ✓ ${(Number(tip.amount) / 1e9).toFixed(2)} ${tip.token} → @${username}`);
+    }
   }
   console.log("");
 
@@ -145,7 +167,7 @@ async function main() {
   console.log(`   ${supporterCount} supporter relationships`);
 
   console.log("\n✅ Seeding complete!");
-  console.log("   Run `curl http://localhost:4000/api/v1/creators` to verify.");
+  console.log("   Verify: curl https://tipchain-backend.vercel.app/api/v1/creators");
 }
 
 main()

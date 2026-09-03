@@ -158,11 +158,35 @@ export class TipService {
       take: limit,
     });
 
-    return supporters.map((s: any, index: number) => ({
+    if (supporters.length > 0) {
+      return supporters.map((s: any, index: number) => ({
+        rank: index + 1,
+        walletAddress: s.senderWallet,
+        totalTipped: (s._sum.amount ?? BigInt(0)).toString(),
+        tipCount: s._count.senderWallet,
+      }));
+    }
+
+    // Fallback: no tips recorded yet — rank creators by lifetime earnings so the
+    // leaderboard is never empty on a fresh database.
+    const creators = await prisma.creator.findMany({
+      orderBy: [{ totalTips: "desc" }, { supporterCount: "desc" }],
+      take: limit,
+      select: {
+        walletAddress: true,
+        username: true,
+        totalTips: true,
+        supporterCount: true,
+      },
+    });
+
+    return creators.map((c: any, index: number) => ({
       rank: index + 1,
-      walletAddress: s.senderWallet,
-      totalTipped: (s._sum.amount ?? BigInt(0)).toString(),
-      tipCount: s._count.senderWallet,
+      walletAddress: c.walletAddress,
+      username: c.username,
+      totalTipped: c.totalTips.toString(),
+      tipCount: 0,
+      supporterCount: c.supporterCount,
     }));
   }
 
