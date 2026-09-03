@@ -5,7 +5,6 @@ Send SOL (or USDC) tips to your favorite creators — direct, fast, and on Solan
 ## Live
 
 - **Web app:** https://tipchainsolana.vercel.app
-- **API:** https://tipchain-backend.vercel.app
 
 ## What it does
 
@@ -63,17 +62,3 @@ cd backend
 npm run seed              # upserts demo creators + sample tips
 npm run seed -- --clear   # removes demo data
 ```
-
-## API
-
-Base URL: `https://tipchain-backend.vercel.app`
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/creators` | List creators |
-| GET | `/api/v1/creator/by-username/:username` | Get creator by username |
-| GET | `/api/v1/creator/:wallet` | Get creator by wallet |
-| POST | `/api/v1/creator/register` | Register a creator (auth) |
-| POST | `/api/v1/transaction` | Record a tip |
-| GET | `/api/v1/transactions/:wallet` | Tip history for a wallet |
-| GET | `/api/v1/leaderboard` | Top tippers |

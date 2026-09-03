@@ -44,7 +44,20 @@ export async function fetchJSON<T = unknown>(
       throw new Error(`API error ${res.status}: ${text || res.statusText}`);
     }
 
-    return res.json() as Promise<T>;
+    const json = (await res.json()) as unknown;
+
+    // Backend wraps successful responses as { success, data, ... }.
+    // Unwrap so callers receive the payload directly (e.g. the creators array).
+    if (
+      json &&
+      typeof json === "object" &&
+      (json as { success?: boolean }).success === true &&
+      "data" in (json as Record<string, unknown>)
+    ) {
+      return (json as { data: unknown }).data as T;
+    }
+
+    return json as T;
   } catch (err: unknown) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error("Request timed out — server may be waking up. Please try again.");
@@ -153,14 +166,20 @@ export async function getCreators(params?: {
   if (params?.sort) q.set("sort", params.sort);
   if (params?.search) q.set("search", params.search);
   const qs = q.toString();
-  // Backend wraps in { data: [...], total, page, totalPages }
-  const res = await fetchJSON<{ data: CreatorResponse[]; total: number; page: number; totalPages: number }>(
-    `/api/v1/creators${qs ? `?${qs}` : ""}`
-  );
-  // Normalize: some pages expect { creators: [...] }
-  return { creators: res.data ?? res, total: res.total, page: res.page, totalPages: res.totalPages };
+  // fetchJSON unwraps the envelope; the list endpoint returns { creators, pagination }
+  const res = await fetchJSON<{
+    creators?: CreatorResponse[];
+    pagination?: { page: number; limit: number; total: number; totalPages: number };
+  }>(`/api/v1/creators${qs ? `?${qs}` : ""}`);
+  const creators = res.creators ?? [];
+  const pagination = res.pagination;
+  return {
+    creators,
+    total: pagination?.total ?? creators.length,
+    page: pagination?.page ?? 1,
+    totalPages: pagination?.totalPages ?? 1,
+  };
 }
-
 export async function getCreatorByUsername(username: string) {
   return fetchJSON<CreatorDetailResponse>(`/api/v1/creator/by-username/${username}`);
 }
@@ -222,9 +241,12 @@ export async function getTransactions(
   if (filters?.token && filters.token !== "ALL") q.set("token", filters.token);
   if (filters?.direction && filters.direction !== "all") q.set("direction", filters.direction);
   if (filters?.days) q.set("days", String(filters.days));
-  return fetchJSON<{ transactions: TransactionResponse[]; total: number }>(
-    `/api/v1/transactions/${wallet}?${q.toString()}`
-  );
+  // fetchJSON unwraps the envelope; the endpoint returns { transactions, pagination }
+  const res = await fetchJSON<{
+    transactions?: TransactionResponse[];
+    pagination?: { page: number; limit: number; total: number; totalPages: number };
+  }>(`/api/v1/transactions/${wallet}?${q.toString()}`);
+  return { transactions: res.transactions ?? [], total: res.pagination?.total ?? 0 };
 }
 
 export async function recordTip(data: {
