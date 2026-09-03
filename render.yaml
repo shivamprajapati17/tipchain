@@ -4,7 +4,7 @@ services:
     runtime: node
     rootDir: backend
     buildCommand: npm install && npx prisma generate && npx tsc
-    startCommand: npx prisma db push --skip-generate --accept-data-loss && node dist/index.js
+    startCommand: node dist/index.js
     envVars:
       - key: NODE_ENV
         value: production
@@ -14,13 +14,13 @@ services:
         value: devnet
       - key: SOLANA_RPC_URL
         value: https://api.devnet.solana.com
+      # Secrets below are set in the Render dashboard (Settings → Environment),
+      # never committed to the repository.
       - key: DATABASE_URL
-        value: postgresql://postgres.lvuombqhggrgbwkdwzbw:XM7AJxpVLbcUm7Wq@aws-0-ap-northeast-1.pooler.supabase.com:5432/postgres
+        sync: false
       - key: JWT_SECRET
-        value: 63ad70718a83cc6448f9fd2f657773a7be2a48ffbd1aff37fdcda7bd9954366b
+        sync: false
       - key: JWT_REFRESH_SECRET
-        value: e092cfa9bba808c3093ebe76022953e15f71d60c30b571fce96e0d214c7aa269
-      - key: REDIS_URL
-        value: redis://localhost:6379
+        sync: false
     healthCheckPath: /health
     autoDeploy: true
