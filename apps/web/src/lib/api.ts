@@ -244,14 +244,6 @@ export async function recordTip(data: {
 // Alias for backward compatibility
 export const recordTransaction = recordTip;
 
-// ─── Supporter Endpoints ────────────────────────────────────────────────────
-
-export async function getSupporters(creatorWallet: string) {
-  return fetchJSON<SupporterResponse[]>(
-    `/api/v1/creator/${creatorWallet}/supporters`
-  );
-}
-
 // ─── Health Check ───────────────────────────────────────────────────────────
 
 export async function healthCheck() {

@@ -92,12 +92,24 @@ function EmptyState({ query }: { query: string }) {
       className="flex flex-col items-center justify-center py-20 text-center"
     >
       <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-white/5 bg-white/[0.03]">
-        <Search className="size-7 text-white/30" />
+        {query.trim() ? <Search className="size-7 text-white/30" /> : <Users className="size-7 text-white/30" />}
       </div>
-      <h2 className="mb-2 text-lg font-semibold text-white">No creators found</h2>
+      <h2 className="mb-2 text-lg font-semibold text-white">
+        {query.trim() ? "No creators found" : "No creators yet"}
+      </h2>
       <p className="text-sm text-white/40 max-w-md">
-        No results match &ldquo;{query}&rdquo;. Try adjusting your search.
+        {query.trim()
+          ? <>No results match &ldquo;{query}&rdquo;. Try adjusting your search.</>
+          : <>Be the first creator on TipChain. Connect your wallet and create your profile.</>}
       </p>
+      {!query.trim() && (
+        <Link href="/profile" className="mt-6">
+          <Button className="gap-2 rounded-xl">
+            <Users className="size-4" />
+            Create Your Profile
+          </Button>
+        </Link>
+      )}
     </motion.div>
   );
 }
