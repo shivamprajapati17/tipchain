@@ -15,6 +15,14 @@ Send SOL (or USDC) tips to your favorite creators — direct, fast, and on Solan
 - **History** — full send/receive history per wallet with token and date filters
 - **Leaderboard API** — top tippers ranked by amount sent
 
+## Screenshots
+
+_Connect a wallet (Phantom or MetaMask via the Solana Snap) to send a tip._
+
+| Home | Creators | Creator profile — Send a Tip |
+| --- | --- | --- |
+| ![Home](screenshots/home.png) | ![Creators](screenshots/creators.png) | ![Creator profile with tip card](screenshots/creator-profile.png)
+
 ## Stack
 
 | Layer | Technology |
