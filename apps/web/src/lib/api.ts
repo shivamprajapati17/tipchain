@@ -1,6 +1,7 @@
-// In production (deployed on Vercel), call the Render backend directly
-// In development, use the direct backend URL from env or localhost
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://tipchain-api.onrender.com";
+// In production (deployed on Vercel), the API runs as serverless functions on
+// Vercel at https://tipchain-backend.vercel.app — always-on, never sleeps.
+// Override with NEXT_PUBLIC_API_URL for local development.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://tipchain-backend.vercel.app";
 
 const TIPCHAIN_API_KEY =
   process.env.NEXT_PUBLIC_TIPCHAIN_API_KEY || "tipchain-api-key";

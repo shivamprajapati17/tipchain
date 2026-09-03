@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "crons": [
+    {
+      "path": "/internal/cron/cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
+}

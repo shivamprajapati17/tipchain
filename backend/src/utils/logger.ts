@@ -36,11 +36,16 @@ const fileFormat = winston.format.combine(
   winston.format.json()
 );
 
-const logger = winston.createLogger({
-  level: isProduction() ? "info" : "debug",
-  levels,
-  transports: [
-    new winston.transports.Console({ format: consoleFormat }),
+const transports: winston.transport[] = [
+  new winston.transports.Console({ format: consoleFormat }),
+];
+
+// File logging only works on hosts with a writable filesystem (local dev,
+// containers). Serverless runtimes such as Vercel are read-only outside
+// /tmp, so a File transport there would crash on boot — opt in explicitly
+// with LOG_TO_FILE=true on hosts that support it.
+if (!isProduction() || process.env.LOG_TO_FILE === "true") {
+  transports.push(
     new winston.transports.File({
       filename: path.join(logDir, "error.log"),
       level: "error",
@@ -53,8 +58,14 @@ const logger = winston.createLogger({
       format: fileFormat,
       maxsize: 5242880,
       maxFiles: 5,
-    }),
-  ],
+    })
+  );
+}
+
+const logger = winston.createLogger({
+  level: isProduction() ? "info" : "debug",
+  levels,
+  transports,
 });
 
 export default logger;
