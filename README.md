@@ -1,10 +1,10 @@
-# TipChain ✦
+# TipChain 
 
 Send SOL (or USDC) tips to your favorite creators — direct, fast, and on Solana.
 
 ## Live
 
-- **Web app:** https://tipchainsolana.vercel.app
+- Web app: https://tipchainsolana.vercel.app
 
 ## What it does
 
