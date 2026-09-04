@@ -8,15 +8,15 @@ Send SOL (or USDC) tips to your favorite creators — direct, fast, and on Solan
 
 ## What it does
 
-- **Creator profiles** — connect a Solana wallet and create a public profile with a username, bio, avatar, and social links
-- **Direct tipping** — anyone can tip a creator in SOL or USDC with an optional message
-- **Dashboard** — creators see their earnings, supporter count, and recent tips
-- **History** — full send/receive history per wallet with token and date filters
-- **Leaderboard API** — top tippers ranked by amount sent
+- Creator profiles — connect a Solana wallet and create a public profile with a username, bio, avatar, and social links
+- Direct tipping — anyone can tip a creator in SOL or USDC with an optional message
+- Dashboard — creators see their earnings, supporter count, and recent tips
+- History — full send/receive history per wallet with token and date filters
+- Leaderboard API — top tippers ranked by amount sent
 
 ## Screenshots
 
-_Connect a wallet (Phantom or MetaMask via the Solana Snap) to send a tip._
+Connect a wallet (Phantom or MetaMask via the Solana Snap) to send a tip._
 
 | Home | Creators | Creator profile — Send a Tip |
 | --- | --- | --- |
